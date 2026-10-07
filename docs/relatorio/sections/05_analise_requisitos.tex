@@ -1,0 +1,47 @@
+\section{Análise de Requisitos}
+
+\subsection{Requisitos funcionais}
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabular}{|p{1cm}|p{3.5cm}|p{5cm}|p{2cm}|p{2cm}|}
+    \hline
+    \textbf{ID} & \textbf{Nome} & \textbf{Descrição} & \textbf{Casos de Uso} & \textbf{Prioridade} \\
+    \hline
+    RF01 & Cadastrar Paciente & O sistema deve permitir o cadastro, edição e inativação de pacientes, registrando dados demográficos, identificadores únicos (como CPF) e informações de contato. & UC01 & Essencial \\
+    \hline
+    RF02 & Gerenciar Profissionais e Clínica & O sistema deve manter o cadastro da organização (clínica), dos profissionais de saúde e seus respectivos papéis e especialidades. & UC01, UC02, UC03 & Essencial \\
+    \hline
+    RF03 & Agendar Consulta & O sistema deve permitir o agendamento, cancelamento e reagendamento de consultas com base na disponibilidade (agenda) dos profissionais. & UC02 & Essencial \\
+    \hline
+    RF04 & Registrar Atendimento e Interações Clínicas & O profissional de saúde deve ser capaz de registrar o início e fim de um encontro clínico presencial ou remoto, documentando informações básicas do atendimento e possíveis diagnósticos ou observações. & UC03 & Essencial \\
+    \hline
+    RF05 & Gerenciar Comunicações e Lembretes & O sistema deve registrar todas as interações com o paciente (ligações, e-mails, mensagens) e enviar solicitações de confirmação de agendamento automatizadas. & UC02 & Essencial \\
+    \hline
+    RF06 & Controle de Acesso e Perfil de Usuário & O sistema deve garantir que o acesso aos dados dos pacientes seja restrito aos usuários autenticados e de acordo com seus respectivos papéis de acesso (Recepcionista vs. Médico) & UC01, UC02, UC03 & Essencial \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsection{Requisitos não funcionais}
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabular}{|p{1cm}|p{3cm}|p{3cm}|p{5cm}|p{2cm}|}
+    \hline
+    \textbf{ID} & \textbf{Categoria} & \textbf{Nome} & \textbf{Descrição} & \textbf{Prioridade} \\
+    \hline
+    NF01 & Usabilidade & Interface Intuitiva e Responsiva & A interface do usuário deve ser intuitiva e fácil de usar, logo, o usuário não pode demorar mais do que 10 segundos para encontrar qualquer operação do sistema & Essencial \\
+    \hline
+    NF02 & Segurança & Autenticação e Autorização & O acesso à plataforma exige autenticação por senha forte e controle de autorização baseado em papéis (RBAC - Role-Based Access Control) seguindo o princípio do menor privilégio. & Essencial \\
+    \hline
+    NF03 & Segurança & Criptografia de Dados & Todo o tráfego de dados entre a aplicação, o backend e APIs externas deve obrigatoriamente utilizar o protocolo HTTPS (TLS 1.2+) & Essencial \\
+    \hline
+    NF04 & Desempenho & Tempo de Resposta & O sistema deve retornar os resultados das buscas por pacientes e disponibilização de horários de agenda em no máximo 2 segundos para manter o fluxo rápido. & Importante \\
+    \hline
+    NF05 & Privacidade & Adequação à LGPD & O sistema deve tratar dados de saúde de forma segura, exigindo base legal, consentimento quando aplicável e permitindo a pseudo-anonimização em bases analíticas. & Essencial \\
+    \hline
+    NF06 & Interoperabilidade & Adoção do Padrão FHIR & O sistema deve suportar a serialização/deserialização de dados demográficos e agendamentos no formato JSON em estrita conformidade com a estrutura dos recursos do HL7 FHIR & Essencial \\
+    \hline
+  \end{tabular}
+\end{table}

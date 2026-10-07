@@ -1,0 +1,114 @@
+% ufpb-relatorio.sty — layout for UFPB / Centro de Informática reports.
+% Metadata is declared in main.tex through the commands defined below;
+% \maketitle renders the cover page from it.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ufpb-relatorio}[2026/09/28 UFPB report layout]
+
+% ---------- Language and typography ----------
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage[brazilian]{babel}
+\RequirePackage{microtype}
+\RequirePackage{csquotes}
+\RequirePackage{indentfirst}
+\RequirePackage[a4paper,margin=2cm]{geometry}
+
+% ---------- Content ----------
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}
+\RequirePackage{enumitem}
+\RequirePackage{float}
+\RequirePackage{xcolor}
+\RequirePackage[font=small,labelfont=bf]{caption}
+\RequirePackage{listings}
+\RequirePackage[nottoc]{tocbibind}
+\RequirePackage[backend=biber,style=abnt]{biblatex}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!60!black}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{green!40!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  frame=single,
+  xleftmargin=2em,
+  framexleftmargin=0.5em,
+  breaklines=true,
+  showstringspaces=false,
+  literate={á}{{\'a}}1 {ã}{{\~a}}1 {â}{{\^a}}1 {à}{{\`a}}1
+           {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1 {ó}{{\'o}}1
+           {õ}{{\~o}}1 {ô}{{\^o}}1 {ú}{{\'u}}1 {ç}{{\c{c}}}1,
+}
+% listings has no Portuguese strings of its own.
+\renewcommand{\lstlistingname}{Código}
+\renewcommand{\lstlistlistingname}{Lista de Códigos}
+
+% hyperref must come after almost every other package.
+\RequirePackage[hidelinks]{hyperref}
+
+% Unfilled placeholders render red so none survive to the final PDF.
+\newcommand{\todoph}[1]{\textcolor{red}{[#1]}}
+
+% ---------- Cover metadata ----------
+\newcommand{\@universidade}{Universidade Federal da Paraíba}
+\newcommand{\@centro}{Centro de Informática}
+\newcommand{\@disciplina}{}
+\newcommand{\@subtitulo}{}
+\newcommand{\@professor}{}
+\newcommand{\@local}{João Pessoa -- PB}
+\newcommand{\@logo}{images/logo-ci.jpeg}
+\newcommand{\@autores}{}
+
+\newcommand{\universidade}[1]{\renewcommand{\@universidade}{#1}}
+\newcommand{\centro}[1]{\renewcommand{\@centro}{#1}}
+\newcommand{\disciplina}[1]{\renewcommand{\@disciplina}{#1}}
+\newcommand{\subtitulo}[1]{\renewcommand{\@subtitulo}{#1}}
+\newcommand{\professor}[1]{\renewcommand{\@professor}{#1}}
+\newcommand{\local}[1]{\renewcommand{\@local}{#1}}
+\newcommand{\logo}[1]{\renewcommand{\@logo}{#1}}
+% \autor{Nome}{Matrícula} — call once per author.
+\newcommand{\autor}[2]{\g@addto@macro\@autores{#1 & Mat.\ #2 \\}}
+
+\newlength{\ufpb@logowidth}
+\setlength{\ufpb@logowidth}{3.5cm}
+
+\newcommand{\ufpb@header}{%
+  \noindent
+  \begin{minipage}[c]{\ufpb@logowidth}
+    \includegraphics[width=\linewidth]{\@logo}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[c]{\dimexpr\textwidth-\ufpb@logowidth-1em\relax}
+    {\Large\bfseries \@universidade\par}
+    {\Large \@centro\par}
+    \ifx\@disciplina\@empty\else{\large \@disciplina\par}\fi
+  \end{minipage}%
+}
+
+\renewcommand{\maketitle}{%
+  \begin{titlepage}
+    \ufpb@header
+    \vfill
+    \begin{center}
+      {\LARGE\bfseries \@title\par}
+      \ifx\@subtitulo\@empty\else\vspace{1em}{\Large \@subtitulo\par}\fi
+    \end{center}
+    \vfill
+    \begin{flushright}
+      \begin{tabular}{@{}r@{\hspace{1.5em}}l@{}}
+        \@autores
+      \end{tabular}
+      \ifx\@professor\@empty\else
+        \par\vspace{2em}
+        \underline{Professor(a):}\par
+        \@professor\par
+      \fi
+    \end{flushright}
+    \vfill
+    \begin{center}
+      {\large\bfseries \@local, \@date\par}
+    \end{center}
+  \end{titlepage}%
+}

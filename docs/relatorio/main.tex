@@ -1,0 +1,56 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{ufpb-relatorio}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\addbibresource{references.bib}
+
+% ---------- Metadados da capa ----------
+\disciplina{Métodos de Projeto de Software}
+\title{Documento de Requisitos}
+\subtitulo{CliniCore}
+\autor{Beatriz Montenegro Maia Chaves}{20230012233}
+\autor{Frankley Kaiky M. Silva}{20220060460}
+\autor{Pedro Luca Vaz Matias}{20230089874}
+\professor{Raoni Kulesza}
+\date{Outubro, 2026}
+% Opcionais — valores padrão definidos em ufpb-relatorio.sty:
+% \universidade{Universidade Federal da Paraíba}
+% \centro{Centro de Informática}
+% \local{João Pessoa -- PB}
+% \logo{images/logo-ci.jpeg}
+
+\begin{document}
+
+\maketitle
+
+% Importa o Resumo e o Histórico
+\input{sections/00_historico}
+
+\newpage
+\renewcommand{\contentsname}{Sumário}
+\tableofcontents
+\newpage
+
+% Importa as secções do documento
+\input{sections/01_introducao}
+\newpage
+\input{sections/02_descricao_geral}
+\newpage
+\input{sections/03_glossario}
+\newpage
+\input{sections/04_elicitacao}
+\newpage
+\input{sections/05_analise_requisitos}
+\newpage
+\input{sections/06_especificacoes}
+\newpage
+\input{sections/07_analise_casos_uso}
+\newpage
+\input{sections/08_interface}
+\newpage
+\input{sections/09_arquitetura}
+
+
+\end{document}
