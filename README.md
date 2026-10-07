@@ -1,47 +1,53 @@
-# SIGAA Bot
+# 🏥 CliniCore - CRM Médico Ambulatorial
 
-Bot de Telegram que se conecta ao SIGAA (via *sigaa-tools*) para responder perguntas
-e enviar notificações acadêmicas. **Toda a documentação vive neste repositório (docs as code)**,
-incluindo o relatório.
+![Status do Projeto](https://img.shields.io/badge/Status-Em%20Desenvolvimento-blue)
+![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933?logo=node.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql&logoColor=white)
+![FHIR](https://img.shields.io/badge/Interoperabilidade-HL7%20FHIR-E3242B)
 
-## Atores
+O **CliniCore** é um sistema de CRM (*Customer/Clinic Relationship Management*) desenvolvido para clínicas médicas. Seu objetivo é centralizar e otimizar o relacionamento com pacientes, a gestão da agenda de consultas e o histórico de comunicações. 
 
-| Ator              | Papel                                                              |
-|-------------------|--------------------------------------------------------------------|
-| **Estudante**     | Usa o bot no Telegram (perguntas + notificações)                   |
-| **Administrador** | Gerencia usuários e monitora a atividade do bot                    |
-| SIGAA / Telegram  | Sistemas externos (atores secundários)                             |
+Diferente de um Prontuário Eletrônico (PEP/EHR) hospitalar complexo, o CliniCore foca na agilidade ambulatorial e na retenção de pacientes, possuindo como diferencial a adoção do padrão internacional **HL7 FHIR (R4)** para garantir total interoperabilidade com sistemas externos de saúde.
 
-## Estrutura
+---
 
-```
-docs/
-  specs/       contratos do que deve ser implementado (lidos antes de codar)
-  adr/         decisões arquiteturais
-  uml/         casos de uso e classes de análise (Mermaid)
-  relatorio/   relatório do projeto (Markdown)
-src/sigaa_bot/
-  dominio/     ENTIDADES: Usuario, Papel, exceções de domínio
-  repositorio/ persistência (contrato + implementação em memória RAM)
-  controle/    CONTROLES: regras de aplicação (ControladorDeUsuarios)
-  fronteira/   FRONTEIRAS: interfaces com o mundo externo (console admin; Telegram depois)
-tests/         testes automatizados (espelham src/)
-```
+## ✨ Principais Funcionalidades
 
-Dependências apontam para dentro: `fronteira → controle → repositorio → dominio`.
+- 🧑‍🤝‍🧑 **Gestão de Pacientes e Profissionais:** Cadastro unificado de pacientes, médicos e configuração da clínica.
+- 📅 **Gestão de Agendamentos (Grade Ambulatorial):** Criação de horários de agenda (Schedules/Slots) e marcação de consultas.
+- 🩺 **Registro de Atendimentos:** Interface ágil para o profissional de saúde registrar o encontro clínico, diagnósticos básicos e observações.
+- 🔔 **Comunicações e Lembretes:** Histórico de interações e disparos automatizados para confirmação de agendamentos.
+- 🔒 **Controle de Acesso Segregado:** Autenticação e autorização via perfis (Recepcionista, Médico, Administrador, Paciente) baseada no princípio do menor privilégio (RBAC).
 
-## Como rodar
+---
 
-```bash
-python -m venv .venv && source .venv/bin/activate
-python -m venv .venv && source .venv/bin/activate
-pytest                   # testes
-python -m sigaa_bot      # console do administrador (dados em RAM)
-```
+## 🛠️ Tecnologias e Arquitetura
 
-## Status
+A arquitetura do sistema adota um padrão multicamadas baseada em Web Services RESTful, estruturada da seguinte forma:
 
-- [x] Sprint 1: adicionar usuário e listar usuários (persistência em RAM)
-- [ ] Sprint 2+: bot Telegram, vínculo com SIGAA, notificações, monitoramento
+*   **Frontend (Camada de Apresentação):** Single Page Application (SPA) responsiva construída com **React**.
+*   **Backend (API & Regras de Negócio):** Servidor em **Node.js com Express**, responsável pelo roteamento, segurança (JWT) e orquestração dos serviços (Pacientes, Agendamentos, Atendimentos).
+*   **Banco de Dados (Persistência):** Banco de dados relacional **PostgreSQL**, otimizado para o fluxo diário do CRM.
+*   **Interoperabilidade (FHIR Facade):** Camada dedicada à conversão dos dados internos do sistema para os recursos do padrão **HL7 FHIR** (`Patient`, `Practitioner`, `Appointment`, `Encounter`, etc.), permitindo integração nativa e segura com operadoras e redes de saúde externas.
 
-Contribuição: veja [CONTRIBUTING.md](CONTRIBUTING.md).
+---
+
+## 🛡️ Segurança e Conformidade (LGPD)
+Por lidar com dados pessoais sensíveis, o sistema foi projetado sob os pilares da LGPD, garantindo criptografia de dados em trânsito (HTTPS/TLS), trilhas de auditoria (logs de operações) e segregação de permissões de acesso aos prontuários e contatos.
+
+---
+
+## 🚀 Como executar o projeto localmente
+
+*(Instruções a serem atualizadas conforme o avanço do desenvolvimento técnico do projeto)*
+
+### Pré-requisitos
+- Node.js (v18+)
+- PostgreSQL
+- Gerenciador de pacotes (npm ou yarn)
+
+### Passos
+1. Clone este repositório:
+   ```bash
+   git clone [https://github.com/seu-usuario/clinicore.git](https://github.com/seu-usuario/clinicore.git)
