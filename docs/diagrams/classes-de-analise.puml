@@ -1,0 +1,34 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide empty members
+
+class CadastroUsuarioController <<control>> {
+  +cadastrarUsuario()
+  +listarUsuarios()
+  +validarLogin()
+  +validarSenha()
+}
+
+interface RepositorioUsuario <<control>> {
+  +salvar(usuario)
+  +listarTodos()
+}
+
+class RepositorioMemoria <<control>>
+class RepositorioArquivoBinario <<control>>
+class ArquivoUsuarios <<entity>> {
+  caminho
+}
+class Usuario <<entity>> {
+  login
+  nome
+  papel
+}
+
+CadastroUsuarioController --> Usuario
+CadastroUsuarioController --> RepositorioUsuario
+RepositorioMemoria ..|> RepositorioUsuario
+RepositorioArquivoBinario ..|> RepositorioUsuario
+RepositorioArquivoBinario --> ArquivoUsuarios
+@enduml
