@@ -11,6 +11,8 @@ test('adiciona um usuário com papel definido e identificador único', () => {
   const usuario = controlador.adicionar({
     nome: 'Ana Silva',
     email: 'ana@clinicore.com',
+    login: 'ana',
+    senha: 'Senha@123',
     papel: Papel.RECEPCIONISTA,
   });
 
@@ -26,6 +28,8 @@ test('rejeita e-mail duplicado sem cadastrar um segundo usuário', () => {
   controlador.adicionar({
     nome: 'Ana Silva',
     email: 'ana@clinicore.com',
+    login: 'ana',
+    senha: 'Senha@123',
     papel: Papel.RECEPCIONISTA,
   });
 
@@ -33,6 +37,8 @@ test('rejeita e-mail duplicado sem cadastrar um segundo usuário', () => {
     () => controlador.adicionar({
       nome: 'Outra Ana',
       email: 'ana@clinicore.com',
+    login: 'ana',
+    senha: 'Senha@123',
       papel: Papel.MEDICO,
     }),
     { message: 'Já existe um usuário cadastrado com este e-mail.' },
@@ -47,6 +53,8 @@ test('rejeita usuário com papel que não faz parte dos papéis permitidos', () 
     () => controlador.adicionar({
       nome: 'Ana Silva',
       email: 'ana@clinicore.com',
+    login: 'ana',
+    senha: 'Senha@123',
       papel: 'GERENTE',
     }),
     { message: 'O papel do usuário é inválido.' },
@@ -58,11 +66,15 @@ test('lista todos os usuários em ordem de cadastro sem expor a coleção intern
   controlador.adicionar({
     nome: 'Ana Silva',
     email: 'ana@clinicore.com',
+    login: 'ana',
+    senha: 'Senha@123',
     papel: Papel.RECEPCIONISTA,
   });
   controlador.adicionar({
     nome: 'Dr. Bruno Lima',
     email: 'bruno@clinicore.com',
+    login: 'bruno',
+    senha: 'Senha@123',
     papel: Papel.MEDICO,
   });
 
@@ -83,6 +95,8 @@ test('não permite alterar um usuário por meio do valor retornado ao adicioná-
   const usuario = controlador.adicionar({
     nome: 'Ana Silva',
     email: 'ana@clinicore.com',
+    login: 'ana',
+    senha: 'Senha@123',
     papel: Papel.RECEPCIONISTA,
   });
 
@@ -96,6 +110,8 @@ test('não permite alterar um usuário por meio do valor retornado ao adicioná-
     () => controlador.adicionar({
       nome: 'Outra Ana',
       email: 'ana@clinicore.com',
+    login: 'ana',
+    senha: 'Senha@123',
       papel: Papel.MEDICO,
     }),
     { message: 'Já existe um usuário cadastrado com este e-mail.' },
@@ -107,6 +123,8 @@ test('não permite alterar um usuário por meio de uma listagem', () => {
   controlador.adicionar({
     nome: 'Ana Silva',
     email: 'ana@clinicore.com',
+    login: 'ana',
+    senha: 'Senha@123',
     papel: Papel.RECEPCIONISTA,
   });
 

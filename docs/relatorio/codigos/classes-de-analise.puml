@@ -10,9 +10,34 @@ skinparam class {
 
 ' Entidades Principais e Administrativas
 class Clinica <<Organization>>
+class Usuario {
+  id: Number
+  nome: String
+  email: String
+  login: String
+  papel: Papel
+}
+class Papel <<enumeration>>
 class Paciente <<Patient>>
 class Profissional <<Practitioner>>
 class VinculoProfissional <<PractitionerRole>>
+
+' Controle, validação e persistência de usuários
+class ControladorDeUsuarios <<control>> {
+  +adicionar(nome, email, login, senha, papel): Usuario
+  +listar(): Usuario[]
+}
+interface RepositorioDeUsuarios <<repository>> {
+  +listar(): Usuario[]
+  +salvar(usuario): void
+}
+class RepositorioEmMemoria <<repository>>
+class RepositorioEmArquivoBinario <<repository>>
+class FabricaDeRepositorioDeUsuarios <<factory>> {
+  +criarRepositorioDeUsuarios(modo, arquivo): RepositorioDeUsuarios
+}
+class ErroDeValidacaoDeUsuario <<exception>>
+class ErroDePersistenciaDeUsuarios <<exception>>
 
 ' Entidades de Agendamento (Módulo Ambulatorial)
 class Agenda <<Schedule>>
@@ -31,6 +56,17 @@ class Diagnostico <<Condition>>
 Clinica "1" -down- "*" Paciente : gerencia >
 Clinica "1" -right- "*" VinculoProfissional : possui >
 Profissional "1" -left- "*" VinculoProfissional : atua como >
+Clinica "1" -left- "*" Usuario : possui >
+Usuario --> Papel
+
+' Validação e persistência da Sprint 02
+ControladorDeUsuarios --> Usuario : cria/lista >
+ControladorDeUsuarios --> RepositorioDeUsuarios : usa >
+ControladorDeUsuarios ..> ErroDeValidacaoDeUsuario : lança >
+RepositorioDeUsuarios <|.. RepositorioEmMemoria
+RepositorioDeUsuarios <|.. RepositorioEmArquivoBinario
+RepositorioEmArquivoBinario ..> ErroDePersistenciaDeUsuarios : lança >
+FabricaDeRepositorioDeUsuarios --> RepositorioDeUsuarios : seleciona >
 
 ' Relacionamentos de CRM e Comunicação
 Paciente "1" -left- "*" RegistroComunicacao : recebe/envia >
