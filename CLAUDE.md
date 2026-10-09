@@ -1,12 +1,19 @@
 # Projeto Métodos — contexto para agentes
 
-## Escopo atual
+## Especificações das atividades
 
-Este repositório é o projeto em grupo de **Métodos de Projeto de Software**.
-A Sprint 02 cobre apenas cadastro/listagem de usuários, validação com exceções e
-persistência em memória ou arquivo binário. Não adicione Telegram, SIGAA,
-autenticação real, banco externo ou funcionalidades de sprints futuras sem uma
-atividade que peça isso explicitamente.
+Não mantenha instruções de sprints neste arquivo: elas mudam a cada atividade.
+Para descobrir a especificação atual, consulte o SIGAA pelo MCP `sigaa` e leia
+os corpos de tarefa e tópicos da disciplina antes de alterar o código. O
+cliente e a documentação do MCP estão em
+[`PucaVaz/sigaa-tools`](https://github.com/PucaVaz/sigaa-tools).
+
+Fluxo mínimo:
+
+1. execute `sigaa_sync`;
+2. localize a tarefa em `sigaa_list_deadlines`;
+3. leia `sigaa_get_tarefa_body` e os materiais/tópicos relacionados;
+4. confirme o escopo no repositório antes de implementar.
 
 ## Estrutura e arquitetura
 
