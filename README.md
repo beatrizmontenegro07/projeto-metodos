@@ -40,14 +40,20 @@ Por lidar com dados pessoais sensíveis, o sistema foi projetado sob os pilares 
 
 ## 🚀 Como executar o projeto localmente
 
-*(Instruções a serem atualizadas conforme o avanço do desenvolvimento técnico do projeto)*
+Nesta primeira entrega, implementei o núcleo de usuários em memória. Ele ainda não depende de banco de dados nem de servidor HTTP.
 
 ### Pré-requisitos
 - Node.js (v18+)
-- PostgreSQL
-- Gerenciador de pacotes (npm ou yarn)
 
 ### Passos
-1. Clone este repositório:
+1. Clone o repositório e entre na pasta:
    ```bash
-   git clone [https://github.com/seu-usuario/clinicore.git](https://github.com/seu-usuario/clinicore.git)
+   git clone https://github.com/beatrizmontenegro07/projeto-metodos.git
+   cd projeto-metodos
+   ```
+2. Execute os testes:
+   ```bash
+   npm test
+   ```
+
+Os testes verificam a adição de usuários, a validação de papéis, a prevenção de e-mails duplicados e a listagem de usuários cadastrados.
