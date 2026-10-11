@@ -10,7 +10,7 @@ class ControladorDeUsuarios {
   adicionar({ nome, email, login, senha, papel }) {
     this.#validarPapel(papel);
     this.#validarLogin(login);
-    this.#validarSenha(senha, login);
+    this.#validarSenha(senha, login, email);
     this.#garantirEmailDisponivel(email);
     const usuario = new Usuario({ id: this.#proximoId(), nome, email, login, papel });
     this.#repositorio.salvar(usuario);
@@ -25,8 +25,8 @@ class ControladorDeUsuarios {
     if (typeof login !== 'string' || login.length === 0 || login.length > 12 || /\d/.test(login))
       throw new ErroDeValidacaoDeUsuario('O login não pode ser vazio, ter números ou mais de 12 caracteres.');
   }
-  #validarSenha(senha, login) {
-    if (typeof senha !== 'string' || senha.length < 8 || senha.length > 128 || senha === login)
+  #validarSenha(senha, login, email) {
+    if (typeof senha !== 'string' || senha.length < 8 || senha.length > 128 || senha === login || senha === email)
       throw new ErroDeValidacaoDeUsuario('A senha não atende à política do IAM.');
     const tipos = [/\p{Ll}/u, /\p{Lu}/u, /\d/u, /[^\p{L}\d]/u].filter((regra) => regra.test(senha));
     if (tipos.length < 3) throw new ErroDeValidacaoDeUsuario('A senha deve conter pelo menos três tipos de caracteres.');
