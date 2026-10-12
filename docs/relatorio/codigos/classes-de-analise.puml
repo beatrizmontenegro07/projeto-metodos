@@ -22,10 +22,16 @@ class Paciente <<Patient>>
 class Profissional <<Practitioner>>
 class VinculoProfissional <<PractitionerRole>>
 
-' Controle, validação e persistência de usuários
+' Controle, validação, autenticação e persistência de usuários
 class ControladorDeUsuarios <<control>> {
   +adicionar(nome, email, login, senha, papel): Usuario
+  +autenticar(login, senha): Usuario
+  +obterPorId(id): Usuario
   +listar(): Usuario[]
+}
+class ServicoDeTokenJwt <<service>> {
+  +gerarTokenJwt(payload, opcoes): String
+  +verificarTokenJwt(token, opcoes): Object
 }
 interface RepositorioDeUsuarios <<repository>> {
   +listar(): Usuario[]
@@ -38,6 +44,7 @@ class FabricaDeRepositorioDeUsuarios <<factory>> {
 }
 class ErroDeValidacaoDeUsuario <<exception>>
 class ErroDePersistenciaDeUsuarios <<exception>>
+class ErroDeAutenticacao <<exception>>
 
 ' Entidades de Agendamento (Módulo Ambulatorial)
 class Agenda <<Schedule>>
@@ -59,10 +66,12 @@ Profissional "1" -left- "*" VinculoProfissional : atua como >
 Clinica "1" -left- "*" Usuario : possui >
 Usuario --> Papel
 
-' Validação e persistência da Sprint 02
-ControladorDeUsuarios --> Usuario : cria/lista >
+' Validação, autenticação e persistência
+ControladorDeUsuarios --> Usuario : cria/autentica/lista >
 ControladorDeUsuarios --> RepositorioDeUsuarios : usa >
 ControladorDeUsuarios ..> ErroDeValidacaoDeUsuario : lança >
+ControladorDeUsuarios ..> ErroDeAutenticacao : lança >
+ServicoDeTokenJwt ..> ErroDeAutenticacao : lança >
 RepositorioDeUsuarios <|.. RepositorioEmMemoria
 RepositorioDeUsuarios <|.. RepositorioEmArquivoBinario
 RepositorioEmArquivoBinario ..> ErroDePersistenciaDeUsuarios : lança >

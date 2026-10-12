@@ -2,8 +2,9 @@
   "name": "clinicore",
   "version": "0.1.0",
   "private": true,
-  "description": "Núcleo inicial do CliniCore para Métodos de Projeto de Software.",
+  "description": "Núcleo e API do CliniCore para Métodos de Projeto de Software.",
   "scripts": {
+    "start": "node src/api/servidor.js",
     "test": "node --test"
   }
 }
