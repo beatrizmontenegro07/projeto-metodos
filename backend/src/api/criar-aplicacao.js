@@ -8,7 +8,7 @@ const LIMITE_BYTES_CORPO = 64 * 1024;
 
 function obterModoDeArmazenamentoPorArgs(argv = process.argv.slice(2)) {
   const argStorage = argv.find((arg) => arg.startsWith('--storage='));
-  if (!argStorage) return 'memoria';
+  if (!argStorage) return 'arquivo';
   const valor = argStorage.split('=')[1];
   if (valor === 'memory' || valor === 'memoria') return 'memoria';
   if (valor === 'file' || valor === 'arquivo') return 'arquivo';

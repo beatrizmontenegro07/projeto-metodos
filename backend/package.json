@@ -4,7 +4,7 @@
   "private": true,
   "description": "Núcleo e API do CliniCore para Métodos de Projeto de Software.",
   "scripts": {
-    "start": "node src/api/servidor.js",
+    "start": "node src/api/servidor.js --storage=file",
     "test": "node --test"
   }
 }
