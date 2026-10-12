@@ -1,9 +1,13 @@
 {
-  "name": "clinicore",
+  "name": "clinicore-workspace",
   "version": "0.1.0",
   "private": true,
-  "description": "Núcleo inicial do CliniCore para Métodos de Projeto de Software.",
+  "description": "Monorepo do CliniCore para Métodos de Projeto de Software.",
+  "workspaces": [
+    "backend"
+  ],
   "scripts": {
-    "test": "node --test"
+    "test": "npm test --workspace=backend",
+    "test:backend": "npm test --workspace=backend"
   }
 }

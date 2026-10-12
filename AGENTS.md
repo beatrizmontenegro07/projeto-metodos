@@ -17,12 +17,12 @@ Minimum workflow:
 
 ## Structure and architecture
 
-- `src/main/java/br/ufpb/mps/domain/`: entities.
-- `src/main/java/br/ufpb/mps/application/`: use cases, validation, and ports.
-- `src/main/java/br/ufpb/mps/infra/`: persistence implementations.
-- `src/main/java/br/ufpb/mps/interfaceadapters/`: application input/output.
-- `src/test/java/`: executable tests using `assert`.
-- `docs/diagrams/`: PlantUML sources and rendered images.
+- `backend/src/domain/`: entities, enums, domain errors.
+- `backend/src/application/`: use cases, validation, and ports.
+- `backend/src/infra/`: persistence implementations (memory, binary file).
+- `backend/src/api/`: application input/output, routes and HTTP adaptors.
+- `backend/test/`: executable tests using `node --test` and Node's `assert`.
+- `docs/relatorio/`: LaTeX report and PlantUML diagrams (`codigos/` and `images/`).
 
 Keep dependencies pointed inward: adapters depend on application code, while
 infrastructure implements interfaces defined by the application layer.
@@ -37,27 +37,24 @@ infrastructure implements interfaces defined by the application layer.
   password is only validated and is not part of the persisted `User` entity.
 - Keep the `memory` and `file` storage modes. Storage is selected at startup
   through `--storage=memory` or `--storage=file`.
-- Do not commit `users.bin`, `.class` files, `out/`, `sources.txt`, credentials,
+- Do not commit `users.bin`, `usuarios.bin`, `node_modules/`, credentials,
   or runtime artifacts.
 - Update the analysis class diagram when responsibilities or relevant classes
   change.
 
 ## Required verification
 
-Use JDK 17 in a container; do not install local build dependencies:
+Execute unit and integration tests from project root or backend:
 
 ```bash
-docker run --rm -v "$PWD":/app -w /app eclipse-temurin:17-jdk sh -c \
-'find src/main/java src/test/java -name "*.java" > /tmp/sources.txt && \
-javac -Xlint:all -d /tmp/mps-out @/tmp/sources.txt && \
-java -ea -cp /tmp/mps-out br.ufpb.mps.Sprint02Tests'
+npm test
 ```
 
 Render diagrams before declaring documentation done:
 
 ```bash
-docker run --rm --user 0 -v "$PWD/docs/diagrams":/data plantuml/plantuml:latest \
--tpng /data/classes-de-analise.puml
+docker run --rm --user 0 -v "$PWD/docs/relatorio/codigos":/data plantuml/plantuml:latest \
+-tpng /data/classes-de-analise.puml -o ../images
 ```
 
 ## Git
