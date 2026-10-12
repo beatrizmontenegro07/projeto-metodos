@@ -4,11 +4,14 @@
   "private": true,
   "description": "Monorepo do CliniCore para Métodos de Projeto de Software.",
   "workspaces": [
-    "backend"
+    "backend",
+    "frontend"
   ],
   "scripts": {
     "start": "npm start --workspace=backend",
-    "test": "npm test --workspace=backend",
-    "test:backend": "npm test --workspace=backend"
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "test": "npm test --workspaces --if-present",
+    "test:backend": "npm test --workspace=backend",
+    "test:frontend": "npm test --workspace=frontend"
   }
 }
