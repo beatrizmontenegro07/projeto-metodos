@@ -1,0 +1,92 @@
+.branding {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  padding: 28px 24px;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 420px;
+}
+
+.headline {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+.description {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* Elementos decorativos ficam ocultos em telas pequenas para priorizar o formulário. */
+.illustration,
+.description {
+  display: none;
+}
+
+.illustration {
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  margin: auto 0;
+  /* Dissolve as bordas da imagem no fundo do painel. */
+  -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 62%, transparent 100%);
+}
+
+.security {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.securityIcon {
+  flex: none;
+  color: var(--color-navy);
+}
+
+.securityTitle {
+  margin: 0 0 2px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.securityText {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 640px) {
+  .description {
+    display: block;
+  }
+}
+
+@media (min-width: 960px) {
+  .branding {
+    min-height: 100vh;
+    padding: 72px 56px 48px 72px;
+    gap: 28px;
+  }
+
+  .headline {
+    font-size: 1.5rem;
+  }
+
+  .illustration {
+    display: block;
+  }
+}
+
