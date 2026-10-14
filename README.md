@@ -11,6 +11,18 @@ Diferente de um Prontuário Eletrônico (PEP/EHR) hospitalar complexo, o CliniCo
 
 ---
 
+## 👥 Equipe
+
+Projeto da disciplina **Métodos de Projeto de Software** (UFPB, 2026.2), com o professor Raoni Kulesza.
+
+| Integrante | Matrícula |
+|---|---|
+| Beatriz Montenegro Maia Chaves | 20230012233 |
+| Frankley Kaiky M. Silva | 20220060460 |
+| Pedro Luca Vaz Matias | 20230089874 |
+
+---
+
 ## ✨ Principais Funcionalidades
 
 - 🧑‍🤝‍🧑 **Gestão de Pacientes e Profissionais:** Cadastro unificado de pacientes, médicos e configuração da clínica.
