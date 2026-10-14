@@ -81,6 +81,7 @@ constructor argument so tests can pass an in-memory one.
 npm test        # Vitest; uses an in-memory SQLite database
 npm run lint
 npm run build   # also type-checks
+OPENSPEC_TELEMETRY=0 npx @fission-ai/openspec@1 validate --all   # same check as CI
 ```
 
 Render diagrams before declaring documentation done:
@@ -90,11 +91,24 @@ docker run --rm --user 0 -v "$PWD/docs/relatorio/codigos":/data plantuml/plantum
 -tpng /data/classes-de-analise.puml -o ../images
 ```
 
-## Git
+## Git and pull requests
 
-- Work from `feat/`, `fix/`, `docs/`, or `refactor/` branches.
+- Work from `feat/`, `fix/`, `docs/`, or `refactor/` branches cut from
+  `develop`, and open pull requests against `develop`. `main` only receives
+  release PRs from `develop` (see `CONTRIBUTING.md`); never push to either
+  directly.
 - Use small Conventional Commit commits with a clear English message.
-- Open a pull request; do not push directly to `main`.
+- Keep each PR reviewable: about 400 changed lines, not counting
+  `package-lock.json` or generated files (migrations metadata, shadcn
+  components). Split larger work into a stack of dependent PRs with
+  [`gh stack`](https://github.com/github/gh-stack): one concern per layer,
+  foundations (schema, domain rules) at the bottom, screens at the top, and
+  each layer passing the required verification on its own.
+- Agents run `gh stack` non-interactively: always pass branch names to
+  `init`, `add`, and `checkout`, and use `gh stack submit --auto` and
+  `gh stack view --json`.
+- Merge stacked PRs bottom first on GitHub, then run `gh stack sync` to rebase
+  the remaining layers onto `develop`.
 - Before reporting a delivery, inspect the diff, run the required verification,
   and read back the remote pull request state.
 
