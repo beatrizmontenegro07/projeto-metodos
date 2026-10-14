@@ -20,7 +20,7 @@ src/
 │       ├── errors.ts           ← exceções: UserValidationError, UserPersistenceError
 │       ├── user-controller.ts  ← controle: UserController
 │       └── user-controller.test.ts
-├── db/                 ← infra: esquema Drizzle (schema.ts) e conexão (index.ts)
+├── db/                 ← infra: esquema Drizzle (schema.ts), conexão (index.ts) e erros do banco (errors.ts)
 └── i18n/               ← ui: idiomas e textos traduzidos (messages/)
 ```
 
@@ -60,11 +60,11 @@ classDiagram
             -Database database
             +add(newUser: NewUser) Promise~User~
             +list() Promise~User[]~
-            -ensureEmailAndLoginAreAvailable(email, login) void
             -accessStorage(operation) T
         }
         class rules {
             <<module>>
+            +normalizeEmail(email) string
             +validateRole(role) void
             +validateLogin(login) void
             +validatePassword(password, login, email) void
@@ -100,6 +100,10 @@ classDiagram
         class Database {
             <<libSQL>>
         }
+        class dbErrors {
+            <<module>>
+            +findUniqueConstraintColumn(error) string
+        }
         class users {
             <<table>>
             id integer PK
@@ -117,6 +121,7 @@ classDiagram
     UserController ..> rules : valida com
     UserController ..> password : gera hash com
     UserController ..> UserPersistenceError : converte falhas do banco
+    UserController ..> dbErrors : identifica e-mail ou login repetido
     User --> Role
     rules ..> UserValidationError : lança
     UserController ..> UserValidationError : lança (e-mail ou login repetido)
@@ -134,7 +139,7 @@ A escolha é feita uma única vez, na inicialização, pela variável `DATABASE_
 | Memória (RAM) | `:memory:` | `createDatabase` aplica as migrações na conexão; os dados somem quando o processo termina |
 | Permanente | `file:local.db` (SQLite local) ou `libsql://<banco>.turso.io` (Turso) | Os dados sobrevivem ao reinício; o esquema é aplicado com `npm run db:migrate` |
 
-Falhas do banco (arquivo inacessível, banco fora do ar, tabelas ausentes) são capturadas em `UserController.accessStorage` e convertidas em `UserPersistenceError` (NF-CON-01). As regras de login e senha lançam `UserValidationError` com um código estável, que a interface traduz para a mensagem do idioma do usuário (`messages/pt-BR.json`, `users.errors.<código>`).
+Falhas do banco (arquivo inacessível, banco fora do ar, tabelas ausentes) são capturadas em `UserController.accessStorage` e convertidas em `UserPersistenceError` (NF-CON-01). E-mail e login repetidos são barrados pelos índices únicos da tabela `users` — inclusive em cadastros simultâneos — e a violação vira `UserValidationError` com `EMAIL_ALREADY_REGISTERED` ou `LOGIN_ALREADY_REGISTERED`. O e-mail é gravado em minúsculas (`normalizeEmail`). As regras de login e senha lançam `UserValidationError` com um código estável, que a interface traduz para a mensagem do idioma do usuário (`messages/pt-BR.json`, `users.errors.<código>`).
 
 ## 3. Padrões de projeto utilizados
 

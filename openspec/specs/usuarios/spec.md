@@ -6,7 +6,7 @@ Gerenciamento dos usuários do CliniCore (Administrador, Recepcionista, Médico 
 ## Requirements
 
 ### Requirement: RF07 — Cadastrar usuário
-O sistema DEVE permitir que o Administrador cadastre usuários informando nome, e-mail, login, senha e papel (Administrador, Recepcionista, Médico ou Paciente), recusando e-mails e logins já cadastrados e informando o motivo de qualquer recusa.
+O sistema DEVE permitir que o Administrador cadastre usuários informando nome, e-mail, login, senha e papel (Administrador, Recepcionista, Médico ou Paciente), recusando e-mails (sem diferenciar maiúsculas de minúsculas) e logins já cadastrados, mesmo quando dois cadastros chegam ao mesmo tempo, e informando o motivo de qualquer recusa.
 
 **Prioridade:** Essencial
 **Casos de uso:** UC05
@@ -20,6 +20,16 @@ O sistema DEVE permitir que o Administrador cadastre usuários informando nome, 
 - **GIVEN** já existe um usuário com o e-mail "ana@clinicore.com"
 - **WHEN** o Administrador tenta cadastrar outro usuário com o e-mail "ana@clinicore.com"
 - **THEN** o sistema recusa o cadastro informando "Já existe um usuário cadastrado com este e-mail."
+
+#### Scenario: E-mail cadastrado com outras maiúsculas
+- **GIVEN** já existe um usuário com o e-mail "ana@clinicore.com"
+- **WHEN** o Administrador tenta cadastrar outro usuário com o e-mail "ANA@Clinicore.com"
+- **THEN** o sistema recusa o cadastro informando "Já existe um usuário cadastrado com este e-mail."
+
+#### Scenario: Cadastros simultâneos com o mesmo login
+- **GIVEN** não existe usuário com o login "ana"
+- **WHEN** dois cadastros com o login "ana" e e-mails diferentes chegam ao mesmo tempo
+- **THEN** apenas um é armazenado, e o outro é recusado informando "Já existe um usuário cadastrado com este login."
 
 #### Scenario: Login já cadastrado
 - **GIVEN** já existe um usuário com o login "ana"
