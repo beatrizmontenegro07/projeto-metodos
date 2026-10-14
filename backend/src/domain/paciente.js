@@ -28,15 +28,20 @@ class Paciente {
     this.dataNascimento = dataNascimento;
     this.genero = genero;
     this.telefones = Array.isArray(telefones)
-      ? telefones.map((tel) => {
-          if (tel instanceof Telefone) return tel;
-          if (typeof tel === 'string') return new Telefone({ numero: tel });
-          return new Telefone(tel);
-        })
+      ? telefones.map((tel) => Paciente.#criarTelefone(tel))
       : [];
     this.email = email;
     this.endereco = endereco;
     this.ativo = Boolean(ativo);
+  }
+
+  static #criarTelefone(tel) {
+    if (tel instanceof Telefone) return tel;
+    try {
+      return typeof tel === 'string' ? new Telefone({ numero: tel }) : new Telefone(tel ?? {});
+    } catch (erro) {
+      throw new ErroDeValidacaoDePaciente(erro.message);
+    }
   }
 
   #validarNome(nome) {

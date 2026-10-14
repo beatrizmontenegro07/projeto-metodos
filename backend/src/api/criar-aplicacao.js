@@ -1,8 +1,11 @@
 const http = require('node:http');
 const { ControladorDeUsuarios } = require('../application/controlador-de-usuarios');
+const { ControladorDePacientes } = require('../application/controlador-de-pacientes');
 const { criarRepositorioDeUsuarios } = require('../infra/fabrica-de-repositorio-de-usuarios');
+const { criarRepositorioDePacientes } = require('../infra/fabrica-de-repositorio-de-pacientes');
 const { criarMiddlewareDeAutenticacao } = require('./middleware-autenticacao');
 const { registrarRotasDeAutenticacao } = require('./rotas-de-autenticacao');
+const { registrarRotasDePacientes } = require('./rotas-de-pacientes');
 
 const LIMITE_BYTES_CORPO = 64 * 1024;
 
@@ -31,14 +34,39 @@ function executarCadeiaDeMiddlewares(middlewares, handler, req, res) {
   return proximo();
 }
 
+/**
+ * Compara o padrão da rota (ex.: /api/pacientes/:id) com o caminho requisitado.
+ * Retorna os parâmetros extraídos ou null quando não há correspondência.
+ */
+function casarCaminho(padrao, caminho) {
+  const partesPadrao = padrao.split('/');
+  const partesCaminho = caminho.split('/');
+  if (partesPadrao.length !== partesCaminho.length) return null;
+
+  const params = {};
+  for (let i = 0; i < partesPadrao.length; i += 1) {
+    const segmento = partesPadrao[i];
+    if (segmento.startsWith(':')) {
+      if (!partesCaminho[i]) return null;
+      params[segmento.slice(1)] = decodeURIComponent(partesCaminho[i]);
+    } else if (segmento !== partesCaminho[i]) {
+      return null;
+    }
+  }
+  return params;
+}
+
 function criarAplicacao({
   controladorDeUsuarios,
+  controladorDePacientes,
   jwtSecret = process.env.JWT_SECRET,
   tempoExpiracaoSegundos = 7200,
   configurarRotasExtras,
 } = {}) {
   const controlador = controladorDeUsuarios
     || new ControladorDeUsuarios(criarRepositorioDeUsuarios({ modo: obterModoDeArmazenamentoPorArgs() }));
+  const pacientes = controladorDePacientes
+    || new ControladorDePacientes(criarRepositorioDePacientes({ modo: obterModoDeArmazenamentoPorArgs() }));
 
   const autenticarRequisicao = criarMiddlewareDeAutenticacao({
     jwtSecret,
@@ -52,6 +80,10 @@ function criarAplicacao({
     jwtSecret,
     tempoExpiracaoSegundos,
   });
+  registrarRotasDePacientes(rotas, {
+    controladorDePacientes: pacientes,
+    autenticarRequisicao,
+  });
 
   if (typeof configurarRotasExtras === 'function') {
     configurarRotasExtras(rotas, { autenticarRequisicao, controladorDeUsuarios: controlador });
@@ -59,7 +91,7 @@ function criarAplicacao({
 
   async function simularRequisicao({ method = 'GET', url = '/', headers = {}, body = undefined } = {}) {
     const metodoNormalizado = method.toUpperCase();
-    const caminhoSemQuery = url.split('?')[0];
+    const [caminhoSemQuery, queryString = ''] = url.split('?');
 
     const cabecalhosNormalizados = {};
     for (const [chave, valor] of Object.entries(headers)) {
@@ -70,6 +102,8 @@ function criarAplicacao({
       method: metodoNormalizado,
       url: caminhoSemQuery,
       headers: cabecalhosNormalizados,
+      query: Object.fromEntries(new URLSearchParams(queryString)),
+      params: {},
       body,
     };
 
@@ -103,9 +137,16 @@ function criarAplicacao({
       return { status: 204, headers: cabecalhosResposta, body: null };
     }
 
-    const rotaEncontrada = rotas.find(
-      (r) => r.method.toUpperCase() === metodoNormalizado && r.path === caminhoSemQuery,
-    );
+    let rotaEncontrada;
+    for (const rota of rotas) {
+      if (rota.method.toUpperCase() !== metodoNormalizado) continue;
+      const params = casarCaminho(rota.path, caminhoSemQuery);
+      if (params) {
+        rotaEncontrada = rota;
+        req.params = params;
+        break;
+      }
+    }
 
     if (!rotaEncontrada) {
       res.status(404).json({ erro: 'Rota não encontrada.' });

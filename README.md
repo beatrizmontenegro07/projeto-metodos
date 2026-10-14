@@ -98,3 +98,34 @@ curl -X POST http://localhost:3000/api/usuarios \
 Em seguida, acesse **`http://localhost:5173`** no navegador e faça login utilizando:
 - **Usuário ou E-mail:** `anasilva` (ou `ana.silva@clinicore.com`)
 - **Senha:** `Ana@Password1`
+
+### 5. API de Gerenciamento de Pacientes
+
+Todas as rotas exigem o cabeçalho `Authorization: Bearer <token>` (obtido em `POST /api/auth/login`) e um usuário com papel **`ADMINISTRADOR`** ou **`RECEPCIONISTA`**.
+
+| Método | Rota | Descrição | Sucesso |
+|--------|------|-----------|---------|
+| `GET` | `/api/pacientes?pagina=1&tamanhoPagina=10` | Lista pacientes com paginação (`tamanhoPagina` máx. 100) | `200` |
+| `GET` | `/api/pacientes/:id` | Consulta um paciente | `200` |
+| `POST` | `/api/pacientes` | Cadastra um paciente | `201` |
+| `PUT` | `/api/pacientes/:id` | Edita um paciente | `200` |
+| `DELETE` | `/api/pacientes/:id` | Remove um paciente | `200` |
+
+Códigos de erro: `400` dados ou parâmetros inválidos, `401` não autenticado, `403` papel sem permissão, `404` paciente inexistente, `409` CPF já cadastrado.
+
+Os pacientes são persistidos em `backend/pacientes.bin` (modo `--storage=file`) ou apenas em memória (`--storage=memory`).
+
+Exemplo de cadastro:
+```bash
+curl -X POST http://localhost:3000/api/pacientes \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "nomeCompleto": "Carlos Eduardo Santos",
+    "cpf": "12345678901",
+    "dataNascimento": "1985-04-12",
+    "genero": "male",
+    "telefones": [{ "numero": "83988776655", "tipo": "mobile" }],
+    "email": "carlos@email.com"
+  }'
+```

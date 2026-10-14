@@ -79,6 +79,26 @@ class ErroDeValidacaoDeUsuario <<exception>>
 class ErroDePersistenciaDeUsuarios <<exception>>
 class ErroDeAutenticacao <<exception>>
 
+' Controle e persistência de pacientes (UC01 / RF01)
+class ControladorDePacientes <<control>> {
+  +cadastrar(dados): Paciente
+  +obterPorId(id): Paciente
+  +atualizar(id, dados): Paciente
+  +remover(id): void
+  +listarPaginado(pagina, tamanhoPagina): PaginaDePacientes
+}
+interface RepositorioDePacientes <<repository>> {
+  +listar(): Paciente[]
+  +salvar(paciente): void
+  +atualizar(paciente): void
+  +remover(id): void
+}
+class RepositorioDePacientesEmMemoria <<repository>>
+class RepositorioDePacientesEmArquivoBinario <<repository>>
+class ErroDeValidacaoDePaciente <<exception>>
+class ErroDePacienteNaoEncontrado <<exception>>
+class ErroDePacienteDuplicado <<exception>>
+
 ' Entidades de Agendamento (Módulo Ambulatorial)
 class Agenda <<Schedule>>
 class HorarioDisponivel <<Slot>>
@@ -114,6 +134,15 @@ RepositorioDeUsuarios <|.. RepositorioEmMemoria
 RepositorioDeUsuarios <|.. RepositorioEmArquivoBinario
 RepositorioEmArquivoBinario ..> ErroDePersistenciaDeUsuarios : lança >
 FabricaDeRepositorioDeUsuarios --> RepositorioDeUsuarios : seleciona >
+
+' Gerenciamento de pacientes
+ControladorDePacientes --> Paciente : cria/edita/remove/lista >
+ControladorDePacientes --> RepositorioDePacientes : usa >
+ControladorDePacientes ..> ErroDeValidacaoDePaciente : lança >
+ControladorDePacientes ..> ErroDePacienteNaoEncontrado : lança >
+ControladorDePacientes ..> ErroDePacienteDuplicado : lança >
+RepositorioDePacientes <|.. RepositorioDePacientesEmMemoria
+RepositorioDePacientes <|.. RepositorioDePacientesEmArquivoBinario
 
 ' Relacionamentos de CRM e Comunicação
 Paciente "1" -left- "*" RegistroComunicacao : recebe/envia >
