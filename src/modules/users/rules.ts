@@ -9,6 +9,11 @@ const MIN_PASSWORD_CHARACTER_TYPES = 3;
 // AWS IAM default password policy: lowercase, uppercase, digit, and symbol.
 const PASSWORD_CHARACTER_TYPES = [/\p{Ll}/u, /\p{Lu}/u, /\d/u, /[^\p{L}\d]/u];
 
+/** E-mails are stored and compared without letter case, so "Ana@x.com" and "ana@x.com" are the same user. */
+export function normalizeEmail(email: string): string {
+  return email.toLowerCase();
+}
+
 export function validateRole(role: unknown): void {
   if (!isRole(role)) throw new UserValidationError("INVALID_ROLE");
 }

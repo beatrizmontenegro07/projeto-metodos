@@ -71,6 +71,47 @@ describe("adding and listing users", () => {
     expect(await controller.list()).toHaveLength(1);
   });
 
+  it("rejects a duplicate login added concurrently without adding a second user", async () => {
+    const results = await Promise.allSettled([
+      controller.add(validUser({ email: "first@clinicore.com" })),
+      controller.add(validUser({ email: "second@clinicore.com" })),
+    ]);
+
+    const rejection = results.find((result) => result.status === "rejected");
+    expect(rejection?.reason).toBeInstanceOf(UserValidationError);
+    expect(rejection?.reason).toHaveProperty("code", "LOGIN_ALREADY_REGISTERED");
+    expect(await controller.list()).toHaveLength(1);
+  });
+
+  it("rejects a duplicate e-mail added concurrently without adding a second user", async () => {
+    const results = await Promise.allSettled([
+      controller.add(validUser({ login: "first" })),
+      controller.add(validUser({ login: "second" })),
+    ]);
+
+    const rejection = results.find((result) => result.status === "rejected");
+    expect(rejection?.reason).toBeInstanceOf(UserValidationError);
+    expect(rejection?.reason).toHaveProperty("code", "EMAIL_ALREADY_REGISTERED");
+    expect(await controller.list()).toHaveLength(1);
+  });
+
+  it("stores the e-mail in lowercase", async () => {
+    const user = await controller.add(validUser({ email: "Ana.Silva@Clinicore.com" }));
+
+    expect(user.email).toBe("ana.silva@clinicore.com");
+    expect((await controller.list())[0].email).toBe("ana.silva@clinicore.com");
+  });
+
+  it("rejects an e-mail that differs from a registered one only in letter case", async () => {
+    await controller.add(validUser());
+
+    await expectValidationError(
+      controller.add(validUser({ email: "ANA@Clinicore.com", login: "other" })),
+      "EMAIL_ALREADY_REGISTERED",
+    );
+    expect(await controller.list()).toHaveLength(1);
+  });
+
   it("rejects a role outside the allowed roles", async () => {
     await expectValidationError(controller.add(validUser({ role: "MANAGER" as Role })), "INVALID_ROLE");
   });
