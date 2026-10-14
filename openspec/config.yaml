@@ -9,7 +9,7 @@ context: |
   Entidade principal: Paciente, relacionada a Usuário (o recepcionista que cadastrou).
   Visão, usuários, escopo negativo e restrições estão em docs/01-visao.md.
   Termos do domínio estão em docs/02-glossario.md; use-os exatamente como definidos.
-  Stack: Node.js + TypeScript + Express (backend), React (frontend), PostgreSQL, Jest; diagramas em Mermaid.
+  Stack: Next.js (App Router) + TypeScript, shadcn/ui, SQLite com Drizzle ORM (Turso na Vercel), Vitest; diagramas em Mermaid.
   Arquitetura: monolito modular em camadas (domínio, aplicação, infraestrutura, interfaces).
 
 rules:

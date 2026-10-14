@@ -1,9 +1,8 @@
 # 🏥 CliniCore - CRM Médico Ambulatorial
 
 ![Status do Projeto](https://img.shields.io/badge/Status-Em%20Desenvolvimento-blue)
-![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=black)
-![Node.js](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933?logo=node.js&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql&logoColor=white)
+![Next.js](https://img.shields.io/badge/App-Next.js%20%2B%20TypeScript-000000?logo=nextdotjs&logoColor=white)
+![SQLite](https://img.shields.io/badge/Database-SQLite%20%2B%20Drizzle-003B57?logo=sqlite&logoColor=white)
 ![FHIR](https://img.shields.io/badge/Interoperabilidade-HL7%20FHIR-E3242B)
 
 O **CliniCore** é um sistema de CRM (*Customer/Clinic Relationship Management*) desenvolvido para clínicas médicas. Seu objetivo é centralizar e otimizar o relacionamento com pacientes, a gestão da agenda de consultas e o histórico de comunicações. 
@@ -24,11 +23,11 @@ Diferente de um Prontuário Eletrônico (PEP/EHR) hospitalar complexo, o CliniCo
 
 ## 🛠️ Tecnologias e Arquitetura
 
-A arquitetura do sistema adota um padrão multicamadas baseada em Web Services RESTful, estruturada da seguinte forma:
+O CliniCore é um único aplicativo web full-stack, organizado em camadas (ver [ADR-0004](docs/07-arquitetura/adr/0004-nextjs-typescript-sqlite.md)):
 
-*   **Frontend (Camada de Apresentação):** Single Page Application (SPA) responsiva construída com **React**.
-*   **Backend (API & Regras de Negócio):** Servidor em **Node.js com Express**, responsável pelo roteamento, segurança (JWT) e orquestração dos serviços (Pacientes, Agendamentos, Atendimentos).
-*   **Banco de Dados (Persistência):** Banco de dados relacional **PostgreSQL**, otimizado para o fluxo diário do CRM.
+*   **Aplicação (Interface e Servidor):** **Next.js** (App Router) com **TypeScript**; componentes de interface com **shadcn/ui** e **Tailwind CSS**.
+*   **Regras de Negócio:** módulos por capacidade em `src/modules/` (Usuários, Pacientes, Agendamentos, Atendimentos), independentes das telas.
+*   **Banco de Dados (Persistência):** **SQLite** com **Drizzle ORM** — arquivo local no desenvolvimento e **Turso** (SQLite hospedado) no deploy na **Vercel**.
 *   **Interoperabilidade (FHIR Facade):** Camada dedicada à conversão dos dados internos do sistema para os recursos do padrão **HL7 FHIR** (`Patient`, `Practitioner`, `Appointment`, `Encounter`, etc.), permitindo integração nativa e segura com operadoras e redes de saúde externas.
 
 ---
@@ -40,20 +39,74 @@ Por lidar com dados pessoais sensíveis, o sistema foi projetado sob os pilares 
 
 ## 🚀 Como executar o projeto localmente
 
-Nesta primeira entrega, implementei o núcleo de usuários em memória. Ele ainda não depende de banco de dados nem de servidor HTTP.
-
 ### Pré-requisitos
-- Node.js (v18+)
+- Node.js 22.12 ou superior
 
 ### Passos
-1. Clone o repositório e entre na pasta:
+1. Clone o repositório e instale as dependências:
    ```bash
    git clone https://github.com/beatrizmontenegro07/projeto-metodos.git
    cd projeto-metodos
+   npm install
    ```
-2. Execute os testes:
+2. Configure o banco local e aplique as migrações:
    ```bash
-   npm test
+   cp .env.sample .env.local
+   npm run db:migrate
+   ```
+3. Inicie a aplicação em http://localhost:3000:
+   ```bash
+   npm run dev
    ```
 
-Os testes verificam a adição de usuários, a validação de papéis, a prevenção de e-mails duplicados e a listagem de usuários cadastrados.
+### Mecanismo de armazenamento
+
+O armazenamento é escolhido na inicialização pela variável `DATABASE_URL`:
+
+| Valor | Mecanismo |
+|---|---|
+| `:memory:` | RAM — os dados somem quando o processo termina (migrações aplicadas automaticamente) |
+| `file:local.db` | SQLite permanente em arquivo local (padrão do `.env.sample`) |
+| `libsql://<banco>.turso.io` | Turso, com `DATABASE_AUTH_TOKEN` |
+
+Para rodar só em memória: `DATABASE_URL=:memory: npm run dev`.
+
+### Esquema e migrações
+
+O esquema fica em [`src/db/schema.ts`](src/db/schema.ts). Depois de alterá-lo, gere a migração e aplique-a:
+
+```bash
+npm run db:generate
+npm run db:migrate
+```
+
+As migrações geradas em `drizzle/` são versionadas; nunca edite uma migração já aplicada.
+
+### Testes e verificação
+
+```bash
+npm test        # Vitest, com SQLite em memória (não precisa de .env)
+npm run lint
+npm run build
+```
+
+### Deploy na Vercel
+
+1. Crie um banco no [Turso](https://turso.tech) e gere um token de acesso.
+2. Na Vercel, defina `DATABASE_URL` (`libsql://...`) e `DATABASE_AUTH_TOKEN` nas variáveis de ambiente do projeto.
+3. Antes de publicar uma versão que altere o esquema, aplique as migrações no Turso:
+   ```bash
+   DATABASE_URL=libsql://... DATABASE_AUTH_TOKEN=... npm run db:migrate
+   ```
+
+### Estrutura
+
+```text
+src/
+├── app/            ← rotas e páginas (Next.js App Router)
+├── components/ui/  ← componentes shadcn/ui
+├── db/             ← cliente do banco e esquema Drizzle
+├── lib/            ← utilitários compartilhados
+└── modules/        ← regras de negócio por capacidade (ex.: usuarios)
+drizzle/            ← migrações SQL geradas
+```

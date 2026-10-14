@@ -17,15 +17,23 @@ Minimum workflow:
 
 ## Structure and architecture
 
-- `src/main/java/br/ufpb/mps/domain/`: entities.
-- `src/main/java/br/ufpb/mps/application/`: use cases, validation, and ports.
-- `src/main/java/br/ufpb/mps/infra/`: persistence implementations.
-- `src/main/java/br/ufpb/mps/interfaceadapters/`: application input/output.
-- `src/test/java/`: executable tests using `assert`.
-- `docs/diagrams/`: PlantUML sources and rendered images.
+Single Next.js (App Router) + TypeScript app, SQLite through Drizzle ORM. See
+`docs/07-arquitetura/adr/0004-nextjs-typescript-sqlite.md`.
 
-Keep dependencies pointed inward: adapters depend on application code, while
-infrastructure implements interfaces defined by the application layer.
+- `src/app/`: routes, pages, and server actions (ui layer).
+- `src/components/ui/`: shadcn/ui components; add new ones with
+  `npx shadcn@latest add <component>`.
+- `src/modules/<capability>/`: business rules per capability (e.g.
+  `usuarios`): types, validation, domain errors, and controllers. Tests sit
+  next to the code as `*.test.ts`.
+- `src/db/`: Drizzle schema (`schema.ts`) and the database client (`index.ts`).
+- `drizzle/`: generated SQL migrations, committed.
+- `docs/relatorio/codigos/`: PlantUML sources; rendered images in
+  `docs/relatorio/images/`.
+
+Keep dependencies pointed inward: `src/app` calls `src/modules`; modules never
+import from `src/app` or React. Controllers receive the database
+(`BancoDeDados`) as a constructor argument so tests can pass an in-memory one.
 
 ## Implementation rules
 
@@ -33,31 +41,32 @@ infrastructure implements interfaces defined by the application layer.
   minimal implementation.
 - Domain validation must raise clear exceptions; do not use magic values or
   `null` to signal errors.
-- Never expose or persist plaintext passwords. For the current user flow, the
-  password is only validated and is not part of the persisted `User` entity.
-- Keep the `memory` and `file` storage modes. Storage is selected at startup
-  through `--storage=memory` or `--storage=file`.
-- Do not commit `users.bin`, `.class` files, `out/`, `sources.txt`, credentials,
-  or runtime artifacts.
+- Never expose or persist plaintext passwords. Store only `usuarios.senha_hash`
+  (see `src/modules/usuarios/senha.ts`) and select public columns explicitly.
+- Storage is selected at startup through `DATABASE_URL`: `:memory:` (RAM),
+  `file:local.db` (local SQLite), or `libsql://...` (Turso). Do not add
+  per-mechanism repositories; wrap database failures in the module's
+  persistence error.
+- Change the schema only in `src/db/schema.ts`, then run `npm run db:generate`.
+  Never edit a migration that has already been applied.
+- Do not commit `*.db` files, `.env*` files other than `.env.sample`,
+  credentials, or runtime artifacts.
 - Update the analysis class diagram when responsibilities or relevant classes
   change.
 
 ## Required verification
 
-Use JDK 17 in a container; do not install local build dependencies:
-
 ```bash
-docker run --rm -v "$PWD":/app -w /app eclipse-temurin:17-jdk sh -c \
-'find src/main/java src/test/java -name "*.java" > /tmp/sources.txt && \
-javac -Xlint:all -d /tmp/mps-out @/tmp/sources.txt && \
-java -ea -cp /tmp/mps-out br.ufpb.mps.Sprint02Tests'
+npm test        # Vitest; uses an in-memory SQLite database
+npm run lint
+npm run build   # also type-checks
 ```
 
 Render diagrams before declaring documentation done:
 
 ```bash
-docker run --rm --user 0 -v "$PWD/docs/diagrams":/data plantuml/plantuml:latest \
--tpng /data/classes-de-analise.puml
+docker run --rm --user 0 -v "$PWD/docs/relatorio/codigos":/data plantuml/plantuml:latest \
+-tpng /data/classes-de-analise.puml -o ../images
 ```
 
 ## Git
