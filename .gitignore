@@ -1,3 +1,32 @@
+# dependencies
+/node_modules
 node_modules/
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
 *.swp
+*.pem
+
+# debug
+npm-debug.log*
+
+# env files (.env.example documents the expected variables)
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
