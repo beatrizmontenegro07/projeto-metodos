@@ -25,10 +25,13 @@ function criarManipuladoresDePacientes({ controladorDePacientes }) {
   return {
     listar(req, res) {
       try {
-        const { pagina, tamanhoPagina } = req.query || {};
+        const { pagina, tamanhoPagina, busca, status, ordenacao } = req.query || {};
         const resultado = controladorDePacientes.listarPaginado({
           ...(pagina !== undefined && { pagina }),
           ...(tamanhoPagina !== undefined && { tamanhoPagina }),
+          ...(busca !== undefined && { busca }),
+          ...(status !== undefined && { status }),
+          ...(ordenacao !== undefined && { ordenacao }),
         });
         return res.status(200).json(resultado);
       } catch (erro) {

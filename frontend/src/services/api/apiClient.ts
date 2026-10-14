@@ -11,6 +11,10 @@ export function setAccessToken(token: string | null): void {
   accessToken = token;
 }
 
+export function getAccessToken(): string | null {
+  return accessToken;
+}
+
 export class ApiNetworkError extends Error {
   constructor() {
     super('NETWORK');
@@ -20,30 +24,75 @@ export class ApiNetworkError extends Error {
 
 export class ApiResponseError extends Error {
   readonly status: number;
+  readonly data?: unknown;
 
-  constructor(status: number) {
-    super(`HTTP_${status}`);
+  constructor(status: number, message?: string, data?: unknown) {
+    super(message ?? `HTTP_${status}`);
     this.name = 'ApiResponseError';
     this.status = status;
+    this.data = data;
   }
 }
 
-export async function postJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json', Accept: 'application/json' };
-  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+async function requestJson<TResponse>(
+  method: string,
+  path: string,
+  body?: unknown,
+): Promise<TResponse> {
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+  };
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+  }
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
 
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
-      method: 'POST',
+      method,
       headers,
-      body: JSON.stringify(body),
+      ...(body !== undefined && { body: JSON.stringify(body) }),
     });
   } catch {
     throw new ApiNetworkError();
   }
 
-  if (!response.ok) throw new ApiResponseError(response.status);
+  if (!response.ok) {
+    let errorData: any;
+    let errorMessage: string | undefined;
+    try {
+      errorData = await response.json();
+      if (errorData && typeof errorData.erro === 'string') {
+        errorMessage = errorData.erro;
+      }
+    } catch {
+      // Ignora erro no parse do corpo de erro
+    }
+    throw new ApiResponseError(response.status, errorMessage, errorData);
+  }
+
+  if (response.status === 204) {
+    return null as TResponse;
+  }
+
   return (await response.json()) as TResponse;
 }
 
+export async function getJson<TResponse>(path: string): Promise<TResponse> {
+  return requestJson<TResponse>('GET', path);
+}
+
+export async function postJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
+  return requestJson<TResponse>('POST', path, body);
+}
+
+export async function putJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
+  return requestJson<TResponse>('PUT', path, body);
+}
+
+export async function deleteJson<TResponse>(path: string): Promise<TResponse> {
+  return requestJson<TResponse>('DELETE', path);
+}

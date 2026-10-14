@@ -270,3 +270,31 @@ test('GET /api/pacientes lista com paginação via query string', async () => {
   assert.equal(invalida.status, 400);
 });
 
+test('GET /api/pacientes filtra por termo de busca e por status', async () => {
+  const { app, controladorDePacientes, comToken } = await montarAmbiente();
+  controladorDePacientes.cadastrar(dadosPaciente({ nomeCompleto: 'Ana Beatriz Souza', cpf: '11111111111', ativo: true }));
+  controladorDePacientes.cadastrar(dadosPaciente({ nomeCompleto: 'Bruno Ferreira Lima', cpf: '22222222222', ativo: false }));
+  controladorDePacientes.cadastrar(dadosPaciente({ nomeCompleto: 'Carla Beatriz Mendes', cpf: '33333333333', ativo: true }));
+
+  // Busca por nome
+  const buscaNome = await app.simularRequisicao({
+    method: 'GET',
+    url: '/api/pacientes?busca=Beatriz',
+    headers: comToken('recepcao'),
+  });
+  assert.equal(buscaNome.status, 200);
+  assert.equal(buscaNome.body.paginacao.totalItens, 2);
+  assert.deepEqual(buscaNome.body.dados.map((p) => p.nomeCompleto), ['Ana Beatriz Souza', 'Carla Beatriz Mendes']);
+
+  // Filtro por status
+  const filtroInativo = await app.simularRequisicao({
+    method: 'GET',
+    url: '/api/pacientes?status=inativo',
+    headers: comToken('recepcao'),
+  });
+  assert.equal(filtroInativo.status, 200);
+  assert.equal(filtroInativo.body.paginacao.totalItens, 1);
+  assert.equal(filtroInativo.body.dados[0].nomeCompleto, 'Bruno Ferreira Lima');
+});
+
+

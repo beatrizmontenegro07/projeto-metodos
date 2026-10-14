@@ -87,11 +87,11 @@ Caso ainda não exista nenhum usuário cadastrado no arquivo local `backend/usua
 curl -X POST http://localhost:3000/api/usuarios \
   -H "Content-Type: application/json" \
   -d '{
-    "nome": "Dra. Ana Silva",
+    "nome": "Ana Silva",
     "login": "anasilva",
     "email": "ana.silva@clinicore.com",
     "senha": "Ana@Password1",
-    "papel": "MEDICO"
+    "papel": "RECEPCIONISTA"
   }'
 ```
 

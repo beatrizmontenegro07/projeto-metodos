@@ -1,0 +1,57 @@
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.actionBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Visualizar (Lupa) */
+.viewBtn {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.viewBtn:hover {
+  background-color: #bae6fd;
+  color: #0369a1;
+}
+
+/* Editar (Lápis) */
+.editBtn {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.editBtn:hover {
+  background-color: #bae6fd;
+  color: #0369a1;
+}
+
+/* Remover (Lixeira) */
+.deleteBtn {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.deleteBtn:hover {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+

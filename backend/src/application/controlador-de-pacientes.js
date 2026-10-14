@@ -62,7 +62,13 @@ class ControladorDePacientes {
     this.#repositorio.remover(existente.id);
   }
 
-  listarPaginado({ pagina = 1, tamanhoPagina = TAMANHO_PAGINA_PADRAO } = {}) {
+  listarPaginado({
+    pagina = 1,
+    tamanhoPagina = TAMANHO_PAGINA_PADRAO,
+    busca = '',
+    status = '',
+    ordenacao = '',
+  } = {}) {
     const paginaNumerica = this.#validarInteiroPositivo(pagina, 'pagina');
     const tamanhoNumerico = this.#validarInteiroPositivo(tamanhoPagina, 'tamanhoPagina');
     if (tamanhoNumerico > TAMANHO_PAGINA_MAXIMO) {
@@ -71,7 +77,39 @@ class ControladorDePacientes {
       );
     }
 
-    const registros = this.#repositorio.listar().sort((a, b) => a.id - b.id);
+    let registros = this.#repositorio.listar();
+
+    if (busca && typeof busca === 'string' && busca.trim().length > 0) {
+      const termo = busca.trim().toLowerCase();
+      const digitosBusca = termo.replace(/\D/g, '');
+      registros = registros.filter((p) => {
+        const nomeMatch = p.nomeCompleto?.toLowerCase().includes(termo);
+        const cpfMatch = digitosBusca.length > 0 && p.cpf?.includes(digitosBusca);
+        const telMatch = digitosBusca.length > 0 && Array.isArray(p.telefones) && p.telefones.some((t) => t.numero?.includes(digitosBusca));
+        const emailMatch = p.email?.toLowerCase().includes(termo);
+        return Boolean(nomeMatch || cpfMatch || telMatch || emailMatch);
+      });
+    }
+
+    if (status && typeof status === 'string') {
+      const statusNormalizado = status.trim().toLowerCase();
+      if (statusNormalizado === 'ativo') {
+        registros = registros.filter((p) => p.ativo === true);
+      } else if (statusNormalizado === 'inativo') {
+        registros = registros.filter((p) => p.ativo === false);
+      }
+    }
+
+    if (ordenacao === 'nome-asc') {
+      registros.sort((a, b) => (a.nomeCompleto || '').localeCompare(b.nomeCompleto || ''));
+    } else if (ordenacao === 'nome-desc') {
+      registros.sort((a, b) => (b.nomeCompleto || '').localeCompare(a.nomeCompleto || ''));
+    } else if (ordenacao === 'recentes') {
+      registros.sort((a, b) => b.id - a.id);
+    } else {
+      registros.sort((a, b) => a.id - b.id);
+    }
+
     const inicio = (paginaNumerica - 1) * tamanhoNumerico;
 
     return {
@@ -80,7 +118,7 @@ class ControladorDePacientes {
         pagina: paginaNumerica,
         tamanhoPagina: tamanhoNumerico,
         totalItens: registros.length,
-        totalPaginas: Math.ceil(registros.length / tamanhoNumerico),
+        totalPaginas: Math.ceil(registros.length / tamanhoNumerico) || 1,
       },
     };
   }
