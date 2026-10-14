@@ -1,7 +1,7 @@
 import { loadEnvConfig } from "@next/env";
 import { defineConfig } from "drizzle-kit";
 
-// Lê os mesmos arquivos .env* que o Next.js, para que o drizzle-kit migre o mesmo banco que a aplicação usa.
+// Read the same .env* files as Next.js, so drizzle-kit migrates the database the app uses.
 loadEnvConfig(process.cwd());
 
 export default defineConfig({

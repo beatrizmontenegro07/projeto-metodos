@@ -3,47 +3,44 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 
 import * as schema from "./schema";
 
-/** URL que escolhe o armazenamento em RAM: os dados existem só enquanto o processo roda. */
-export const URL_DO_BANCO_EM_MEMORIA = ":memory:";
-const PASTA_DE_MIGRACOES = "drizzle";
+/** URL that selects RAM storage: data exists only while the process runs. */
+export const IN_MEMORY_DATABASE_URL = ":memory:";
+const MIGRATIONS_FOLDER = "drizzle";
 
-export type BancoDeDados = ReturnType<typeof conectar>;
+export type Database = ReturnType<typeof connect>;
 
-function conectar(url: string, authToken?: string) {
+function connect(url: string, authToken?: string) {
   return drizzle({ connection: { url, authToken }, schema });
 }
 
-export async function aplicarMigracoes(bancoDeDados: BancoDeDados): Promise<void> {
-  await migrate(bancoDeDados, { migrationsFolder: PASTA_DE_MIGRACOES });
+export async function applyMigrations(database: Database): Promise<void> {
+  await migrate(database, { migrationsFolder: MIGRATIONS_FOLDER });
 }
 
-export async function criarBancoDeDados(url: string, authToken?: string): Promise<BancoDeDados> {
-  const bancoDeDados = conectar(url, authToken);
-  // Bancos permanentes (arquivo local ou Turso) são migrados por `npm run db:migrate`;
-  // o banco em memória nasce vazio a cada execução e precisa do esquema na hora.
-  if (url === URL_DO_BANCO_EM_MEMORIA) await aplicarMigracoes(bancoDeDados);
-  return bancoDeDados;
+export async function createDatabase(url: string, authToken?: string): Promise<Database> {
+  const database = connect(url, authToken);
+  // Permanent databases (local file or Turso) are migrated by `npm run db:migrate`;
+  // an in-memory database starts empty on every run and needs the schema right away.
+  if (url === IN_MEMORY_DATABASE_URL) await applyMigrations(database);
+  return database;
 }
 
-const escopoGlobal = globalThis as typeof globalThis & {
-  bancoDeDadosDaAplicacao?: Promise<BancoDeDados>;
+const globalScope = globalThis as typeof globalThis & {
+  applicationDatabase?: Promise<Database>;
 };
 
 /**
- * Conexão única do processo. O mecanismo de armazenamento é escolhido na
- * inicialização pela DATABASE_URL. Fica em globalThis para que o hot reload
- * do `next dev` não descarte o banco em memória.
+ * The process-wide connection. The storage mechanism is chosen at startup by
+ * DATABASE_URL. It lives on globalThis so `next dev` hot reloads do not drop
+ * the in-memory database.
  */
-export function obterBancoDeDados(): Promise<BancoDeDados> {
-  escopoGlobal.bancoDeDadosDaAplicacao ??= criarBancoDeDados(
-    lerUrlDoBanco(),
-    process.env.DATABASE_AUTH_TOKEN,
-  );
-  return escopoGlobal.bancoDeDadosDaAplicacao;
+export function getDatabase(): Promise<Database> {
+  globalScope.applicationDatabase ??= createDatabase(readDatabaseUrl(), process.env.DATABASE_AUTH_TOKEN);
+  return globalScope.applicationDatabase;
 }
 
-function lerUrlDoBanco(): string {
+function readDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL não definida. Copie .env.sample para .env.local.");
+  if (!url) throw new Error("DATABASE_URL is not set. Copy .env.sample to .env.local.");
   return url;
 }

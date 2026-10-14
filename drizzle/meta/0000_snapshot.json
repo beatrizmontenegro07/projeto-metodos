@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "50b74016-2567-4a4d-b3e2-7b592027abba",
+  "id": "da33186e-61a7-4753-9d35-6caa24f70f68",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "usuarios": {
-      "name": "usuarios",
+    "users": {
+      "name": "users",
       "columns": {
         "id": {
           "name": "id",
@@ -14,8 +14,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "nome": {
-          "name": "nome",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -35,15 +35,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "senha_hash": {
-          "name": "senha_hash",
+        "password_hash": {
+          "name": "password_hash",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "papel": {
-          "name": "papel",
+        "role": {
+          "name": "role",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -51,15 +51,15 @@
         }
       },
       "indexes": {
-        "usuarios_email_unique": {
-          "name": "usuarios_email_unique",
+        "users_email_unique": {
+          "name": "users_email_unique",
           "columns": [
             "email"
           ],
           "isUnique": true
         },
-        "usuarios_login_unique": {
-          "name": "usuarios_login_unique",
+        "users_login_unique": {
+          "name": "users_login_unique",
           "columns": [
             "login"
           ],

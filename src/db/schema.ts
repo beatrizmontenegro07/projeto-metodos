@@ -1,13 +1,13 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-// Caminho relativo: o drizzle-kit carrega este arquivo sem o alias "@/".
-import { PAPEIS } from "../modules/usuarios/papel";
+// Relative path: drizzle-kit loads this file without resolving the "@/" alias.
+import { ROLES } from "../modules/users/role";
 
-export const usuarios = sqliteTable("usuarios", {
+export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  nome: text("nome").notNull(),
+  name: text("name").notNull(),
   email: text("email").notNull().unique(),
   login: text("login").notNull().unique(),
-  senhaHash: text("senha_hash").notNull(),
-  papel: text("papel", { enum: PAPEIS }).notNull(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role", { enum: ROLES }).notNull(),
 });
