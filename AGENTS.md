@@ -49,6 +49,9 @@ import from `src/app` or React. Controllers receive the database
   persistence error.
 - Change the schema only in `src/db/schema.ts`, then run `npm run db:generate`.
   Never edit a migration that has already been applied.
+- API route paths are English, lowercase, kebab-case, with plural resource
+  names: `src/app/api/users/route.ts` serves `/api/users`, and auth lives
+  under `/api/auth/*`. Domain code keeps the Portuguese glossary terms.
 - Do not commit `*.db` files, `.env*` files other than `.env.sample`,
   credentials, or runtime artifacts.
 - Update the analysis class diagram when responsibilities or relevant classes
