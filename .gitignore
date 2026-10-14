@@ -20,9 +20,13 @@ node_modules/
 # debug
 npm-debug.log*
 
-# env files (.env.example documents the expected variables)
+# env files (.env.sample documents the expected variables)
 .env*
-!.env.example
+!.env.sample
+
+# local SQLite databases
+*.db
+*.db-*
 
 # vercel
 .vercel
