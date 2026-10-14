@@ -4,9 +4,12 @@ schema: spec-driven
 # Ajuste para o SEU sistema (troque o nome e as restrições).
 context: |
   Escreva todos os artefatos em português do Brasil.
-  Sistema: ReservaCI — reserva de salas e laboratórios do Centro de Informática.
+  Sistema: CliniCore — CRM ambulatorial para clínicas (pacientes, agenda, comunicações)
+  com interoperabilidade HL7 FHIR R4.
+  Entidade principal: Paciente, relacionada a Usuário (o recepcionista que cadastrou).
   Visão, usuários, escopo negativo e restrições estão em docs/01-visao.md.
   Termos do domínio estão em docs/02-glossario.md; use-os exatamente como definidos.
+  Stack: Node.js + TypeScript + Express (backend), React (frontend), PostgreSQL, Jest; diagramas em Mermaid.
   Arquitetura: monolito modular em camadas (domínio, aplicação, infraestrutura, interfaces).
 
 rules:
