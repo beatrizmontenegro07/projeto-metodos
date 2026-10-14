@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "description": "Outpatient CRM for clinics with HL7 FHIR R4 interoperability."
+  },
+  "home": {
+    "tagline": "Outpatient CRM for clinics."
+  },
+  "users": {
+    "roles": {
+      "ADMIN": "Administrator",
+      "RECEPTIONIST": "Receptionist",
+      "DOCTOR": "Doctor",
+      "PATIENT": "Patient"
+    },
+    "errors": {
+      "INVALID_ROLE": "The user role is invalid.",
+      "INVALID_LOGIN": "The login must not be empty, contain numbers, or exceed 12 characters.",
+      "PASSWORD_POLICY_VIOLATION": "The password must have 8 to 128 characters and differ from the login and e-mail.",
+      "PASSWORD_TOO_FEW_CHARACTER_TYPES": "The password must contain at least three character types: lowercase, uppercase, numbers, and symbols.",
+      "EMAIL_ALREADY_REGISTERED": "A user with this e-mail already exists.",
+      "LOGIN_ALREADY_REGISTERED": "A user with this login already exists."
+    }
+  }
+}

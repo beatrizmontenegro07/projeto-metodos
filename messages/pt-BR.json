@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "description": "CRM ambulatorial para clínicas com interoperabilidade HL7 FHIR R4."
+  },
+  "home": {
+    "tagline": "CRM ambulatorial para clínicas."
+  },
+  "users": {
+    "roles": {
+      "ADMIN": "Administrador",
+      "RECEPTIONIST": "Recepcionista",
+      "DOCTOR": "Médico",
+      "PATIENT": "Paciente"
+    },
+    "errors": {
+      "INVALID_ROLE": "O papel do usuário é inválido.",
+      "INVALID_LOGIN": "O login não pode ser vazio, ter números ou mais de 12 caracteres.",
+      "PASSWORD_POLICY_VIOLATION": "A senha deve ter de 8 a 128 caracteres e ser diferente do login e do e-mail.",
+      "PASSWORD_TOO_FEW_CHARACTER_TYPES": "A senha deve conter pelo menos três tipos de caracteres: minúsculas, maiúsculas, números e símbolos.",
+      "EMAIL_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este e-mail.",
+      "LOGIN_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este login."
+    }
+  }
+}
