@@ -16,16 +16,55 @@ class Usuario {
   email: String
   login: String
   papel: Papel
+  pacienteId: Number
+  profissionalId: Number
 }
 class Papel <<enumeration>>
-class Paciente <<Patient>>
-class Profissional <<Practitioner>>
-class VinculoProfissional <<PractitionerRole>>
+class Paciente <<Patient>> {
+  id: Number
+  cpf: String
+  cns: String
+  nomeCompleto: String
+  dataNascimento: Date
+  genero: String
+  email: String
+  ativo: Boolean
+}
+class Telefone <<ContactPoint>> {
+  numero: String
+  tipo: String
+}
+class Profissional <<Practitioner>> {
+  id: Number
+  nomeCompleto: String
+  cpf: String
+  conselho: String
+  numeroRegistro: String
+  ufRegistro: String
+  ativo: Boolean
+}
+class Especialidade <<CodeableConcept>> {
+  nome: String
+  rqe: String
+}
+class VinculoProfissional <<PractitionerRole>> {
+  id: Number
+  profissionalId: Number
+  clinicaId: Number
+  papel: String
+  ativo: Boolean
+}
 
-' Controle, validação e persistência de usuários
+' Controle, validação, autenticação e persistência de usuários
 class ControladorDeUsuarios <<control>> {
   +adicionar(nome, email, login, senha, papel): Usuario
+  +autenticar(login, senha): Usuario
+  +obterPorId(id): Usuario
   +listar(): Usuario[]
+}
+class ServicoDeTokenJwt <<service>> {
+  +gerarTokenJwt(payload, opcoes): String
+  +verificarTokenJwt(token, opcoes): Object
 }
 interface RepositorioDeUsuarios <<repository>> {
   +listar(): Usuario[]
@@ -38,6 +77,27 @@ class FabricaDeRepositorioDeUsuarios <<factory>> {
 }
 class ErroDeValidacaoDeUsuario <<exception>>
 class ErroDePersistenciaDeUsuarios <<exception>>
+class ErroDeAutenticacao <<exception>>
+
+' Controle e persistência de pacientes (UC01 / RF01)
+class ControladorDePacientes <<control>> {
+  +cadastrar(dados): Paciente
+  +obterPorId(id): Paciente
+  +atualizar(id, dados): Paciente
+  +remover(id): void
+  +listarPaginado(pagina, tamanhoPagina): PaginaDePacientes
+}
+interface RepositorioDePacientes <<repository>> {
+  +listar(): Paciente[]
+  +salvar(paciente): void
+  +atualizar(paciente): void
+  +remover(id): void
+}
+class RepositorioDePacientesEmMemoria <<repository>>
+class RepositorioDePacientesEmArquivoBinario <<repository>>
+class ErroDeValidacaoDePaciente <<exception>>
+class ErroDePacienteNaoEncontrado <<exception>>
+class ErroDePacienteDuplicado <<exception>>
 
 ' Entidades de Agendamento (Módulo Ambulatorial)
 class Agenda <<Schedule>>
@@ -58,15 +118,31 @@ Clinica "1" -right- "*" VinculoProfissional : possui >
 Profissional "1" -left- "*" VinculoProfissional : atua como >
 Clinica "1" -left- "*" Usuario : possui >
 Usuario --> Papel
+Usuario "0..1" ..> "0..1" Paciente : vincula >
+Usuario "0..1" ..> "0..1" Profissional : vincula >
+Paciente "1" *-down- "*" Telefone : possui >
+Profissional "*" -down- "*" Especialidade : possui >
+VinculoProfissional "*" --> "*" Especialidade : atende >
 
-' Validação e persistência da Sprint 02
-ControladorDeUsuarios --> Usuario : cria/lista >
+' Validação, autenticação e persistência
+ControladorDeUsuarios --> Usuario : cria/autentica/lista >
 ControladorDeUsuarios --> RepositorioDeUsuarios : usa >
 ControladorDeUsuarios ..> ErroDeValidacaoDeUsuario : lança >
+ControladorDeUsuarios ..> ErroDeAutenticacao : lança >
+ServicoDeTokenJwt ..> ErroDeAutenticacao : lança >
 RepositorioDeUsuarios <|.. RepositorioEmMemoria
 RepositorioDeUsuarios <|.. RepositorioEmArquivoBinario
 RepositorioEmArquivoBinario ..> ErroDePersistenciaDeUsuarios : lança >
 FabricaDeRepositorioDeUsuarios --> RepositorioDeUsuarios : seleciona >
+
+' Gerenciamento de pacientes
+ControladorDePacientes --> Paciente : cria/edita/remove/lista >
+ControladorDePacientes --> RepositorioDePacientes : usa >
+ControladorDePacientes ..> ErroDeValidacaoDePaciente : lança >
+ControladorDePacientes ..> ErroDePacienteNaoEncontrado : lança >
+ControladorDePacientes ..> ErroDePacienteDuplicado : lança >
+RepositorioDePacientes <|.. RepositorioDePacientesEmMemoria
+RepositorioDePacientes <|.. RepositorioDePacientesEmArquivoBinario
 
 ' Relacionamentos de CRM e Comunicação
 Paciente "1" -left- "*" RegistroComunicacao : recebe/envia >

@@ -1,0 +1,24 @@
+:root {
+  /* Cores extraídas do mockup de referência */
+  --color-primary: #2b7be4;
+  --color-primary-hover: #1f68c9;
+  --color-primary-soft: #e8f1fd;
+  --color-navy: #12295c;
+  --color-text: #1b2b4b;
+  --color-text-muted: #6b7c99;
+  --color-placeholder: #8c9ab3;
+  --color-border: #dbe4f0;
+  --color-surface: #ffffff;
+  --color-brand-bg-start: #f1f6ff;
+  --color-brand-bg-end: #d9e8fb;
+  --color-danger: #c62f3e;
+  --color-danger-soft: #fdecee;
+  --color-focus: #1a5fc4;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --shadow-primary: 0 6px 16px rgb(43 123 228 / 28%);
+
+  --font-family: 'Segoe UI', 'Helvetica Neue', Arial, system-ui, -apple-system, 'Noto Sans', sans-serif;
+}
+
