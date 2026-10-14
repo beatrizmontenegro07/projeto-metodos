@@ -27,14 +27,8 @@ class ControladorDeUsuarios <<control>> {
   +adicionar(nome, email, login, senha, papel): Usuario
   +listar(): Usuario[]
 }
-interface RepositorioDeUsuarios <<repository>> {
-  +listar(): Usuario[]
-  +salvar(usuario): void
-}
-class RepositorioEmMemoria <<repository>>
-class RepositorioEmArquivoBinario <<repository>>
-class FabricaDeRepositorioDeUsuarios <<factory>> {
-  +criarRepositorioDeUsuarios(modo, arquivo): RepositorioDeUsuarios
+class BancoDeDados <<infra>> {
+  DATABASE_URL: memória (RAM) | arquivo SQLite | Turso
 }
 class ErroDeValidacaoDeUsuario <<exception>>
 class ErroDePersistenciaDeUsuarios <<exception>>
@@ -61,12 +55,9 @@ Usuario --> Papel
 
 ' Validação e persistência da Sprint 02
 ControladorDeUsuarios --> Usuario : cria/lista >
-ControladorDeUsuarios --> RepositorioDeUsuarios : usa >
+ControladorDeUsuarios --> BancoDeDados : usa >
 ControladorDeUsuarios ..> ErroDeValidacaoDeUsuario : lança >
-RepositorioDeUsuarios <|.. RepositorioEmMemoria
-RepositorioDeUsuarios <|.. RepositorioEmArquivoBinario
-RepositorioEmArquivoBinario ..> ErroDePersistenciaDeUsuarios : lança >
-FabricaDeRepositorioDeUsuarios --> RepositorioDeUsuarios : seleciona >
+ControladorDeUsuarios ..> ErroDePersistenciaDeUsuarios : lança >
 
 ' Relacionamentos de CRM e Comunicação
 Paciente "1" -left- "*" RegistroComunicacao : recebe/envia >

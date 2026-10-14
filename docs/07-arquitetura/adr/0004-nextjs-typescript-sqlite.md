@@ -2,7 +2,7 @@
 
 - **Status:** proposto
 - **Data:** 2026-10-14
-- **Requisitos relacionados:** NF-MAN-01, NF-CON-03, S2.3 ([cronograma](../../00-entregas.md))
+- **Requisitos relacionados:** NF-MAN-01, NF-CON-01, S2.3 ([cronograma](../../00-entregas.md))
 
 ## Contexto
 
