@@ -20,7 +20,7 @@ O CliniCore passa a ser um único aplicativo **Next.js** (App Router) em **TypeS
 | `file:local.db` | SQLite em arquivo local | Desenvolvimento |
 | `libsql://<banco>.turso.io` | Turso (SQLite hospedado) | Deploy na Vercel |
 
-O esquema fica em `src/db/schema.ts` e as migrações versionadas em `drizzle/`. Esta decisão substitui o [ADR-0003](0003-persistencia-substituivel.md): não há interface de repositório nem uma implementação por mecanismo, porque a troca RAM × permanente é feita pela URL com o mesmo código. Falhas do banco continuam convertidas em exceção de negócio (`ErroDePersistenciaDeUsuarios`) pelo controle.
+O esquema fica em `src/db/schema.ts` e as migrações versionadas em `drizzle/`. Esta decisão substitui o [ADR-0003](0003-persistencia-substituivel.md): não há interface de repositório nem uma implementação por mecanismo, porque a troca RAM × permanente é feita pela URL com o mesmo código. Falhas do banco continuam convertidas em exceção de negócio (`UserPersistenceError`) pelo controle.
 
 ## Alternativas consideradas
 

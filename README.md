@@ -26,7 +26,8 @@ Diferente de um Prontuário Eletrônico (PEP/EHR) hospitalar complexo, o CliniCo
 O CliniCore é um único aplicativo web full-stack, organizado em camadas (ver [ADR-0004](docs/07-arquitetura/adr/0004-nextjs-typescript-sqlite.md)):
 
 *   **Aplicação (Interface e Servidor):** **Next.js** (App Router) com **TypeScript**; componentes de interface com **shadcn/ui** e **Tailwind CSS**.
-*   **Regras de Negócio:** módulos por capacidade em `src/modules/` (Usuários, Pacientes, Agendamentos, Atendimentos), independentes das telas.
+*   **Regras de Negócio:** módulos por capacidade em `src/modules/` (`users`, `patients`, `appointments`, `encounters`), independentes das telas.
+*   **Idiomas (i18n):** código em inglês; textos da interface traduzidos com **next-intl** em `messages/` — **pt-BR** (padrão) e **en**, com o idioma no início da URL (`/pt-BR/...`, `/en/...`). Ver [ADR-0005](docs/07-arquitetura/adr/0005-ingles-no-codigo-e-i18n.md).
 *   **Banco de Dados (Persistência):** **SQLite** com **Drizzle ORM** — arquivo local no desenvolvimento e **Turso** (SQLite hospedado) no deploy na **Vercel**.
 *   **Interoperabilidade (FHIR Facade):** Camada dedicada à conversão dos dados internos do sistema para os recursos do padrão **HL7 FHIR** (`Patient`, `Practitioner`, `Appointment`, `Encounter`, etc.), permitindo integração nativa e segura com operadoras e redes de saúde externas.
 
@@ -103,10 +104,15 @@ npm run build
 
 ```text
 src/
-├── app/            ← rotas e páginas (Next.js App Router)
+├── app/
+│   ├── [locale]/   ← páginas, sempre com prefixo de idioma (/pt-BR, /en)
+│   └── api/        ← rotas de API, sem prefixo de idioma
 ├── components/ui/  ← componentes shadcn/ui
 ├── db/             ← cliente do banco e esquema Drizzle
+├── i18n/           ← idiomas suportados e configuração do next-intl
 ├── lib/            ← utilitários compartilhados
-└── modules/        ← regras de negócio por capacidade (ex.: usuarios)
+├── modules/        ← regras de negócio por capacidade (ex.: users)
+└── proxy.ts        ← redireciona URLs sem idioma
+messages/           ← catálogos de tradução (en.json é a fonte)
 drizzle/            ← migrações SQL geradas
 ```
