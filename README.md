@@ -40,20 +40,61 @@ Por lidar com dados pessoais sensíveis, o sistema foi projetado sob os pilares 
 
 ## 🚀 Como executar o projeto localmente
 
-Nesta primeira entrega, implementei o núcleo de usuários em memória. Ele ainda não depende de banco de dados nem de servidor HTTP.
+O repositório está organizado em **monorepo** (NPM Workspaces) contendo:
+- `backend/`: API HTTP em Node.js com autenticação JWT, controle de acesso por papéis (RBAC) e persistência em arquivo binário (`--storage=file`) ou em memória (`--storage=memory`).
+- `frontend/`: Aplicação web em React + TypeScript + Vite com a interface de autenticação.
 
 ### Pré-requisitos
 - Node.js (v18+)
+- npm (v9+)
 
-### Passos
-1. Clone o repositório e entre na pasta:
-   ```bash
-   git clone https://github.com/beatrizmontenegro07/projeto-metodos.git
-   cd projeto-metodos
-   ```
-2. Execute os testes:
-   ```bash
-   npm test
-   ```
+### 1. Instalação
+Clone o repositório, entre na pasta do projeto e instale as dependências:
+```bash
+git clone https://github.com/beatrizmontenegro07/projeto-metodos.git
+cd projeto-metodos
+npm install
+```
 
-Os testes verificam a adição de usuários, a validação de papéis, a prevenção de e-mails duplicados e a listagem de usuários cadastrados.
+### 2. Executar os testes automatizados
+Para rodar todas as suítes de teste (backend e frontend):
+```bash
+npm test
+```
+
+Ou separadamente por módulo:
+```bash
+npm test --workspace=backend
+npm test --workspace=frontend
+```
+
+### 3. Iniciar o Backend e o Frontend
+
+Em um **primeiro terminal**, inicie a API do backend (porta `3000`, utilizando persistência em arquivo binário `backend/usuarios.bin` por padrão):
+```bash
+JWT_SECRET="segredo-desenvolvimento" npm start
+```
+> Para iniciar o backend apenas em memória (`--storage=memory`), utilize `npm run start:memory`.
+
+Em um **segundo terminal**, inicie o servidor de desenvolvimento do frontend (porta `5173`):
+```bash
+npm run dev --workspace=frontend
+```
+
+### 4. Testar o Login na Interface
+Caso ainda não exista nenhum usuário cadastrado no arquivo local `backend/usuarios.bin`, cadastre um usuário inicial com o comando abaixo:
+```bash
+curl -X POST http://localhost:3000/api/usuarios \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Dra. Ana Silva",
+    "login": "anasilva",
+    "email": "ana.silva@clinicore.com",
+    "senha": "Ana@Password1",
+    "papel": "MEDICO"
+  }'
+```
+
+Em seguida, acesse **`http://localhost:5173`** no navegador e faça login utilizando:
+- **Usuário ou E-mail:** `anasilva` (ou `ana.silva@clinicore.com`)
+- **Senha:** `Ana@Password1`

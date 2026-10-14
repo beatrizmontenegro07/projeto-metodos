@@ -11,14 +11,22 @@ class ControladorDeUsuarios {
     this.#repositorio = repositorio;
   }
 
-  adicionar({ nome, email, login, senha, papel }) {
+  adicionar({ nome, email, login, senha, papel, pacienteId, profissionalId }) {
     this.#validarPapel(papel);
     this.#validarLogin(login);
     this.#validarSenha(senha, login, email);
     this.#garantirEmailDisponivel(email);
     this.#garantirLoginDisponivel(login);
 
-    const usuario = new Usuario({ id: this.#proximoId(), nome, email, login, papel });
+    const usuario = new Usuario({
+      id: this.#proximoId(),
+      nome,
+      email,
+      login,
+      papel,
+      pacienteId: pacienteId ?? null,
+      profissionalId: profissionalId ?? null,
+    });
     const senhaHash = this.#gerarHashDeSenha(senha);
     this.#repositorio.salvar({ ...usuario, senhaHash });
 
@@ -54,8 +62,16 @@ class ControladorDeUsuarios {
     return this.listar().reduce((maior, usuario) => Math.max(maior, usuario.id), 0) + 1;
   }
 
-  #copiarUsuario({ id, nome, email, login, papel }) {
-    return new Usuario({ id, nome, email, login, papel });
+  #copiarUsuario({ id, nome, email, login, papel, pacienteId, profissionalId }) {
+    return new Usuario({
+      id,
+      nome,
+      email,
+      login,
+      papel,
+      pacienteId: pacienteId ?? null,
+      profissionalId: profissionalId ?? null,
+    });
   }
 
   #gerarHashDeSenha(senha) {
