@@ -1,0 +1,58 @@
+@startuml
+left to right direction
+
+' Configurações de estilo para manter as mesmas cores
+skinparam usecase {
+    BackgroundColor LightBlue
+    BorderColor #333333
+    ArrowColor #333333
+}
+skinparam actor {
+    BorderColor #333333
+    BackgroundColor White
+}
+skinparam rectangle {
+    BorderColor #333333
+}
+
+' Atores principais (à esquerda)
+actor Paciente
+actor Recepcionista
+actor "Profissional de Saúde" as Profissional
+actor Administrador
+
+' Sistema / Limite
+rectangle CliniCore {
+    usecase "Agendar Consulta" as UC_Agendar
+    usecase "Reagendar Consulta" as UC_Reagendar
+    usecase "Cadastrar Paciente" as UC_Cadastrar
+    usecase "Registrar Atendimento\nBásico" as UC_Registrar
+    usecase "Autenticar Usuário" as UC_Autenticar
+    usecase "Gerenciar Profissionais\ne Clínica" as UC_GerenciarProf
+    usecase "Gerenciar Comunicações\ne Lembretes" as UC_GerenciarCom
+}
+
+' Ator externo (posicionado automaticamente na base pelo motor de layout)
+actor "Gmail/WhatsApp\n<<sistema externo>>" as SistExterno
+
+' Relacionamentos dos Atores com os Casos de Uso
+Paciente --> UC_Agendar
+Recepcionista --> UC_Agendar
+Recepcionista --> UC_Cadastrar
+Profissional --> UC_Registrar
+Administrador --> UC_GerenciarProf
+
+' Relacionamentos de Extensão e Inclusão (pontilhados)
+UC_Agendar ..> UC_Reagendar : <<extend>>
+
+UC_Agendar ..> UC_Autenticar : <<include>>
+UC_Cadastrar ..> UC_Autenticar : <<include>>
+UC_Registrar ..> UC_Autenticar : <<include>>
+UC_GerenciarProf ..> UC_Autenticar : <<include>>
+
+UC_Agendar ..> UC_GerenciarCom : <<include>>
+
+' Relacionamento do Ator Externo
+SistExterno --> UC_GerenciarCom
+
+@enduml

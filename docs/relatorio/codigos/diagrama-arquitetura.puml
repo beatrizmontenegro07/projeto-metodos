@@ -1,0 +1,107 @@
+@startuml
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName sans-serif
+
+' Configuração das cores para replicar o estilo preto e branco
+skinparam node {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam component {
+    BackgroundColor White
+    BorderColor Black
+    Style uml2
+}
+skinparam database {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam cloud {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam package {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam arrow {
+    Color Black
+    FontColor Black
+}
+
+title \n<size:20><b>Arquitetura do Sistema: CliniCore</b></size>\n
+
+' Atores
+actor "Usuários\n(Recepcionista, Médico, Admin)" as Usuarios
+actor "Paciente" as ActorPaciente
+
+' Camada de Apresentação
+node "Camada de Apresentação" {
+    component "Interface Web (SPA)\nReact" as Frontend
+}
+
+' Camada de Backend
+node "Camada de Backend (Node.js + Express)" as Backend {
+    component "API Gateway / Roteamento\n(Rotas Express)" as API
+    component "Serviço de Segurança\n(Autenticação JWT / RBAC)" as Auth
+
+    package "Serviços de Negócio" {
+        component "Gestão de Agendamentos" as ServAgendamentos
+        component "Gestão de Pacientes" as ServPacientes
+        component "Gestão de Atendimentos" as ServAtendimentos
+        
+        ' Força o alinhamento horizontal dos serviços
+        ServAgendamentos -[hidden]right-> ServPacientes
+        ServPacientes -[hidden]right-> ServAtendimentos
+    }
+
+    component "Camada de Interoperabilidade\n(FHIR Facade)" as FHIR
+}
+
+' Camada de Persistência
+database "Camada de Persistência" as CamadaDB {
+    database "Banco de Dados Interno\n(PostgreSQL)" as DB
+}
+
+' Ambiente Externo
+cloud "Ambiente Externo" as NuvemExterna {
+    component "Sistemas Externos de Saúde\nHIS / Operadoras" as SistemasExternos
+}
+
+' --- Relacionamentos e Fluxos ---
+
+' Acesso ao Frontend
+Usuarios -down-> Frontend : HTTPS
+ActorPaciente -down-> Frontend : HTTPS (Portal)
+
+' Frontend para API Gateway
+Frontend -down-> API : Requisições REST (JSON)
+
+' API Gateway roteando para os serviços internos
+API -right-> Auth
+API -down-> ServAgendamentos
+API -down-> ServPacientes
+API -down-> ServAtendimentos
+
+' Serviços de Negócio acessando a Camada de Interoperabilidade
+ServAgendamentos -down.> FHIR
+ServPacientes -down.> FHIR
+ServAtendimentos -down.> FHIR
+
+' Força a Camada de Persistência a ficar à direita do Backend
+Backend -[hidden]right-> CamadaDB
+
+' Serviços de Negócio acessando o Banco de Dados
+ServAgendamentos -right-> DB
+ServPacientes -right-> DB
+ServAtendimentos -right-> DB
+
+' Integração com o Ambiente Externo (Forçando para baixo)
+FHIR -down-> SistemasExternos : Interoperabilidade FHIR (HTTPS)
+
+@enduml

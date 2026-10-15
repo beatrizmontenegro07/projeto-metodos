@@ -1,0 +1,80 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty methods
+hide empty attributes
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' Entidades Principais e Administrativas
+class Clinica <<Organization>>
+class Usuario {
+  id: Number
+  nome: String
+  email: String
+  login: String
+  papel: Papel
+}
+class Papel <<enumeration>>
+class Paciente <<Patient>>
+class Profissional <<Practitioner>>
+class VinculoProfissional <<PractitionerRole>>
+
+' Controle, validação e persistência de usuários
+class ControladorDeUsuarios <<control>> {
+  +adicionar(nome, email, login, senha, papel): Usuario
+  +listar(): Usuario[]
+}
+class BancoDeDados <<infra>> {
+  DATABASE_URL: memória (RAM) | arquivo SQLite | Turso
+}
+class ErroDeValidacaoDeUsuario <<exception>>
+class ErroDePersistenciaDeUsuarios <<exception>>
+
+' Entidades de Agendamento (Módulo Ambulatorial)
+class Agenda <<Schedule>>
+class HorarioDisponivel <<Slot>>
+class Agendamento <<Appointment>>
+
+' Entidades de Relacionamento (CRM)
+class RegistroComunicacao <<Communication>>
+
+' Entidades Clínicas Básicas
+class Atendimento <<Encounter>>
+class AnotacaoClinica <<Observation>>
+class Diagnostico <<Condition>>
+
+' Relacionamentos Estruturais
+Clinica "1" -down- "*" Paciente : gerencia >
+Clinica "1" -right- "*" VinculoProfissional : possui >
+Profissional "1" -left- "*" VinculoProfissional : atua como >
+Clinica "1" -left- "*" Usuario : possui >
+Usuario --> Papel
+
+' Validação e persistência da Sprint 02
+ControladorDeUsuarios --> Usuario : cria/lista >
+ControladorDeUsuarios --> BancoDeDados : usa >
+ControladorDeUsuarios ..> ErroDeValidacaoDeUsuario : lança >
+ControladorDeUsuarios ..> ErroDePersistenciaDeUsuarios : lança >
+
+' Relacionamentos de CRM e Comunicação
+Paciente "1" -left- "*" RegistroComunicacao : recebe/envia >
+
+' Relacionamentos de Agendamento (Baseado na Grade Ambulatorial)
+VinculoProfissional "1" -down- "*" Agenda : possui (grade) >
+Agenda "1" *-down- "*" HorarioDisponivel : contem >
+HorarioDisponivel "1" -right- "0..1" Agendamento : reservado para >
+Agendamento "*" -up- "1" Paciente : pertence a >
+Agendamento "*" -up- "1" VinculoProfissional : destinado a >
+
+' Relacionamentos do Encontro Clínico
+Agendamento "1" -down- "0..1" Atendimento : resulta em >
+Atendimento "*" -up- "1" Paciente : sujeito >
+
+' Relacionamentos de Desfecho Clínico
+Atendimento "1" *-down- "*" AnotacaoClinica : gera >
+Atendimento "1" *-down- "*" Diagnostico : identifica >
+
+@enduml

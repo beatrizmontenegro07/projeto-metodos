@@ -1,0 +1,34 @@
+\section{Descrição geral}
+
+\subsection{Motivação}
+A gestão do relacionamento com pacientes em clínicas médicas frequentemente sofre com dados fragmentados, ausência de históricos de comunicação unificados e com faltas constantes em consultas. Diante disso, a motivação principal para o desenvolvimento desse sistema é construir uma plataforma centralizada e amigável que otimize o atendimento, aproxime o vínculo da clínica com o paciente e, obrigatoriamente, adote padrões internacionais (FHIR) para permitir fácil integração com outras redes de atenção à saúde.
+
+\subsection{Problemas identificados}
+Foram identificados os seguintes problemas:
+\begin{itemize}
+    \item Dificuldade de rastrear o histórico de interações administrativas com o paciente;
+    \item Alta taxa de faltas por deficiência na comunicação e notificação;
+    \item Sistemas isolados que não conversam com prontuários externos ou operadoras de saúde;
+    \item Incapacidade de gerar visões unificadas sobre a saúde e o engajamento do paciente.
+\end{itemize}
+
+\subsection{Visão geral do sistema}
+O sistema será um CRM clínico destinado ao gerenciamento do relacionamento entre a clínica e seus pacientes, centralizando informações relevantes para o atendimento e para a gestão da clínica. As principais funcionalidades inicialmente previstas são o cadastro padronizado de pacientes e profissionais de saúde, o agendamento e gerenciamento da agenda da clínica, o registro do histórico de comunicações e o envio de notificações e lembretes. O sistema também permitirá o registro de encontros clínicos e de observações em alto nível, além de possibilitar a interoperabilidade com outros sistemas de saúde por meio da exposição e do consumo de recursos padronizados pelo FHIR (Fast Healthcare Interoperability Resources).
+
+Entretanto, como parte do escopo negativo, o sistema não terá como objetivo atuar como um Prontuário Eletrônico do Paciente (PEP/EHR) de alta complexidade ou como um sistema de gestão hospitalar. Dessa forma, funcionalidades como prescrição eletrônica avançada, gestão de leitos, faturamento hospitalar e integração com equipamentos de diagnóstico por imagem não serão feitas.
+
+\subsection{Usuários do sistema}
+Os usuários previstos são:
+\begin{itemize}
+    \item \textbf{Administrador/Gestor da Clínica:} Responsável pelas configurações globais, gestão da organização (clínica) e extração de relatórios de engajamento e faltas.
+    \item \textbf{Recepcionista/Secretário:} Usuário de linha de frente que opera o sistema para gerenciar filas, agendamentos, contatos e o cadastro demográfico dos pacientes.
+    \item \textbf{Profissional de Saúde:} Usuário que visualiza a agenda diária e registra informações básicas do encontro clínico de modo simplificado.
+    \item \textbf{Paciente:} Usuário externo que pode acessar um portal ou interagir passivamente através de notificações e lembretes para confirmação de agendamentos.
+\end{itemize}
+
+\subsection{Suposições e restrições gerais}
+\begin{itemize}
+    \item A arquitetura deve obrigatoriamente mapear e comunicar dados respeitando o padrão HL7 FHIR.
+    \item Como o sistema trata de dados sensíveis de saúde, a conformidade com as exigências de privacidade e proteção da LGPD é mandatória.
+    \item O sistema dependerá de conectividade com a internet para sua operação e para comunicação com APIs externas.
+\end{itemize}
