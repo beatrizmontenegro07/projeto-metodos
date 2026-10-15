@@ -1,6 +1,6 @@
 # ADR-0005: Escrever o código em inglês e traduzir a interface com i18n
 
-- **Status:** proposto
+- **Status:** aceito
 - **Data:** 2026-10-14
 - **Requisitos relacionados:** NF01
 
