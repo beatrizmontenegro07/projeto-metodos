@@ -25,5 +25,11 @@
       "EMAIL_ALREADY_REGISTERED": "A user with this e-mail already exists.",
       "LOGIN_ALREADY_REGISTERED": "A user with this login already exists."
     }
+  },
+  "api": {
+    "errors": {
+      "INVALID_REQUEST_BODY": "The request body must be JSON with the name, e-mail, login, password and role as text.",
+      "STORAGE_UNAVAILABLE": "User data is unavailable right now. Try again."
+    }
   }
 }

@@ -79,6 +79,9 @@ the constructor, and `src/infra` implements it.
   and auth lives under `/api/auth/*`.
 - Read the locale from next-intl (`getLocale`, `getTranslations`), never from
   cookies or headers: pages must stay prerenderable under `cacheComponents`.
+  API route handlers run outside `[locale]`: they use
+  `resolveRequestLocale(request)` and answer failures as
+  `{ error: { code, message } }` (see `src/app/api/users/users-handlers.ts`).
 - Do not commit `*.db` files, `.env*` files other than `.env.sample`,
   credentials, or runtime artifacts.
 ## Course documentation
