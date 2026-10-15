@@ -1,6 +1,6 @@
 # ADR-0004: Adotar Next.js, TypeScript e SQLite com Drizzle
 
-- **Status:** aceito
+- **Status:** aceito; a escolha do mecanismo de persistência foi substituída pelo [ADR-0006](0006-repositorio-de-usuarios.md)
 - **Data:** 2026-10-14
 - **Requisitos relacionados:** NF-MAN-01, NF-CON-01, S2.3 ([cronograma](../../00-entregas.md))
 

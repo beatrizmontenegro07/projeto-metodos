@@ -29,6 +29,9 @@ and `docs/07-arquitetura/adr/0005-ingles-no-codigo-e-i18n.md`.
 - `src/modules/<capability>/`: business rules per capability (e.g. `users`):
   types, validation, domain errors, and controllers. Tests sit next to the
   code as `*.test.ts`.
+- `src/infra/<capability>/`: storage implementations of the module's
+  repository interface (e.g. `InMemoryUserRepository`, `SqliteUserRepository`)
+  and the factory that picks one at startup.
 - `src/db/`: Drizzle schema (`schema.ts`) and the database client (`index.ts`).
 - `src/i18n/`: locales (`routing.ts`) and next-intl request config.
 - `src/proxy.ts`: picks the locale (`NEXT_LOCALE` cookie, then browser
@@ -39,8 +42,9 @@ and `docs/07-arquitetura/adr/0005-ingles-no-codigo-e-i18n.md`.
   `docs/relatorio/images/`.
 
 Keep dependencies pointed inward: `src/app` calls `src/modules`; modules never
-import from `src/app` or React. Controllers receive the `Database` as a
-constructor argument so tests can pass an in-memory one.
+import from `src/app`, `src/infra`, `src/db`, or React. Each module defines a
+repository interface (e.g. `UserRepository`); controllers receive it through
+the constructor, and `src/infra` implements it.
 
 ## Implementation rules
 
@@ -59,10 +63,11 @@ constructor argument so tests can pass an in-memory one.
   errors.
 - Never expose or persist plaintext passwords. Store only `users.password_hash`
   (see `src/modules/users/password.ts`) and select public columns explicitly.
-- Storage is selected at startup through `DATABASE_URL`: `:memory:` (RAM),
-  `file:local.db` (local SQLite), or `libsql://...` (Turso). Do not add
-  per-mechanism repositories; wrap database failures in the module's
-  persistence error.
+- Storage is selected once at startup through `STORAGE`: `memory` (a RAM
+  collection) or `sqlite` (the database at `DATABASE_URL`: `file:local.db` or
+  `libsql://...` for Turso). Every repository implementation must pass the
+  shared contract tests (`*.contract.test.ts`); the SQLite one wraps database
+  failures in the module's persistence error.
 - Change the schema only in `src/db/schema.ts`, then run `npm run db:generate`.
   Never edit a migration that has already been applied.
 - Route paths are English, lowercase, kebab-case, with plural resource names.

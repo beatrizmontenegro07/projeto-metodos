@@ -74,15 +74,16 @@ Por lidar com dados pessoais sensíveis, o sistema foi projetado sob os pilares 
 
 ### Mecanismo de armazenamento
 
-O armazenamento é escolhido na inicialização pela variável `DATABASE_URL`:
+O mecanismo é escolhido na inicialização pela variável `STORAGE` ([ADR-0006](docs/07-arquitetura/adr/0006-repositorio-de-usuarios.md)):
 
-| Valor | Mecanismo |
-|---|---|
-| `:memory:` | RAM — os dados somem quando o processo termina (migrações aplicadas automaticamente) |
-| `file:local.db` | SQLite permanente em arquivo local (padrão do `.env.sample`) |
-| `libsql://<banco>.turso.io` | Turso, com `DATABASE_AUTH_TOKEN` |
+| `STORAGE` | Mecanismo | Classe |
+|---|---|---|
+| `memory` | Coleção em RAM — os dados somem quando o processo termina | `InMemoryUserRepository` |
+| `sqlite` | Banco SQLite na `DATABASE_URL` (padrão do `.env.sample`) | `SqliteUserRepository` |
 
-Para rodar só em memória: `DATABASE_URL=:memory: npm run dev`.
+Com `sqlite`, a `DATABASE_URL` aponta para um arquivo local (`file:local.db`) ou para o Turso (`libsql://<banco>.turso.io`, com `DATABASE_AUTH_TOKEN`).
+
+Para rodar só em memória, sem banco nem migrações: `STORAGE=memory npm run dev`.
 
 ### Esquema e migrações
 
@@ -106,7 +107,7 @@ npm run build
 ### Deploy na Vercel
 
 1. Crie um banco no [Turso](https://turso.tech) e gere um token de acesso.
-2. Na Vercel, defina `DATABASE_URL` (`libsql://...`) e `DATABASE_AUTH_TOKEN` nas variáveis de ambiente do projeto.
+2. Na Vercel, defina `STORAGE=sqlite`, `DATABASE_URL` (`libsql://...`) e `DATABASE_AUTH_TOKEN` nas variáveis de ambiente do projeto.
 3. Antes de publicar uma versão que altere o esquema, aplique as migrações no Turso:
    ```bash
    DATABASE_URL=libsql://... DATABASE_AUTH_TOKEN=... npm run db:migrate
@@ -121,6 +122,7 @@ src/
 │   └── api/        ← rotas de API
 ├── components/ui/  ← componentes shadcn/ui
 ├── db/             ← cliente do banco e esquema Drizzle
+├── infra/          ← mecanismos de armazenamento (RAM e SQLite) de cada capacidade
 ├── i18n/           ← idiomas suportados e configuração do next-intl
 ├── lib/            ← utilitários compartilhados
 ├── modules/        ← regras de negócio por capacidade (ex.: users)
