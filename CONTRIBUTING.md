@@ -74,17 +74,17 @@ Uma correção urgente segue o mesmo fluxo, com uma branch `fix/...` a partir de
 **Exemplos válidos:**
 
 ```
-feat(auth): adicionar autenticação via token JWT
+feat(auth): add JWT token authentication
 
-fix(domain): corrigir cálculo de desconto para pedidos fracionados
+fix(domain): fix discount calculation for split orders
 
-refactor(user): extrair validação de e-mail para classe dedicada
+refactor(user): extract e-mail validation into its own class
 
-docs(adr): registrar decisão de uso de event sourcing (ADR-004)
+docs(adr): record the event sourcing decision (ADR-004)
 ```
 
 **Regras:**
-- Descrição em **português**, no **imperativo** ("adicionar", não "adicionei" ou "adicionando")
+- Mensagem em **inglês**, como o código, no **imperativo** ("add", não "added" ou "adding"). O histórico faz parte do código, que é internacionalizado; a documentação pode continuar em português
 - Máximo de **72 caracteres** na primeira linha
 - Um commit = uma responsabilidade. Se precisar de "e" na descrição, considere dividir
 - Commits de trabalho em progresso devem usar `wip:` e ser squashados antes do merge
@@ -184,7 +184,7 @@ Não é refactoring massivo — é renomear uma variável confusa, extrair um bl
 
 ## 5. Pull Requests
 
-**Título:** mesmo formato de commit (`feat(auth): adicionar login com Google`)
+**Título:** mesmo formato de commit, em inglês (`feat(auth): add Google sign-in`)
 
 **Checklist antes de abrir o PR:**
 - [ ] Testes passando localmente
