@@ -10,6 +10,9 @@ As camadas da disciplina (**ui**, **business** e **infra**) correspondem às pas
 ```text
 src/
 ├── app/                ← ui: páginas em app/[locale]/ e rotas de API em app/api/
+│   └── api/users/
+│       ├── route.ts            ← fronteira: GET e POST /api/users
+│       └── users-handlers.ts   ← requisição → UserController; erro → resposta com código e mensagem
 ├── components/ui/      ← ui: componentes shadcn/ui
 ├── modules/            ← business: uma pasta por capacidade
 │   └── users/
@@ -29,7 +32,7 @@ src/
 └── i18n/               ← ui: idiomas e textos traduzidos (messages/)
 ```
 
-**Regra de dependência:** `ui` → `business` ← `infra`. A camada `business` não importa nada de `ui` nem de `infra`: o `UserController` recebe a interface `UserRepository` pelo construtor, e `infra` a implementa ([ADR-0006](07-arquitetura/adr/0006-repositorio-de-usuarios.md)).
+**Regra de dependência:** `ui` → `business` ← `infra`. A camada `business` não importa nada de `ui` nem de `infra`: o `UserController` recebe a interface `UserRepository` pelo construtor, e `infra` a implementa ([ADR-0006](07-arquitetura/adr/0006-repositorio-de-usuarios.md)). A rota `/api/users` é o ponto de montagem: pega o repositório da fábrica (`getUserRepository`) e o entrega ao `UserController`.
 
 ## 2. Diagrama de classes de projeto
 
@@ -39,6 +42,18 @@ src/
 classDiagram
     direction LR
 
+    namespace ui {
+        class usersRoute {
+            <<route /api/users>>
+            +GET(request) Response
+            +POST(request) Response
+        }
+        class usersHandlers {
+            <<module>>
+            +createUsersHandlers(getController) UsersHandlers
+            -failureResponse(request, error) Response
+        }
+    }
     namespace business {
         class User {
             +number id
@@ -168,6 +183,9 @@ classDiagram
         }
     }
 
+    usersRoute ..> usersHandlers : usa
+    usersRoute ..> userRepositoryFactory : getUserRepository
+    usersHandlers --> UserController
     UserController --> UserRepository
     UserController ..> NewUser : recebe
     UserController ..> rules : valida com

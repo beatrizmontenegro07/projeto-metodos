@@ -85,6 +85,27 @@ Com `sqlite`, a `DATABASE_URL` aponta para um arquivo local (`file:local.db`) ou
 
 Para rodar só em memória, sem banco nem migrações: `STORAGE=memory npm run dev`.
 
+### Testando a rota de usuários
+
+Com o app rodando, a rota `/api/users` chama o `UserController`:
+
+```bash
+# cadastrar
+curl -X POST localhost:3000/api/users -H 'content-type: application/json' \
+  -d '{"name":"Ana Silva","email":"ana@clinicore.com","login":"ana","password":"Secret@123","role":"ADMIN"}'
+
+# listar
+curl localhost:3000/api/users
+```
+
+Cada erro volta com um código e uma mensagem específica, em pt-BR por padrão ou em inglês com `-H 'accept-language: en'`:
+
+```json
+{ "error": { "code": "LOGIN_HAS_NUMBERS", "message": "O login não pode conter números." } }
+```
+
+A rota ainda não exige login: a restrição do cadastro ao Administrador chega com a autenticação (UC04).
+
 ### Esquema e migrações
 
 O esquema fica em [`src/db/schema.ts`](src/db/schema.ts). Depois de alterá-lo, gere a migração e aplique-a:

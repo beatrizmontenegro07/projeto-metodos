@@ -8,3 +8,5 @@ export const routing = defineRouting({
   // browser language, so pages stay statically prerendered per locale.
   localePrefix: "never",
 });
+
+export type Locale = (typeof routing.locales)[number];
