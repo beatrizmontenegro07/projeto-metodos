@@ -112,6 +112,12 @@ docker run --rm --user 0 -v "$PWD/docs/relatorio/codigos":/data plantuml/plantum
   `gh stack view --json`.
 - Merge stacked PRs bottom first on GitHub, then run `gh stack sync` to rebase
   the remaining layers onto `develop`.
+- Releases follow the dates in `docs/00-entregas.md`: open a PR `develop` →
+  `main` titled `release: vX.Y.Z`, merge it with a merge commit (never squash,
+  so `main` keeps `develop`'s history and the next release merges cleanly),
+  then tag the merge commit on `main` as `vX.Y.Z` and push the tag.
+- Hotfixes branch from `main` (`hotfix/...`) and go to `main` through a PR;
+  then open a PR `main` → `develop` so the fix is not lost in the next release.
 - Before reporting a delivery, inspect the diff, run the required verification,
   and read back the remote pull request state.
 
