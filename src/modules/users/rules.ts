@@ -1,4 +1,4 @@
-import { UserValidationError } from "./errors";
+import { InvalidLoginError, InvalidPasswordError, InvalidRoleError } from "./errors";
 import { isRole } from "./role";
 
 const MAX_LOGIN_LENGTH = 12;
@@ -15,27 +15,25 @@ export function normalizeEmail(email: string): string {
 }
 
 export function validateRole(role: unknown): void {
-  if (!isRole(role)) throw new UserValidationError("INVALID_ROLE");
+  if (!isRole(role)) throw new InvalidRoleError();
 }
 
 export function validateLogin(login: unknown): void {
-  if (typeof login !== "string" || login.length === 0 || login.length > MAX_LOGIN_LENGTH || /\d/.test(login)) {
-    throw new UserValidationError("INVALID_LOGIN");
-  }
+  if (typeof login !== "string" || login.length === 0) throw new InvalidLoginError("LOGIN_EMPTY");
+  if (login.length > MAX_LOGIN_LENGTH) throw new InvalidLoginError("LOGIN_TOO_LONG");
+  if (/\d/.test(login)) throw new InvalidLoginError("LOGIN_HAS_NUMBERS");
 }
 
 export function validatePassword(password: unknown, { login, email }: { login: string; email: string }): void {
-  if (
-    typeof password !== "string" ||
-    password.length < MIN_PASSWORD_LENGTH ||
-    password.length > MAX_PASSWORD_LENGTH ||
-    password === login ||
-    password === email
-  ) {
-    throw new UserValidationError("PASSWORD_POLICY_VIOLATION");
+  if (typeof password !== "string" || password.length < MIN_PASSWORD_LENGTH) {
+    throw new InvalidPasswordError("PASSWORD_TOO_SHORT");
   }
+  if (password.length > MAX_PASSWORD_LENGTH) throw new InvalidPasswordError("PASSWORD_TOO_LONG");
+  if (password === login) throw new InvalidPasswordError("PASSWORD_EQUALS_LOGIN");
+  if (password === email) throw new InvalidPasswordError("PASSWORD_EQUALS_EMAIL");
+
   const presentCharacterTypes = PASSWORD_CHARACTER_TYPES.filter((characterType) => characterType.test(password));
   if (presentCharacterTypes.length < MIN_PASSWORD_CHARACTER_TYPES) {
-    throw new UserValidationError("PASSWORD_TOO_FEW_CHARACTER_TYPES");
+    throw new InvalidPasswordError("PASSWORD_TOO_FEW_CHARACTER_TYPES");
   }
 }

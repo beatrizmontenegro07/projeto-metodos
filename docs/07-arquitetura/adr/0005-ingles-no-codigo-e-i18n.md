@@ -12,7 +12,7 @@ O código misturava português (domínio, rotas como `/api/usuarios`) com inglê
 
 Todo o código é escrito em inglês: arquivos e pastas, identificadores, tabelas e colunas do banco, valores de enumeração, rotas e nomes de testes. O texto exibido ao usuário vem dos catálogos do **next-intl** em `messages/`: `en.json` é a fonte e `pt-BR` é o idioma padrão.
 
-As URLs não têm idioma (`/patients`, `/api/users`). O proxy escolhe o idioma pelo cookie `NEXT_LOCALE`, depois pelo idioma do navegador e, por fim, `pt-BR`, e reescreve a requisição internamente para `app/[locale]` (`localePrefix: "never"` do next-intl). Assim as páginas continuam pré-renderizadas por idioma. Visitar `/en` ou `/pt-BR` grava a escolha no cookie e redireciona para `/`. Erros de domínio carregam um código estável (`INVALID_LOGIN`), traduzido pela interface a partir de `<capacidade>.errors.<código>`.
+As URLs não têm idioma (`/patients`, `/api/users`). O proxy escolhe o idioma pelo cookie `NEXT_LOCALE`, depois pelo idioma do navegador e, por fim, `pt-BR`, e reescreve a requisição internamente para `app/[locale]` (`localePrefix: "never"` do next-intl). Assim as páginas continuam pré-renderizadas por idioma. Visitar `/en` ou `/pt-BR` grava a escolha no cookie e redireciona para `/`. Erros de domínio carregam um código estável por caso (`LOGIN_HAS_NUMBERS`), traduzido pela interface a partir de `<capacidade>.errors.<código>`.
 
 Os documentos da disciplina (requisitos, casos de uso, diagramas) continuam em português. A correspondência com o código:
 

@@ -2,7 +2,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { InMemoryUserRepository } from "@/infra/users/in-memory-user-repository";
 
-import { UserValidationError, type UserValidationErrorCode } from "./errors";
+import {
+  DuplicateUserError,
+  InvalidLoginError,
+  InvalidPasswordError,
+  InvalidRoleError,
+  type UserValidationErrorCode,
+} from "./errors";
 import type { Role } from "./role";
 import type { NewUser } from "./user";
 import { UserController } from "./user-controller";
@@ -29,8 +35,12 @@ class RecordingUserRepository extends InMemoryUserRepository {
   }
 }
 
-async function expectValidationError(operation: Promise<unknown>, code: UserValidationErrorCode) {
-  await expect(operation).rejects.toBeInstanceOf(UserValidationError);
+async function expectValidationError(
+  operation: Promise<unknown>,
+  errorClass: abstract new (...args: never[]) => Error,
+  code: UserValidationErrorCode,
+) {
+  await expect(operation).rejects.toBeInstanceOf(errorClass);
   await expect(operation).rejects.toHaveProperty("code", code);
 }
 
@@ -75,25 +85,26 @@ describe("adding and listing users", () => {
 
     await expectValidationError(
       controller.add(validUser({ email: "ANA@Clinicore.com", login: "other" })),
+      DuplicateUserError,
       "EMAIL_ALREADY_REGISTERED",
     );
   });
 
   it("rejects a role outside the allowed roles", async () => {
-    await expectValidationError(controller.add(validUser({ role: "MANAGER" as Role })), "INVALID_ROLE");
+    await expectValidationError(controller.add(validUser({ role: "MANAGER" as Role })), InvalidRoleError, "INVALID_ROLE");
     expect(repository.records).toEqual([]);
   });
 });
 
 describe("login rules", () => {
-  it.each([
-    ["should reject an empty login", ""],
-    ["should reject a login with numbers", "ana1"],
-    ["should reject a login longer than 12 characters", "abcdefghijklm"],
-  ])("%s", async (_scenario, login) => {
+  it.each<[scenario: string, login: string, code: UserValidationErrorCode]>([
+    ["should reject an empty login", "", "LOGIN_EMPTY"],
+    ["should reject a login with numbers", "ana1", "LOGIN_HAS_NUMBERS"],
+    ["should reject a login longer than 12 characters", "abcdefghijklm", "LOGIN_TOO_LONG"],
+  ])("%s", async (_scenario, login, code) => {
     const controller = new UserController(new InMemoryUserRepository());
 
-    await expectValidationError(controller.add(validUser({ login })), "INVALID_LOGIN");
+    await expectValidationError(controller.add(validUser({ login })), InvalidLoginError, code);
   });
 
   it("should accept a login with exactly 12 characters", async () => {
@@ -107,13 +118,13 @@ describe("login rules", () => {
 
 describe("password rules (AWS IAM default policy)", () => {
   it.each<[scenario: string, password: string, code: UserValidationErrorCode, overrides?: Partial<NewUser>]>([
-    ["should reject a password shorter than 8 characters", "Secret1", "PASSWORD_POLICY_VIOLATION"],
-    ["should reject a password longer than 128 characters", `Aa1${"a".repeat(126)}`, "PASSWORD_POLICY_VIOLATION"],
-    ["should reject a password equal to the login", "Strong@Pass", "PASSWORD_POLICY_VIOLATION", { login: "Strong@Pass" }],
+    ["should reject a password shorter than 8 characters", "Secret1", "PASSWORD_TOO_SHORT"],
+    ["should reject a password longer than 128 characters", `Aa1${"a".repeat(126)}`, "PASSWORD_TOO_LONG"],
+    ["should reject a password equal to the login", "Strong@Pass", "PASSWORD_EQUALS_LOGIN", { login: "Strong@Pass" }],
     [
       "should reject a password equal to the e-mail",
       "Ana@clinicore.com1",
-      "PASSWORD_POLICY_VIOLATION",
+      "PASSWORD_EQUALS_EMAIL",
       { email: "Ana@clinicore.com1" },
     ],
     ["should reject a lowercase-only password", "onlyletters", "PASSWORD_TOO_FEW_CHARACTER_TYPES"],
@@ -121,7 +132,7 @@ describe("password rules (AWS IAM default policy)", () => {
   ])("%s", async (_scenario, password, code, overrides = {}) => {
     const controller = new UserController(new InMemoryUserRepository());
 
-    await expectValidationError(controller.add(validUser({ ...overrides, password })), code);
+    await expectValidationError(controller.add(validUser({ ...overrides, password })), InvalidPasswordError, code);
   });
 
   it("should accept a password of 8 to 128 characters with three character types", async () => {

@@ -1,4 +1,4 @@
-import { UserValidationError } from "@/modules/users/errors";
+import { DuplicateUserError } from "@/modules/users/errors";
 import type { User } from "@/modules/users/user";
 import type { NewUserRecord, UserRepository } from "@/modules/users/user-repository";
 
@@ -22,10 +22,10 @@ export class InMemoryUserRepository implements UserRepository {
 
   private ensureEmailAndLoginAreAvailable({ email, login }: NewUserRecord): void {
     if (this.storedUsers.some((user) => user.email === email)) {
-      throw new UserValidationError("EMAIL_ALREADY_REGISTERED");
+      throw new DuplicateUserError("EMAIL_ALREADY_REGISTERED");
     }
     if (this.storedUsers.some((user) => user.login === login)) {
-      throw new UserValidationError("LOGIN_ALREADY_REGISTERED");
+      throw new DuplicateUserError("LOGIN_ALREADY_REGISTERED");
     }
   }
 }
