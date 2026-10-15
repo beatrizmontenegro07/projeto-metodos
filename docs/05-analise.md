@@ -45,5 +45,5 @@ O modelo de domínio completo da clínica (Paciente, Profissional, Agenda, Agend
 | Usuario | `User` (`src/modules/users/user.ts`), tabela `users` | Implementado |
 | Papel | `Role` (`src/modules/users/role.ts`) | Implementado |
 | ControleAutenticacao | — | Planejado (UC04) |
-| TelaLogin | página `src/app/[locale]/login` | Planejado (UC04) |
-| TelaUsuarios | página `src/app/[locale]/users` | Planejado |
+| TelaLogin | página `/login` (`src/app/[locale]/login`) | Planejado (UC04) |
+| TelaUsuarios | página `/users` (`src/app/[locale]/users`) | Planejado |
