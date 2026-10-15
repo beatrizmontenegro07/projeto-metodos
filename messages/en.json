@@ -13,10 +13,15 @@
       "PATIENT": "Patient"
     },
     "errors": {
-      "INVALID_ROLE": "The user role is invalid.",
-      "INVALID_LOGIN": "The login must not be empty, contain numbers, or exceed 12 characters.",
-      "PASSWORD_POLICY_VIOLATION": "The password must have 8 to 128 characters and differ from the login and e-mail.",
+      "LOGIN_EMPTY": "Enter a login.",
+      "LOGIN_TOO_LONG": "The login must have at most 12 characters.",
+      "LOGIN_HAS_NUMBERS": "The login must not contain numbers.",
+      "PASSWORD_TOO_SHORT": "The password must have at least 8 characters.",
+      "PASSWORD_TOO_LONG": "The password must have at most 128 characters.",
+      "PASSWORD_EQUALS_LOGIN": "The password must be different from the login.",
+      "PASSWORD_EQUALS_EMAIL": "The password must be different from the e-mail.",
       "PASSWORD_TOO_FEW_CHARACTER_TYPES": "The password must contain at least three character types: lowercase, uppercase, numbers, and symbols.",
+      "INVALID_ROLE": "The user role is invalid.",
       "EMAIL_ALREADY_REGISTERED": "A user with this e-mail already exists.",
       "LOGIN_ALREADY_REGISTERED": "A user with this login already exists."
     }

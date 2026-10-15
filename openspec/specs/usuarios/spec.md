@@ -48,15 +48,15 @@ O sistema DEVE aceitar apenas logins não vazios, com no máximo 12 caracteres e
 
 #### Scenario: Login vazio
 - **WHEN** o Administrador tenta cadastrar um usuário com login vazio
-- **THEN** o sistema recusa o cadastro informando "O login não pode ser vazio, ter números ou mais de 12 caracteres."
+- **THEN** o sistema recusa o cadastro informando "Informe o login."
 
 #### Scenario: Login com mais de 12 caracteres
 - **WHEN** o Administrador informa o login "abcdefghijklm" (13 caracteres)
-- **THEN** o sistema recusa o cadastro com a mesma mensagem
+- **THEN** o sistema recusa o cadastro informando "O login deve ter no máximo 12 caracteres."
 
 #### Scenario: Login com números
 - **WHEN** o Administrador informa o login "ana1"
-- **THEN** o sistema recusa o cadastro com a mesma mensagem
+- **THEN** o sistema recusa o cadastro informando "O login não pode conter números."
 
 #### Scenario: Login com exatamente 12 caracteres
 - **WHEN** o Administrador informa o login "abcdefghijkl" (12 caracteres)
@@ -70,19 +70,19 @@ O sistema DEVE aceitar apenas senhas que sigam a política de senha padrão do A
 
 #### Scenario: Senha curta
 - **WHEN** o Administrador informa a senha "Secret1" (7 caracteres)
-- **THEN** o sistema recusa o cadastro informando "A senha deve ter de 8 a 128 caracteres e ser diferente do login e do e-mail."
+- **THEN** o sistema recusa o cadastro informando "A senha deve ter pelo menos 8 caracteres."
 
 #### Scenario: Senha longa
 - **WHEN** o Administrador informa uma senha com 129 caracteres
-- **THEN** o sistema recusa o cadastro com a mesma mensagem
+- **THEN** o sistema recusa o cadastro informando "A senha deve ter no máximo 128 caracteres."
 
 #### Scenario: Senha igual ao login
 - **WHEN** o Administrador informa o login "Strong@Pass" e a senha "Strong@Pass" (válida nas demais regras)
-- **THEN** o sistema recusa o cadastro com a mesma mensagem
+- **THEN** o sistema recusa o cadastro informando "A senha deve ser diferente do login."
 
 #### Scenario: Senha igual ao e-mail
 - **WHEN** o Administrador informa o e-mail "Ana@clinicore.com1" e a mesma senha
-- **THEN** o sistema recusa o cadastro com a mesma mensagem
+- **THEN** o sistema recusa o cadastro informando "A senha deve ser diferente do e-mail."
 
 #### Scenario: Senha com poucos tipos de caractere
 - **WHEN** o Administrador informa a senha "ONLYLETTERS1" (maiúsculas e números)
