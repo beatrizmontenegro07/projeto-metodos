@@ -2,7 +2,7 @@
 
 - **Status:** substituído por [ADR-0004](0004-nextjs-typescript-sqlite.md)
 - **Data:** 2026-10-14
-- **Requisitos relacionados:** NF-MAN-01, NF-CON-03
+- **Requisitos relacionados:** NF-MAN-01, NF-CON-01
 
 ## Contexto
 

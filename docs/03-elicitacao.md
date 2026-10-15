@@ -2,63 +2,46 @@
 
 > Seção 4 do modelo. Para cada técnica, registre **por que** foi escolhida e **quando, onde e com quem** foi aplicada.
 > Anexos (roteiros, respostas, fotos) ficam em `docs/03-elicitacao/anexos/`.
-> **Exemplo fictício.**
 
-## 4.1 Entrevista semiestruturada com a Secretaria
-
-| Campo | Registro |
-|---|---|
-| Data e horário | 10/03/2026, 10h–11h |
-| Local | Secretaria do CI, sala 101 |
-| Participantes | Ana (técnica, Secretaria), Bruno (técnico, Secretaria); equipe: Carla, Diego |
-| Roteiro | `anexos/roteiro-entrevista-secretaria.md` |
-
-**Por que esta técnica:** a Secretaria é o cliente e conhece as regras informais (antecedência, prioridades entre finalidades), que não estão escritas em nenhum documento.
-
-**Principais achados:**
-- Reservas pedidas com menos de 24 h são tratadas por telefone → RF03, cenário "Antecedência mínima".
-- Recusas acontecem principalmente por manutenção de laboratório → RF04.
-- No início do período, "metade da manhã" vai em responder e-mails de disponibilidade → P3, RF02.
-
-## 4.2 Questionário com docentes
+## 4.1 Reunião de grupo
 
 | Campo | Registro |
 |---|---|
-| Período de coleta | 12/03/2026 a 19/03/2026 |
-| Meio | Formulário on-line enviado pela lista de docentes do CI |
-| Participantes | 23 respostas de ~60 docentes |
-| Instrumento e respostas | `anexos/questionario-docentes.csv` |
+| Data e horário | 29/09/2026, 18h34, a 30/09/2026, 18h58 |
+| Local | Remoto, por mensagens no WhatsApp |
+| Participantes | Pedro Luca Vaz Matias, Beatriz Montenegro Maia Chaves, Frankley Kaiky M. Silva |
 
-**Por que esta técnica:** os docentes são muitos e têm agenda difícil; o questionário permite quantificar problemas levantados na entrevista.
+**Por que esta técnica:** o projeto ainda estava na definição do tema, e os integrantes precisavam alinhar a necessidade atendida, os atores e os riscos iniciais.
 
 **Principais achados:**
-- 19/23 perguntam à Secretaria antes de pedir uma sala → P2, RF02.
-- 17/23 já descobriram uma recusa só ao chegar na sala → P4, change `notificar-por-email`.
-- 11/23 usariam reserva semanal fixa → RF06 (Desejável).
+- O escopo é um CRM ambulatorial voltado à gestão do relacionamento e dos agendamentos, sem a complexidade de um prontuário eletrônico hospitalar → escopo negativo da [visão](01-visao.md).
+- Os atores são Administrador da clínica, Recepcionista, Profissional de Saúde e Paciente → papéis do RF07.
+- É necessária uma interface de interoperabilidade baseada no HL7 FHIR → restrição R1.
 
-## 4.3 Análise de documentos
+## 4.2 Análise documental e benchmarking
 
 | Campo | Registro |
 |---|---|
-| Data | 20/03/2026 |
-| Documentos | Planilha "Reservas 2026.1"; Resolução de uso dos laboratórios |
-| Responsável | Diego |
+| Período | 30/09/2026 a 01/10/2026, de forma assíncrona |
+| Local | Remoto |
+| Participantes | Pedro Luca Vaz Matias, Beatriz Montenegro Maia Chaves, Frankley Kaiky M. Silva |
+| Documentos | Especificação HL7 FHIR R4; documentação de sistemas de gestão de clínicas do mercado; LGPD |
 
-**Por que esta técnica:** a planilha mostra os dados reais (quantas reservas, quantos conflitos) e a resolução define regras obrigatórias.
+**Por que esta técnica:** na ausência de stakeholders reais, permite compreender os fluxos de trabalho de uma clínica e os requisitos técnicos de interoperabilidade sem depender de contato direto com usuários finais.
 
 **Principais achados:**
-- 412 reservas e 14 conflitos em 2026.1 → P1, NF-CON-01.
-- A resolução exige registro de quem autorizou o uso do laboratório → NF-SEG-02.
+- Os fluxos de trabalho padrão de uma clínica (cadastro, agenda, atendimento e comunicação com o paciente) → RF01–RF05.
+- Os requisitos técnicos de interoperabilidade do HL7 FHIR → P3, restrição R1.
 
-## 4.4 Considerações finais
+## 4.3 Considerações finais
 
-As três técnicas se complementaram: a entrevista revelou regras, o questionário mediu a dor dos docentes e a análise de documentos deu números para priorizar. Faltou observar a Secretaria no pico de início de período (técnica de observação), o que fica para a próxima iteração.
+A elicitação confirmou a necessidade de um sistema que separe a complexidade de um PEP robusto da agilidade exigida para gerir o relacionamento e a agenda, com uma base de dados que outros sistemas consigam interpretar via FHIR. Como não houve contato com stakeholders reais, os fluxos ainda não foram validados com usuários de uma clínica.
 
 ### Rastreabilidade problema → requisito
 
 | Problema | Requisitos |
 |---|---|
-| P1 | RF03, NF-CON-01 |
-| P2 | RF02, NF-USA-01 |
-| P3 | RF02, RF04 |
-| P4 | RF08 (change `notificar-por-email`) |
+| P1 | RF01, RF05 |
+| P2 | RF03, RF05 |
+| P3 | NF06 (interoperabilidade FHIR) |
+| P4 | RF04, RF06 |

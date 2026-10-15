@@ -75,8 +75,19 @@ constructor argument so tests can pass an in-memory one.
   cookies or headers: pages must stay prerenderable under `cacheComponents`.
 - Do not commit `*.db` files, `.env*` files other than `.env.sample`,
   credentials, or runtime artifacts.
-- Update the analysis class diagram when responsibilities or relevant classes
-  change.
+## Course documentation
+
+- `docs/00-entregas.md` belongs to the professor (do not edit it): it lists
+  what each release must deliver. Check it when planning a sprint.
+- Documentation stays in Portuguese; it refers to code by the English names
+  mapped in ADR-0005 and in the glossary's "No código" column.
+- When behavior changes, update in the same PR: the requirement in
+  `openspec/specs/<capability>/spec.md` (ID, **Prioridade**, at least one
+  GIVEN/WHEN/THEN scenario; IDs are never renumbered or reused), the use
+  cases in `docs/04-casos-de-uso/`, the analysis diagram in
+  `docs/05-analise.md`, and the design diagram in `docs/08-projeto.md`.
+- Never invent elicitation records, participants, or findings: document only
+  what the team actually did.
 
 ## Required verification
 

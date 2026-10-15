@@ -1,13 +1,12 @@
-# Visão do sistema — ReservaCI
+# Visão do sistema — CliniCore
 
 > Equivale às seções 1 (Introdução) e 2 (Descrição geral) do modelo de documento de requisitos.
-> **Exemplo fictício.** Substitua pelo conteúdo do seu sistema.
 
 ## 1. Introdução
 
 ### 1.1 Propósito deste repositório
 
-Este repositório especifica o **ReservaCI**, sistema de reserva de salas e laboratórios do Centro de Informática. Ele é destinado à equipe de desenvolvimento, à Secretaria do CI (cliente) e ao professor da disciplina.
+Este repositório especifica e implementa o **CliniCore**, um CRM (*Customer/Clinic Relationship Management*) para clínicas médicas ambulatoriais. O sistema gerencia o relacionamento com os pacientes, possibilitando o agendamento, o acompanhamento de consultas e a comunicação. Um diferencial do projeto é a adoção do padrão **HL7 FHIR (R4)** para modelar e trocar dados de saúde com sistemas externos. O repositório é destinado à equipe de desenvolvimento e ao professor da disciplina.
 
 ### 1.2 Organização
 
@@ -17,7 +16,7 @@ Este repositório especifica o **ReservaCI**, sistema de reserva de salas e labo
 | `docs/02-glossario.md` | Termos do domínio |
 | `docs/03-elicitacao.md` | Técnicas de elicitação usadas e seus registros |
 | `openspec/specs/` | **Requisitos funcionais e não funcionais** (fonte da verdade) |
-| `docs/04-casos-de-uso/` | Diagrama de casos de uso e os 3 casos de uso detalhados |
+| `docs/04-casos-de-uso/` | Diagrama de casos de uso e os casos de uso detalhados |
 | `docs/05-analise.md` | Diagrama de classes de análise |
 | `docs/06-interface/` | Rascunhos de tela |
 | `docs/07-arquitetura/` | Arquitetura (C4) e decisões (ADRs) |
@@ -26,56 +25,61 @@ Este repositório especifica o **ReservaCI**, sistema de reserva de salas e labo
 
 ### 1.3 Documentos relacionados
 
-1. Resolução nº XX/20XX do CI — Normas de uso dos laboratórios; 20XX; Direção do CI; link.
-2. Planilha "Reservas 2026.1" usada hoje pela Secretaria; mar/2026; Secretaria do CI.
-3. [Glossário](02-glossario.md).
+1. Especificação oficial HL7 FHIR (Release 4); 2019; Health Level Seven International.
+2. Lei Geral de Proteção de Dados Pessoais (LGPD) — Lei nº 13.709; 2018; Presidência da República do Brasil.
+3. Documento de requisitos do CliniCore (`docs/relatorio/main.pdf`); outubro de 2026; equipe do projeto.
+4. [Glossário](02-glossario.md).
 
 ## 2. Descrição geral
 
 ### 2.1 Motivação
 
-As reservas de salas e laboratórios são feitas hoje por e-mail e anotadas em uma planilha compartilhada. No início de cada período a Secretaria recebe centenas de pedidos em poucos dias, e conflitos só são descobertos quando duas turmas chegam à mesma sala.
+A gestão do relacionamento com pacientes em clínicas médicas sofre com dados fragmentados, ausência de um histórico de comunicação unificado e faltas frequentes em consultas. O CliniCore centraliza essas informações numa plataforma amigável, que aproxima a clínica do paciente e adota o padrão FHIR para se integrar a outras redes de atenção à saúde.
 
 ### 2.2 Problemas identificados
 
 | # | Problema | Quem é afetado | Evidência |
 |---|---|---|---|
-| P1 | Reservas sobrepostas para a mesma sala | Docentes, discentes | 14 conflitos registrados em 2026.1 (planilha) |
-| P2 | Docente não sabe se a sala está livre antes de pedir | Docentes | Questionário: 19/23 consultam a Secretaria antes |
-| P3 | Secretaria gasta horas respondendo e-mails de disponibilidade | Secretaria | Entrevista: "metade da manhã no início do período" |
-| P4 | Docente não é avisado de recusa ou cancelamento | Docentes | Questionário: 17/23 |
+| P1 | Dificuldade de rastrear o histórico de interações administrativas com o paciente | Recepcionista, Administrador | [Elicitação](03-elicitacao.md) |
+| P2 | Alta taxa de faltas por deficiência na comunicação e nas notificações | Clínica, Paciente | [Elicitação](03-elicitacao.md) |
+| P3 | Sistemas isolados que não conversam com prontuários externos ou operadoras de saúde | Clínica, Profissional de Saúde | [Elicitação](03-elicitacao.md) §4.2 |
+| P4 | Falta de uma visão unificada sobre a saúde e o engajamento do paciente | Administrador, Profissional de Saúde | [Elicitação](03-elicitacao.md) |
 
 ### 2.3 Visão geral do sistema
 
 **O sistema fará:**
-- Cadastro de salas e laboratórios com capacidade e recursos.
-- Consulta de disponibilidade por qualquer usuário autenticado.
-- Solicitação, avaliação e cancelamento de reservas, inclusive recorrentes.
-- Gerenciamento de usuários (Secretaria, Docente, Discente) com login e senha próprios.
+- Cadastro padronizado de pacientes e profissionais de saúde.
+- Agendamento e gerenciamento da agenda da clínica.
+- Registro do histórico de comunicações e envio de notificações e lembretes.
+- Registro de encontros clínicos e de observações em alto nível.
+- Gerenciamento de usuários (Administrador, Recepcionista, Médico e Paciente) com login, senha e controle de acesso por papel.
+- Exposição e consumo de recursos padronizados pelo HL7 FHIR.
 
 **O sistema NÃO fará (escopo negativo):**
 
 | Funcionalidade | Motivo |
 |---|---|
-| Alocação automática das turmas regulares do semestre | Já é feita no SIGAA; o ReservaCI importa apenas a ocupação resultante |
-| Controle de chaves e acesso físico às salas | Fica com a portaria; avaliar em projeto futuro |
-| Reserva de equipamentos avulsos (projetores, notebooks) | Fora do escopo do cliente nesta versão |
+| Prontuário eletrônico do paciente (PEP/EHR) de alta complexidade | O foco é o relacionamento e a agenda ambulatorial, não o registro clínico completo |
+| Gestão hospitalar (leitos, internação) | Fora do contexto ambulatorial |
+| Prescrição eletrônica avançada | Exige regulamentação e integrações específicas |
+| Faturamento hospitalar | Fora do escopo do CRM |
+| Integração com equipamentos de diagnóstico por imagem | Fora do escopo do CRM |
 
-**Integração com outros sistemas:** o ReservaCI **não** é autocontido. Ele importa a ocupação das turmas regulares do SIGAA (planilha exportada, uma vez por período) e envia e-mails pelo servidor SMTP institucional.
+**Integração com outros sistemas:** o CliniCore **não** é autocontido. Ele expõe e consome recursos HL7 FHIR para integrar-se a prontuários externos e operadoras de saúde, e envia lembretes por serviços externos de mensagem (e-mail, WhatsApp).
 
 ### 2.4 Usuários do sistema
 
-Todos os usuários têm vínculo com a UFPB e acessam o sistema principalmente pelo computador. Docentes também usam o celular para consultas rápidas.
-
 | Usuário | Características | Principais dificuldades hoje |
 |---|---|---|
-| **Docente** | ~60 pessoas; uso esporádico, concentrado no início do período e em semanas de prova | Não sabe o que está livre; não é avisado de recusas |
-| **Secretaria** | 2 técnicos administrativos; uso diário | Volume de e-mails; conferência manual de conflitos |
-| **Discente** | Representantes de turma e organizadores de eventos; apenas consulta | Não tem acesso à planilha |
+| **Administrador / Gestor da clínica** | Configura a clínica, gerencia usuários e extrai relatórios de engajamento e faltas | Dados espalhados em planilhas e sistemas que não conversam |
+| **Recepcionista / Secretário** | Linha de frente: filas, agendamentos, contatos e cadastro demográfico dos pacientes | Histórico de contatos com o paciente não fica registrado |
+| **Profissional de Saúde (Médico)** | Visualiza a agenda diária e registra o encontro clínico de forma simplificada | Pouco tempo para registrar o atendimento |
+| **Paciente** | Usuário externo; acessa um portal ou interage por notificações e lembretes de confirmação | Não é lembrado das consultas a tempo |
 
 ### 2.5 Suposições e restrições gerais
 
-- **R1** — Deve rodar na infraestrutura de máquinas virtuais do CI (Linux, PostgreSQL disponível).
-- **R2** — Senhas seguem a política padrão do AWS IAM (RF12) e nunca são exibidas (NF-SEG-03).
-- **R3** — Dados pessoais limitados a nome, e-mail institucional e vínculo (LGPD).
-- **S1** — Supõe-se que a exportação de turmas do SIGAA continuará disponível em formato planilha.
+- **R1** — A arquitetura deve mapear e comunicar dados respeitando o padrão HL7 FHIR (R4).
+- **R2** — Por tratar dados sensíveis de saúde, a conformidade com a LGPD é obrigatória.
+- **R3** — Senhas seguem a política padrão do AWS IAM (RF09) e nunca são exibidas nem armazenadas em texto puro (NF-SEG-01).
+- **R4** — O sistema roda como aplicação web na Vercel, com banco SQLite hospedado no Turso ([ADR-0004](07-arquitetura/adr/0004-nextjs-typescript-sqlite.md)).
+- **S1** — Supõe-se conectividade com a internet para a operação e para a comunicação com APIs externas.
