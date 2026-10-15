@@ -48,12 +48,19 @@ A gestão do relacionamento com pacientes em clínicas médicas sofre com dados 
 ### 2.3 Visão geral do sistema
 
 **O sistema fará:**
-- Cadastro padronizado de pacientes e profissionais de saúde.
-- Agendamento e gerenciamento da agenda da clínica.
-- Registro do histórico de comunicações e envio de notificações e lembretes.
-- Registro de encontros clínicos e de observações em alto nível.
-- Gerenciamento de usuários (Administrador, Recepcionista, Médico e Paciente) com login, senha e controle de acesso por papel.
-- Exposição e consumo de recursos padronizados pelo HL7 FHIR.
+
+Só o núcleo essencial (cerca de 20% das funcionalidades) tem requisitos detalhados, com cenários, em `openspec/specs/`. As demais funcionalidades mantêm o ID do [documento de requisitos](../relatorio/main.pdf) e só serão detalhadas quando entrarem numa sprint ([cronograma](00-entregas.md)).
+
+| Funcionalidade | Requisito | Detalhamento |
+|---|---|---|
+| Gerenciamento de usuários (Administrador, Recepcionista, Médico e Paciente): cadastro com validação de login e senha, e listagem | RF07–RF10 | [`openspec/specs/usuarios/`](../openspec/specs/usuarios/spec.md) — Entrega 1 |
+| Cadastro, edição e inativação de pacientes, com CPF único | RF01 | Change `crud-paciente` — Entrega 2 |
+| Cadastro da clínica, dos profissionais de saúde e de suas especialidades | RF02 | Só nesta visão |
+| Agendamento, cancelamento e reagendamento de consultas pela agenda dos profissionais | RF03 | Só nesta visão |
+| Registro de atendimentos (encontros clínicos) e de observações em alto nível | RF04 | Só nesta visão |
+| Registro das comunicações com o paciente e envio de lembretes de confirmação | RF05 | Só nesta visão |
+| Acesso aos dados restrito a usuários autenticados, conforme o papel | RF06 | Login (UC04); regra de acesso em NF-SEG-02 |
+| Exposição e consumo de recursos padronizados pelo HL7 FHIR | — | NF-INT-01 |
 
 **O sistema NÃO fará (escopo negativo):**
 

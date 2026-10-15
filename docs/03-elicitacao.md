@@ -30,7 +30,7 @@
 **Por que esta técnica:** na ausência de stakeholders reais, permite compreender os fluxos de trabalho de uma clínica e os requisitos técnicos de interoperabilidade sem depender de contato direto com usuários finais.
 
 **Principais achados:**
-- Os fluxos de trabalho padrão de uma clínica (cadastro, agenda, atendimento e comunicação com o paciente) → RF01–RF05.
+- Os fluxos de trabalho padrão de uma clínica (cadastro, agenda, atendimento e comunicação com o paciente) → RF01–RF05 (ver a [visão](01-visao.md) §2.3).
 - Os requisitos técnicos de interoperabilidade do HL7 FHIR → P3, restrição R1.
 
 ## 4.3 Considerações finais
@@ -43,5 +43,5 @@ A elicitação confirmou a necessidade de um sistema que separe a complexidade d
 |---|---|
 | P1 | RF01, RF05 |
 | P2 | RF03, RF05 |
-| P3 | NF06 (interoperabilidade FHIR) |
+| P3 | NF-INT-01 (interoperabilidade FHIR) |
 | P4 | RF04, RF06 |

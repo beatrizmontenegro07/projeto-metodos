@@ -119,16 +119,16 @@ flowchart LR
 
 ## 9.4 Como cada requisito não funcional é atendido
 
-Os requisitos `NF-CAT-nn` estão em [`openspec/specs/rnf/`](../../openspec/specs/rnf/); NF01–NF06 vêm do [documento de requisitos](../relatorio/main.pdf) e ainda serão migrados para `openspec/specs/rnf/`.
+Os requisitos estão em [`openspec/specs/rnf/`](../../openspec/specs/rnf/). Os que vieram do [documento de requisitos](../relatorio/main.pdf) citam o ID original (NF01–NF06) na descrição.
 
 | RNF | Decisão / tática arquitetural | Onde | Situação |
 |---|---|---|---|
 | NF-SEG-01 Senha nunca exibida nem armazenada em texto puro | Só o hash scrypt com salt aleatório de 16 bytes é gravado (`users.password_hash`); o controle seleciona colunas públicas explícitas, sem a senha; erros de validação carregam um código, nunca a senha digitada | `modules/users/password.ts`, `user-controller.ts` | Implementado |
 | NF-MAN-01 Persistência substituível | O mecanismo (RAM, arquivo ou Turso) é escolhido na inicialização por `DATABASE_URL`, com o mesmo código de acesso a dados; o controle recebe o `Database` pelo construtor | `db/index.ts` · [ADR-0004](adr/0004-nextjs-typescript-sqlite.md) | Implementado |
 | NF-CON-01 Falha de armazenamento tratada | Toda operação do banco passa por `UserController.accessStorage`, que converte a falha em `UserPersistenceError` sem encerrar o processo; e-mail e login repetidos são barrados por índices únicos no banco | `modules/users/user-controller.ts` · [ADR-0002](adr/0002-unicidade-no-banco.md) | Implementado |
-| NF01 Usabilidade (operação encontrada em ≤ 10 s) | Componentes padronizados do shadcn/ui; interface em pt-BR e en, com mensagens de erro traduzidas a partir de códigos estáveis | `components/ui/`, `messages/` · [ADR-0005](adr/0005-ingles-no-codigo-e-i18n.md) | Parcial: telas planejadas |
-| NF02 Autenticação e autorização (RBAC) | Papel do usuário como enumeração (`Role`); login com sessão e verificação do papel nas rotas | `modules/users/role.ts` | Parcial: login planejado |
-| NF03 HTTPS (TLS 1.2+) | A Vercel só serve HTTPS; a conexão com o Turso usa `libsql://` sobre TLS | Implantação | Planejado (deploy) |
-| NF04 Desempenho (busca em ≤ 2 s) | Consultas SQL no mesmo processo, sem saltos de rede entre interface e servidor; índices nas colunas de busca; páginas pré-renderizadas na CDN | `db/schema.ts`, Vercel | Planejado (busca de pacientes) |
-| NF05 LGPD | Senhas só como hash; dados acessíveis apenas a usuários autenticados (NF02); logs sem senha nem CPF | `modules/users/password.ts` | Parcial |
-| NF06 Interoperabilidade HL7 FHIR R4 | FHIR Facade na camada business convertendo as entidades internas em recursos FHIR (`Patient`), exposta por rotas de API | `modules/` (planejado) | Planejado |
+| NF-USA-01 Operações encontradas em ≤ 10 s | Componentes padronizados do shadcn/ui; interface em pt-BR e en, com mensagens de erro traduzidas a partir de códigos estáveis | `components/ui/`, `messages/` · [ADR-0005](adr/0005-ingles-no-codigo-e-i18n.md) | Parcial: telas planejadas |
+| NF-SEG-02 Autenticação e autorização por papel (RBAC) | Papel do usuário como enumeração (`Role`); login com sessão e verificação do papel nas rotas | `modules/users/role.ts` | Parcial: login planejado |
+| NF-SEG-03 Tráfego criptografado (TLS 1.2+) | A Vercel só serve HTTPS; a conexão com o Turso usa `libsql://` sobre TLS | Implantação | Planejado (deploy) |
+| NF-DES-01 Buscas em ≤ 2 s (p95) | Consultas SQL no mesmo processo, sem saltos de rede entre interface e servidor; índices nas colunas de busca; páginas pré-renderizadas na CDN | `db/schema.ts`, Vercel | Planejado (busca de pacientes) |
+| NF-PRI-01 Adequação à LGPD | Senhas só como hash; dados acessíveis apenas a usuários autenticados (NF-SEG-02); base legal registrada no cadastro do paciente; relatórios analíticos pseudonimizados; logs sem senha nem CPF | `modules/users/password.ts` | Parcial |
+| NF-INT-01 Interoperabilidade HL7 FHIR R4 | FHIR Facade na camada business convertendo as entidades internas em recursos FHIR (`Patient`), exposta por rotas de API | `modules/` (planejado) | Planejado |
