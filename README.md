@@ -15,11 +15,11 @@ Diferente de um Prontuário Eletrônico (PEP/EHR) hospitalar complexo, o CliniCo
 
 Projeto da disciplina **Métodos de Projeto de Software** (UFPB, 2026.2), com o professor Raoni Kulesza.
 
-| Integrante | Matrícula |
-|---|---|
-| Beatriz Montenegro Maia Chaves | 20230012233 |
-| Frankley Kaiky M. Silva | 20220060460 |
-| Pedro Luca Vaz Matias | 20230089874 |
+| Integrante | Matrícula | GitHub |
+|---|---|---|
+| Beatriz Montenegro Maia Chaves | 20230012233 | [@beatrizmontenegro07](https://github.com/beatrizmontenegro07) |
+| Frankley Kaiky M. Silva | 20220060460 | [@Franky03](https://github.com/Franky03) |
+| Pedro Luca Vaz Matias | 20230089874 | [@PucaVaz](https://github.com/PucaVaz) |
 
 ---
 
