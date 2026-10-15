@@ -3,7 +3,7 @@ import { asc } from "drizzle-orm";
 import type { Database } from "@/db";
 import { findUniqueConstraintColumn } from "@/db/errors";
 import { users } from "@/db/schema";
-import { UserPersistenceError, UserValidationError, type UserValidationErrorCode } from "@/modules/users/errors";
+import { DuplicateUserError, type DuplicateUserErrorCode, UserPersistenceError } from "@/modules/users/errors";
 import type { User } from "@/modules/users/user";
 import type { NewUserRecord, UserRepository } from "@/modules/users/user-repository";
 
@@ -15,7 +15,7 @@ const PUBLIC_COLUMNS = {
   role: users.role,
 };
 
-const DUPLICATE_COLUMN_ERROR_CODES: Partial<Record<string, UserValidationErrorCode>> = {
+const DUPLICATE_COLUMN_ERROR_CODES: Partial<Record<string, DuplicateUserErrorCode>> = {
   email: "EMAIL_ALREADY_REGISTERED",
   login: "LOGIN_ALREADY_REGISTERED",
 };
@@ -43,7 +43,7 @@ export class SqliteUserRepository implements UserRepository {
       return await operation();
     } catch (error) {
       const duplicateErrorCode = DUPLICATE_COLUMN_ERROR_CODES[findUniqueConstraintColumn(error) ?? ""];
-      if (duplicateErrorCode) throw new UserValidationError(duplicateErrorCode);
+      if (duplicateErrorCode) throw new DuplicateUserError(duplicateErrorCode);
       throw new UserPersistenceError("Could not access user storage.", { cause: error });
     }
   }

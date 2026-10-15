@@ -12,7 +12,7 @@ O RF07 exige recusar e-mails (sem diferenciar maiúsculas de minúsculas) e logi
 
 A unicidade é garantida por índices únicos nas colunas `users.email` e `users.login` (`src/db/schema.ts`). O `SqliteUserRepository` não faz consulta prévia: ele insere direto, e o banco recusa o valor repetido. No mecanismo em RAM (`InMemoryUserRepository`), a coleção é verificada antes de inserir; como verificação e inserção acontecem sem pausa entre elas, não há corrida. O e-mail é gravado em minúsculas (`normalizeEmail`), e por isso o índice também barra "ANA@Clinicore.com" quando "ana@clinicore.com" já existe.
 
-A violação chega como "UNIQUE constraint failed: users.<coluna>". `findUniqueConstraintColumn` (`src/db/errors.ts`) identifica a coluna, e `SqliteUserRepository.accessStorage` a converte em `UserValidationError` com o código `EMAIL_ALREADY_REGISTERED` ou `LOGIN_ALREADY_REGISTERED`. Qualquer outra falha do banco vira `UserPersistenceError` (NF-CON-01).
+A violação chega como "UNIQUE constraint failed: users.<coluna>". `findUniqueConstraintColumn` (`src/db/errors.ts`) identifica a coluna, e `SqliteUserRepository.accessStorage` a converte em `DuplicateUserError` com o código `EMAIL_ALREADY_REGISTERED` ou `LOGIN_ALREADY_REGISTERED`. Qualquer outra falha do banco vira `UserPersistenceError` (NF-CON-01).
 
 ## Alternativas consideradas
 

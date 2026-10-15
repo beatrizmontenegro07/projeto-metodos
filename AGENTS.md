@@ -57,9 +57,10 @@ the constructor, and `src/infra` implements it.
   other catalog (`npm test` fails if they diverge), then use
   `getTranslations` (Server Components) or `useTranslations` (Client
   Components).
-- Domain validation must raise typed errors with a stable `code` (see
-  `src/modules/users/errors.ts`); the UI translates the code from
-  `<capability>.errors.<code>`. Do not use magic values or `null` to signal
+- Domain validation raises one error class per field (e.g. `InvalidLoginError`)
+  with one stable `code` per case (e.g. `LOGIN_TOO_LONG`, never a catch-all
+  code); see `src/modules/users/errors.ts`. The UI shows the specific message
+  from `<capability>.errors.<code>`. Do not use magic values or `null` to signal
   errors.
 - Never expose or persist plaintext passwords. Store only `users.password_hash`
   (see `src/modules/users/password.ts`) and select public columns explicitly.

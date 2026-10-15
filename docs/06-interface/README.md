@@ -25,8 +25,8 @@ Relacionada a: UC05 · RF07, RF08, RF09, NF-SEG-01
 │            │                           tipos (Aa, 1, @)            │
 │            │ Papel   [ Recepcionista                        ▾ ]    │
 │            │                                                       │
-│            │ ⚠ O login não pode ser vazio, ter números ou mais     │
-│            │   de 12 caracteres.                                   │
+│            │ ⚠ O login não pode conter números.                    │
+│            │                                                       │
 │            │                         [ Cancelar ]  [ Cadastrar ]   │
 └────────────┴───────────────────────────────────────────────────────┘
 ```
