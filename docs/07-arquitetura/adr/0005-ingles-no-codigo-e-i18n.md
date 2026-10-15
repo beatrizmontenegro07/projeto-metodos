@@ -2,7 +2,7 @@
 
 - **Status:** aceito
 - **Data:** 2026-10-14
-- **Requisitos relacionados:** NF01
+- **Requisitos relacionados:** NF-USA-01
 
 ## Contexto
 

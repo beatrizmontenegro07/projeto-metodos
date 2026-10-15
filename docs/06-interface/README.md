@@ -52,11 +52,11 @@ Relacionada a: UC06 · RF10, NF-SEG-01
 ```
 
 - Ordem de cadastro, sem coluna de senha (RF10).
-- "+ Novo usuário" abre a TL01. O menu "Usuários" só aparece para o Administrador (UC04 / NF02).
+- "+ Novo usuário" abre a TL01. O menu "Usuários" só aparece para o Administrador (UC04 / NF-SEG-02).
 
 ## TL03 — Lista de pacientes
 
-Relacionada a: Cadastrar paciente, Editar paciente · NF04
+Relacionada a: Cadastrar paciente, Editar paciente · NF-DES-01
 
 ```text
 ┌────────────┬──────────────────────────────────────────────────────────────────────────┐

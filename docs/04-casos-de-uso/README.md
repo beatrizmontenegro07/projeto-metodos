@@ -34,7 +34,7 @@ flowchart LR
 
 | Caso de uso | Ator principal | Requisitos | Situação | Descrição detalhada |
 |---|---|---|---|---|
-| UC04 Autenticar | Todos | RF06, NF02 | Planejado | — |
+| UC04 Autenticar | Todos | RF06, NF-SEG-02, NF-SEG-03 | Planejado | — |
 | UC05 Cadastrar usuário | Administrador | RF07, RF08, RF09, NF-SEG-01, NF-MAN-01, NF-CON-01 | Implementado (regras de negócio) | — |
 | UC06 Listar usuários | Administrador | RF10, NF-SEG-01, NF-MAN-01, NF-CON-01 | Implementado (regras de negócio) | — |
 
