@@ -21,9 +21,9 @@ Single Next.js (App Router) + TypeScript app, SQLite through Drizzle ORM, UI
 text through next-intl. See `docs/07-arquitetura/adr/0004-nextjs-typescript-sqlite.md`
 and `docs/07-arquitetura/adr/0005-ingles-no-codigo-e-i18n.md`.
 
-- `src/app/[locale]/`: pages and layouts (ui layer); every page URL starts
-  with a locale (`/pt-BR/...`, `/en/...`).
-- `src/app/api/`: route handlers; no locale prefix.
+- `src/app/[locale]/`: pages and layouts (ui layer). URLs carry no locale:
+  `/patients` is rewritten internally to `[locale]/patients`.
+- `src/app/api/`: route handlers.
 - `src/components/ui/`: shadcn/ui components; add new ones with
   `npx shadcn@latest add <component>`.
 - `src/modules/<capability>/`: business rules per capability (e.g. `users`):
@@ -31,7 +31,8 @@ and `docs/07-arquitetura/adr/0005-ingles-no-codigo-e-i18n.md`.
   code as `*.test.ts`.
 - `src/db/`: Drizzle schema (`schema.ts`) and the database client (`index.ts`).
 - `src/i18n/`: locales (`routing.ts`) and next-intl request config.
-- `src/proxy.ts`: redirects unprefixed page URLs to a locale.
+- `src/proxy.ts`: picks the locale (`NEXT_LOCALE` cookie, then browser
+  language, then `pt-BR`) and rewrites page requests to it.
 - `messages/`: translation catalogs; `en.json` is the source.
 - `drizzle/`: generated SQL migrations, committed.
 - `docs/relatorio/codigos/`: PlantUML sources; rendered images in
@@ -65,9 +66,11 @@ constructor argument so tests can pass an in-memory one.
 - Change the schema only in `src/db/schema.ts`, then run `npm run db:generate`.
   Never edit a migration that has already been applied.
 - Route paths are English, lowercase, kebab-case, with plural resource names.
-  Pages: `src/app/[locale]/patients/page.tsx` serves `/pt-BR/patients` and
-  `/en/patients`. API: `src/app/api/users/route.ts` serves `/api/users`, and
-  auth lives under `/api/auth/*`.
+  Pages: `src/app/[locale]/patients/page.tsx` serves `/patients` in every
+  locale; never put a locale in links or redirects. To switch language, link
+  to `/<locale>` (e.g. `/en`): the proxy stores the choice in the cookie and
+  redirects to `/`. API: `src/app/api/users/route.ts` serves `/api/users`,
+  and auth lives under `/api/auth/*`.
 - Read the locale from next-intl (`getLocale`, `getTranslations`), never from
   cookies or headers: pages must stay prerenderable under `cacheComponents`.
 - Do not commit `*.db` files, `.env*` files other than `.env.sample`,
