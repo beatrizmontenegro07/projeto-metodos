@@ -16,7 +16,7 @@ Implementar o sistema como um único aplicativo, organizado em camadas e dividid
 - **business** (`src/modules/<capacidade>/`): uma pasta por capacidade (`users`, depois `patients`), com entidades, regras, erros de domínio e controles;
 - **infra** (`src/db/`): esquema, conexão e migrações do banco.
 
-As dependências apontam sempre para dentro (ui → business → infra), e os controles recebem o `Database` pelo construtor. Os módulos seguem as pastas de `openspec/specs/`, e cada requisito tem um lugar óbvio no código. A tecnologia usada para implementar esta estrutura está no [ADR-0004](0004-nextjs-typescript-sqlite.md).
+As dependências apontam sempre para dentro (ui → business → infra), e os controles recebem a interface do repositório pelo construtor ([ADR-0006](0006-repositorio-de-usuarios.md)). Os módulos seguem as pastas de `openspec/specs/`, e cada requisito tem um lugar óbvio no código. A tecnologia usada para implementar esta estrutura está no [ADR-0004](0004-nextjs-typescript-sqlite.md).
 
 ## Alternativas consideradas
 
@@ -28,5 +28,5 @@ As dependências apontam sempre para dentro (ui → business → infra), e os co
 
 ## Consequências
 
-- Positivas: um único deploy; as regras de negócio são testadas com um banco `:memory:`, sem interface; cada módulo pode ser rastreado até a sua spec.
+- Positivas: um único deploy; as regras de negócio são testadas com o repositório em RAM, sem banco; cada módulo pode ser rastreado até a sua spec.
 - Negativas: escala apenas verticalmente, o que é aceitável para o volume de uma clínica. A regra de dependência entre camadas é mantida na revisão dos PRs, pois ainda não existe um teste automático que a verifique.

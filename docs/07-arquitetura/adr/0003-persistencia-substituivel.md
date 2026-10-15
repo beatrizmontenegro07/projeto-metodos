@@ -1,6 +1,6 @@
 # ADR-0003: Tornar o mecanismo de persistência substituível
 
-- **Status:** substituído por [ADR-0004](0004-nextjs-typescript-sqlite.md)
+- **Status:** substituído por [ADR-0006](0006-repositorio-de-usuarios.md), que retoma esta decisão com os nomes atuais do código
 - **Data:** 2026-10-14
 - **Requisitos relacionados:** NF-MAN-01, NF-CON-01
 

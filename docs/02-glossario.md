@@ -7,7 +7,7 @@
 |---|---|---|---|---|
 | **Administrador** | Gestor da clínica; configura a organização, gerencia usuários e extrai relatórios. | gestor, admin | `ADMIN` | — |
 | **Agendamento** | Reserva de um bloco de tempo (horário) na agenda de um profissional de saúde para atender um paciente. | marcação, consulta marcada | `Appointment` | — |
-| **Armazenamento em memória** | Modo em que os dados ficam só na memória (RAM) do processo e somem quando o sistema é encerrado. Escolhido na inicialização (NF-MAN-01). | persistência volátil | `DATABASE_URL=:memory:` | Testes automatizados |
+| **Armazenamento em memória** | Modo em que os dados ficam só na memória (RAM) do processo e somem quando o sistema é encerrado. Escolhido na inicialização (NF-MAN-01). | persistência volátil | `STORAGE=memory` (`InMemoryUserRepository`) | Demonstração e testes automatizados |
 | **Armazenamento permanente** | Modo em que os dados são gravados num banco SQLite (arquivo local ou Turso) e sobrevivem ao reinício do sistema (NF-MAN-01). | persistência em disco | `DATABASE_URL=file:local.db` | Uso diário da clínica |
 | **Atendimento** | Evento em que a interação entre paciente e profissional de saúde ocorre e em que observações e diagnósticos básicos são registrados. | encontro, sessão | `Encounter` | — |
 | **Base legal** | Hipótese da LGPD que autoriza o tratamento de um dado pessoal, como o consentimento do titular ou a tutela da saúde (NF-PRI-01). | justificativa | — | Consentimento |
