@@ -35,9 +35,9 @@ flowchart LR
 | Caso de uso | Ator principal | Requisitos | Situação | Descrição detalhada |
 |---|---|---|---|---|
 | UC04 Autenticar | Todos | RF06, NF-SEG-02, NF-SEG-03 | Planejado | — |
-| UC05 Cadastrar usuário | Administrador | RF07, RF08, RF09, NF-SEG-01, NF-MAN-01, NF-CON-01 | Implementado (regras de negócio) | — |
-| UC06 Listar usuários | Administrador | RF10, NF-SEG-01, NF-MAN-01, NF-CON-01 | Implementado (regras de negócio) | — |
+| UC05 Cadastrar usuário | Administrador | RF07, RF08, RF09, NF-SEG-01, NF-MAN-01, NF-CON-01 | Implementado (`POST /api/users`) | — |
+| UC06 Listar usuários | Administrador | RF10, NF-SEG-01, NF-MAN-01, NF-CON-01 | Implementado (`GET /api/users`) | — |
 
-UC05 e UC06 estão implementados em `src/modules/users` (`UserController.add` e `UserController.list`); as telas e a restrição ao Administrador dependem de UC04.
+UC05 e UC06 estão implementados na rota `/api/users` (`src/app/api/users/route.ts`), que chama `UserController.add` e `UserController.list` (`src/modules/users`). As telas e a restrição ao Administrador dependem de UC04.
 
 **Regra:** depois da primeira entrega, IDs de casos de uso **não** são renumerados nem reaproveitados.

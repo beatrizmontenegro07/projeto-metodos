@@ -12,6 +12,7 @@ classDiagram
 
     class TelaLogin { <<boundary>> }
     class TelaUsuarios { <<boundary>> }
+    class RotaDeUsuarios { <<boundary>> }
 
     class ControleAutenticacao { <<control>> }
     class ControladorDeUsuarios { <<control>> }
@@ -23,6 +24,7 @@ classDiagram
 
     TelaLogin ..> ControleAutenticacao
     TelaUsuarios ..> ControladorDeUsuarios
+    RotaDeUsuarios ..> ControladorDeUsuarios
     ControleAutenticacao ..> Usuario
     ControladorDeUsuarios ..> Usuario
 ```
@@ -34,8 +36,8 @@ O modelo de domínio completo da clínica (Paciente, Profissional, Agenda, Agend
 | Caso de uso | Controle | Fronteiras |
 |---|---|---|
 | UC04 Autenticar | ControleAutenticacao | TelaLogin |
-| UC05 Cadastrar usuário | ControladorDeUsuarios | TelaUsuarios |
-| UC06 Listar usuários | ControladorDeUsuarios | TelaUsuarios |
+| UC05 Cadastrar usuário | ControladorDeUsuarios | RotaDeUsuarios (`POST /api/users`), TelaUsuarios |
+| UC06 Listar usuários | ControladorDeUsuarios | RotaDeUsuarios (`GET /api/users`), TelaUsuarios |
 
 ## Correspondência com o código
 
@@ -46,4 +48,5 @@ O modelo de domínio completo da clínica (Paciente, Profissional, Agenda, Agend
 | Papel | `Role` (`src/modules/users/role.ts`) | Implementado |
 | ControleAutenticacao | — | Planejado (UC04) |
 | TelaLogin | página `/login` (`src/app/[locale]/login`) | Planejado (UC04) |
-| TelaUsuarios | página `/users` (`src/app/[locale]/users`) | Planejado |
+| RotaDeUsuarios | rota `/api/users` (`src/app/api/users/route.ts`), que chama `UserController.add` e `UserController.list` | Implementado |
+| TelaUsuarios | página `/users` (`src/app/[locale]/users`), que usará a rota `/api/users` | Planejado |
