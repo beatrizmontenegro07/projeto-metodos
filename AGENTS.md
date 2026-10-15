@@ -108,9 +108,8 @@ docker run --rm --user 0 -v "$PWD/docs/relatorio/codigos":/data plantuml/plantum
 ## Git and pull requests
 
 - Work from `feat/`, `fix/`, `docs/`, or `refactor/` branches cut from
-  `develop`, and open pull requests against `develop`. `main` only receives
-  release PRs from `develop` (see `CONTRIBUTING.md`); never push to either
-  directly.
+  `main`, and open pull requests against `main`. There is no `develop`
+  branch. Never push to `main` directly.
 - Use small Conventional Commit commits with a clear English message.
 - Keep each PR reviewable: about 400 changed lines, not counting
   `package-lock.json` or generated files (migrations metadata, shadcn
@@ -122,13 +121,10 @@ docker run --rm --user 0 -v "$PWD/docs/relatorio/codigos":/data plantuml/plantum
   `init`, `add`, and `checkout`, and use `gh stack submit --auto` and
   `gh stack view --json`.
 - Merge stacked PRs bottom first on GitHub, then run `gh stack sync` to rebase
-  the remaining layers onto `develop`.
-- Releases follow the dates in `docs/00-entregas.md`: open a PR `develop` →
-  `main` titled `release: vX.Y.Z`, merge it with a merge commit (never squash,
-  so `main` keeps `develop`'s history and the next release merges cleanly),
-  then tag the merge commit on `main` as `vX.Y.Z` and push the tag.
-- Hotfixes branch from `main` (`hotfix/...`) and go to `main` through a PR;
-  then open a PR `main` → `develop` so the fix is not lost in the next release.
+  the remaining layers onto `main`.
+- Releases follow the dates in `docs/00-entregas.md`: tag the delivered
+  commit on `main` as `vX.Y.Z` and push the tag. Urgent fixes use a regular
+  `fix/` branch and PR against `main`.
 - Before reporting a delivery, inspect the diff, run the required verification,
   and read back the remote pull request state.
 

@@ -4,60 +4,42 @@ Este documento define as práticas e convenções adotadas no projeto. Todo memb
 
 ---
 
-## 1. Estratégia de branches principais
+## 1. Estratégia de branches
 
-O repositório possui duas branches de longa duração. Nenhuma delas recebe commits diretos.
+O repositório possui uma única branch de longa duração, `main`, que não recebe commits diretos.
 
 ```
-main ──────────────────────────────────────────────► produção
-  ▲                                          ▲
-  │  merge (release ou hotfix)               │ hotfix
-  │                                          │
-develop ──────────────────────────────────► merge antes da release
-  ▲         ▲          ▲
-  │         │          │
-feat/x   fix/y     refactor/z   ← branches de trabalho (curta duração)
+main ──────●──────────●──────────●──────────────► entregas (tags vX.Y.Z)
+           ▲          ▲          ▲
+           │ PR       │ PR       │ PR
+       feat/x      fix/y    refactor/z   ← branches de trabalho (curta duração)
 ```
 
 ### `main`
 
-- Representa o estado **atual de produção**
-- Todo commit em `main` é uma versão entregável e estável
-- Só recebe merges vindos de `develop` (via release) ou de `hotfix/*`
-- Cada merge em `main` deve ser **tagueado** com a versão: `v1.2.0`
-
-### `develop`
-
-- Branch de **integração contínua** — onde o trabalho da equipe converge
-- Deve sempre estar em estado funcional (CI passando)
-- Branches de feature, fix e refactor partem daqui e retornam aqui via PR
-- Periodicamente promovida para `main` quando um conjunto de funcionalidades está pronto para release
+- Branch de integração e de entrega: deve estar sempre funcional (CI passando)
+- Branches de feature, fix, docs e refactor partem dela e voltam a ela via PR
+- Em cada data do [cronograma](docs/00-entregas.md), o commit de `main` que corresponde à entrega é **tagueado** com a versão: `v0.2.0`
 
 ### Fluxo resumido
 
 ```
-1. Partir de develop
-   git checkout develop && git pull
+1. Partir de main
+   git checkout main && git pull
    git checkout -b feat/42-nome-da-feature
 
 2. Desenvolver com commits atômicos
 
-3. Abrir PR de feat/42-... → develop
+3. Abrir PR de feat/42-... → main
    (revisão, CI, aprovação)
 
-4. Merge em develop (squash ou merge commit — decisão do time)
+4. Merge em main
 
-5. Quando develop está pronta para ir a produção:
-   PR develop → main  +  tag da versão
+5. Na data da entrega: tag da versão no commit de main
+   git tag v0.2.0 && git push origin v0.2.0
 ```
 
-### Hotfix (bug crítico em produção)
-
-```
-main → hotfix/99-descricao → PR para main  +  PR para develop
-```
-
-Um hotfix parte de `main`, é corrigido, e depois é integrado em `develop` também — para não perder a correção na próxima release.
+Uma correção urgente segue o mesmo fluxo, com uma branch `fix/...` a partir de `main`.
 
 ---
 
@@ -123,9 +105,8 @@ docs/adr-event-sourcing
 ```
 
 **Regras:**
-- Nunca commitar diretamente em `main` ou `develop`
-- Branches de feature e fix partem de `develop` (ver seção 1)
-- Hotfixes partem de `main` e são integrados em `main` e `develop`
+- Nunca commitar diretamente em `main`
+- Toda branch parte de `main` e volta a ela via PR (ver seção 1)
 - Delete a branch após o merge
 
 ---
