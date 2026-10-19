@@ -115,16 +115,13 @@ describe("/api/users", () => {
   });
 
   it("answers 503 when the storage fails", async () => {
-    const failingRepository: UserRepository = {
-      add: async () => {
+    class FailingUserRepository extends InMemoryUserRepository {
+      override async list(): Promise<never> {
         throw new UserPersistenceError("disk unavailable");
-      },
-      list: async () => {
-        throw new UserPersistenceError("disk unavailable");
-      },
-    };
+      }
+    }
 
-    const response = await handlersFor(failingRepository).list(getRequest());
+    const response = await handlersFor(new FailingUserRepository()).list(getRequest());
 
     expect(response.status).toBe(503);
     expect(await response.json()).toMatchObject({ error: { code: "STORAGE_UNAVAILABLE" } });

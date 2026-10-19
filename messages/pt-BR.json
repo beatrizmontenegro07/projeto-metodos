@@ -23,7 +23,15 @@
       "PASSWORD_TOO_FEW_CHARACTER_TYPES": "A senha deve conter pelo menos três tipos de caracteres: minúsculas, maiúsculas, números e símbolos.",
       "INVALID_ROLE": "O papel do usuário é inválido.",
       "EMAIL_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este e-mail.",
-      "LOGIN_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este login."
+      "LOGIN_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este login.",
+      "FIRST_ADMINISTRATOR_EXISTS": "O primeiro administrador já foi criado. Entre com sua conta."
+    }
+  },
+  "auth": {
+    "errors": {
+      "SIGN_IN_IDENTIFIER_EMPTY": "Informe o login ou o e-mail.",
+      "SIGN_IN_PASSWORD_EMPTY": "Informe a senha.",
+      "CREDENTIALS_INCORRECT": "Login ou senha incorretos."
     }
   },
   "patients": {
