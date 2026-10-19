@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { PATIENT_ERROR_CODES } from "@/modules/patients/errors";
+import { GENDERS } from "@/modules/patients/gender";
+import { LEGAL_BASES } from "@/modules/patients/legal-basis";
 import { USER_VALIDATION_ERROR_CODES } from "@/modules/users/errors";
 import { ROLES } from "@/modules/users/role";
 
@@ -34,6 +37,21 @@ describe("message catalogs", () => {
   it("translates every role", () => {
     for (const role of ROLES) {
       expect(sourceKeys).toContain(`users.roles.${role}`);
+    }
+  });
+
+  it("translates every patient error code", () => {
+    for (const code of PATIENT_ERROR_CODES) {
+      expect(sourceKeys).toContain(`patients.errors.${code}`);
+    }
+  });
+
+  it("translates every gender and legal basis", () => {
+    for (const gender of GENDERS) {
+      expect(sourceKeys).toContain(`patients.genders.${gender}`);
+    }
+    for (const legalBasis of LEGAL_BASES) {
+      expect(sourceKeys).toContain(`patients.legalBases.${legalBasis}`);
     }
   });
 });
