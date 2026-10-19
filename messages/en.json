@@ -63,6 +63,11 @@
     "description": "The data is unavailable right now. Try again.",
     "retry": "Try again"
   },
+  "notFoundPage": {
+    "title": "Page not found",
+    "description": "We could not find what you were looking for.",
+    "home": "Back to home"
+  },
   "users": {
     "list": {
       "title": "Users",
