@@ -119,6 +119,75 @@
     }
   },
   "patients": {
+    "list": {
+      "title": "Pacientes",
+      "description": "Busque pelo nome ou CPF e filtre pela situação.",
+      "newPatient": "Novo paciente",
+      "searchLabel": "Buscar pacientes",
+      "searchPlaceholder": "Buscar por nome ou CPF…",
+      "statusLabel": "Situação",
+      "search": "Buscar",
+      "statuses": {
+        "all": "Todas as situações",
+        "active": "Ativos",
+        "inactive": "Inativos"
+      },
+      "empty": "Nenhum paciente encontrado.",
+      "emptyDescription": "Mude a busca ou o filtro de situação, ou cadastre um novo paciente.",
+      "showing": "Mostrando {shown} de {total} pacientes",
+      "page": "Página {page} de {pages}",
+      "previous": "Anterior",
+      "next": "Próxima",
+      "edit": "Editar",
+      "columns": {
+        "status": "Situação",
+        "actions": "Ações"
+      }
+    },
+    "new": {
+      "title": "Novo paciente",
+      "description": "O paciente fica vinculado a você e começa ativo.",
+      "submit": "Cadastrar",
+      "submitting": "Cadastrando…"
+    },
+    "edit": {
+      "title": "Paciente",
+      "createdBy": "Cadastrado por {name}",
+      "submit": "Salvar",
+      "submitting": "Salvando…",
+      "saved": {
+        "created": "Paciente cadastrado.",
+        "updated": "Alterações salvas."
+      }
+    },
+    "form": {
+      "cancel": "Cancelar",
+      "viewExisting": "Ver paciente"
+    },
+    "fields": {
+      "name": "Nome completo",
+      "cpf": "CPF",
+      "birthDate": "Data de nascimento",
+      "gender": "Sexo",
+      "genderPlaceholder": "Escolha o sexo",
+      "phone": "Telefone",
+      "email": "E-mail",
+      "address": "Endereço",
+      "optional": "Opcional.",
+      "legalBasis": "Base legal (LGPD)",
+      "legalBasisPlaceholder": "Escolha a base legal",
+      "legalBasisHint": "Por que a clínica pode tratar os dados deste paciente."
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "deactivate": "Inativar",
+      "reactivate": "Reativar",
+      "confirmTitle": "Inativar {name}?",
+      "confirmDescription": "O paciente mantém todos os dados e pode ser reativado depois.",
+      "confirm": "Inativar",
+      "cancel": "Cancelar"
+    },
     "genders": {
       "MALE": "Masculino",
       "FEMALE": "Feminino",
