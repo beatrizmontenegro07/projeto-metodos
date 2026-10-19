@@ -63,6 +63,11 @@
     "description": "Os dados não estão disponíveis agora. Tente novamente.",
     "retry": "Tentar novamente"
   },
+  "notFoundPage": {
+    "title": "Página não encontrada",
+    "description": "Não encontramos o que você procurou.",
+    "home": "Voltar ao início"
+  },
   "users": {
     "list": {
       "title": "Usuários",
