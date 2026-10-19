@@ -26,6 +26,39 @@
       "LOGIN_ALREADY_REGISTERED": "A user with this login already exists."
     }
   },
+  "patients": {
+    "genders": {
+      "MALE": "Male",
+      "FEMALE": "Female",
+      "OTHER": "Other",
+      "UNKNOWN": "Unknown"
+    },
+    "legalBases": {
+      "CONSENT": "Data subject consent",
+      "HEALTH_PROTECTION": "Health protection",
+      "LEGAL_OBLIGATION": "Legal obligation",
+      "LIFE_PROTECTION": "Protection of life"
+    },
+    "errors": {
+      "PATIENT_NAME_EMPTY": "Enter the patient name.",
+      "PATIENT_NAME_TOO_LONG": "The patient name must have at most 120 characters.",
+      "CPF_EMPTY": "Enter the CPF.",
+      "CPF_WRONG_LENGTH": "The CPF must have 11 digits.",
+      "CPF_INVALID": "The CPF is invalid.",
+      "BIRTH_DATE_EMPTY": "Enter the date of birth.",
+      "BIRTH_DATE_INVALID": "The date of birth is invalid.",
+      "BIRTH_DATE_IN_FUTURE": "The date of birth cannot be in the future.",
+      "GENDER_INVALID": "The sex is invalid.",
+      "PHONE_EMPTY": "Enter the phone number.",
+      "PHONE_INVALID": "The phone number must have an area code and 8 or 9 digits.",
+      "PATIENT_EMAIL_INVALID": "The patient e-mail is invalid.",
+      "ADDRESS_TOO_LONG": "The address must have at most 200 characters.",
+      "LEGAL_BASIS_MISSING": "Enter the legal basis for processing the data.",
+      "LEGAL_BASIS_INVALID": "The legal basis is invalid.",
+      "CPF_ALREADY_REGISTERED": "A patient with this CPF already exists.",
+      "PATIENT_NOT_FOUND": "Patient not found."
+    }
+  },
   "api": {
     "errors": {
       "INVALID_REQUEST_BODY": "The request body must be JSON with the name, e-mail, login, password and role as text.",

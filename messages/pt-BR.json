@@ -26,6 +26,39 @@
       "LOGIN_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este login."
     }
   },
+  "patients": {
+    "genders": {
+      "MALE": "Masculino",
+      "FEMALE": "Feminino",
+      "OTHER": "Outro",
+      "UNKNOWN": "Desconhecido"
+    },
+    "legalBases": {
+      "CONSENT": "Consentimento do titular",
+      "HEALTH_PROTECTION": "Tutela da saúde",
+      "LEGAL_OBLIGATION": "Cumprimento de obrigação legal",
+      "LIFE_PROTECTION": "Proteção da vida"
+    },
+    "errors": {
+      "PATIENT_NAME_EMPTY": "Informe o nome do paciente.",
+      "PATIENT_NAME_TOO_LONG": "O nome do paciente deve ter no máximo 120 caracteres.",
+      "CPF_EMPTY": "Informe o CPF.",
+      "CPF_WRONG_LENGTH": "O CPF deve ter 11 dígitos.",
+      "CPF_INVALID": "O CPF informado é inválido.",
+      "BIRTH_DATE_EMPTY": "Informe a data de nascimento.",
+      "BIRTH_DATE_INVALID": "A data de nascimento é inválida.",
+      "BIRTH_DATE_IN_FUTURE": "A data de nascimento não pode estar no futuro.",
+      "GENDER_INVALID": "O sexo informado é inválido.",
+      "PHONE_EMPTY": "Informe o telefone.",
+      "PHONE_INVALID": "O telefone deve ter DDD e 8 ou 9 dígitos.",
+      "PATIENT_EMAIL_INVALID": "O e-mail do paciente é inválido.",
+      "ADDRESS_TOO_LONG": "O endereço deve ter no máximo 200 caracteres.",
+      "LEGAL_BASIS_MISSING": "Informe a base legal do tratamento dos dados.",
+      "LEGAL_BASIS_INVALID": "A base legal informada é inválida.",
+      "CPF_ALREADY_REGISTERED": "Já existe um paciente cadastrado com este CPF.",
+      "PATIENT_NOT_FOUND": "Paciente não encontrado."
+    }
+  },
   "api": {
     "errors": {
       "INVALID_REQUEST_BODY": "O corpo da requisição deve ser um JSON com nome, e-mail, login, senha e papel em texto.",
