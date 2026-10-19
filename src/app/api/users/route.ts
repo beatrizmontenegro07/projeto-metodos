@@ -1,11 +1,11 @@
 import { connection, type NextRequest } from "next/server";
 
-import { getUserRepository } from "@/infra/users/user-repository-factory";
-import { UserController } from "@/modules/users/user-controller";
+import { getRequestUser } from "@/infra/auth/session";
+import { getFacade } from "@/infra/facade";
 
 import { createUsersHandlers } from "./users-handlers";
 
-const handlers = createUsersHandlers(async () => new UserController(await getUserRepository()));
+const handlers = createUsersHandlers({ getFacade, authenticate: getRequestUser });
 
 export async function GET(request: NextRequest) {
   // The list changes at runtime, so it must not be prerendered at build time.
