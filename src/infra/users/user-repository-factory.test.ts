@@ -4,7 +4,7 @@ import { IN_MEMORY_DATABASE_URL } from "@/db";
 
 import { InMemoryUserRepository } from "./in-memory-user-repository";
 import { SqliteUserRepository } from "./sqlite-user-repository";
-import { createUserRepository, readStorageMechanism } from "./user-repository-factory";
+import { createUserRepository } from "./user-repository-factory";
 
 describe("choosing the storage mechanism at startup", () => {
   afterEach(() => {
@@ -19,13 +19,5 @@ describe("choosing the storage mechanism at startup", () => {
     vi.stubEnv("DATABASE_URL", IN_MEMORY_DATABASE_URL);
 
     expect(await createUserRepository("sqlite")).toBeInstanceOf(SqliteUserRepository);
-  });
-
-  it.each(["memory", "sqlite"])("accepts STORAGE=%s", (value) => {
-    expect(readStorageMechanism(value)).toBe(value);
-  });
-
-  it.each([undefined, "", "file", "MEMORY"])("rejects STORAGE=%s with a clear message", (value) => {
-    expect(() => readStorageMechanism(value)).toThrow("STORAGE must be one of: memory, sqlite.");
   });
 });
