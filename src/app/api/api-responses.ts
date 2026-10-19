@@ -18,7 +18,7 @@ export const HTTP_NOT_FOUND = 404;
 export const HTTP_CONFLICT = 409;
 export const HTTP_SERVICE_UNAVAILABLE = 503;
 
-type ApiErrorCode = "INVALID_REQUEST_BODY" | "STORAGE_UNAVAILABLE" | "UNAUTHENTICATED" | "ACCESS_DENIED";
+type ApiErrorCode = "INVALID_REQUEST_BODY" | "INVALID_QUERY" | "STORAGE_UNAVAILABLE" | "UNAUTHENTICATED" | "ACCESS_DENIED";
 
 /** Translates a message key in the requester's language. */
 export type Translate = (key: string, values?: Record<string, string>) => string;
