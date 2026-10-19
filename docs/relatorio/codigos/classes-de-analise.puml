@@ -39,6 +39,27 @@ class FabricaDeRepositorioDeUsuarios <<factory>> {
 class ErroDeValidacaoDeUsuario <<exception>>
 class ErroDePersistenciaDeUsuarios <<exception>>
 
+' Autenticação e pacientes (Entrega 2)
+class ControleAutenticacao <<control>> {
+  +entrar(loginOuEmail, senha): Usuario
+}
+class ControladorDePacientes <<control>> {
+  +cadastrar(dados, cadastradoPor): Paciente
+  +editar(id, dados): Paciente
+  +inativar(id): Paciente
+  +reativar(id): Paciente
+  +buscar(texto, situacao): Paciente[]
+}
+interface RepositorioDePacientes <<repository>> {
+  +adicionar(registro): Paciente
+  +atualizar(id, dados): Paciente
+  +alterarSituacao(id, ativo): Paciente
+  +listar(criterios): Paciente[]
+}
+class RepositorioDePacientesEmMemoria <<repository>>
+class RepositorioDePacientesSQLite <<repository>>
+class ErroDeValidacaoDePaciente <<exception>>
+
 ' Entidades de Agendamento (Módulo Ambulatorial)
 class Agenda <<Schedule>>
 class HorarioDisponivel <<Slot>>
@@ -67,6 +88,15 @@ RepositorioDeUsuarios <|.. RepositorioEmMemoria
 RepositorioDeUsuarios <|.. RepositorioSQLite
 RepositorioSQLite ..> ErroDePersistenciaDeUsuarios : lança >
 FabricaDeRepositorioDeUsuarios --> RepositorioDeUsuarios : seleciona >
+
+' Autenticação e pacientes (Entrega 2)
+ControleAutenticacao --> Usuario : autentica >
+Paciente "*" --> "1" Usuario : cadastrado por >
+ControladorDePacientes --> Paciente : cadastra/edita >
+ControladorDePacientes --> RepositorioDePacientes : usa >
+ControladorDePacientes ..> ErroDeValidacaoDePaciente : lança >
+RepositorioDePacientes <|.. RepositorioDePacientesEmMemoria
+RepositorioDePacientes <|.. RepositorioDePacientesSQLite
 
 ' Relacionamentos de CRM e Comunicação
 Paciente "1" -left- "*" RegistroComunicacao : recebe/envia >
