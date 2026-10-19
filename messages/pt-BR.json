@@ -13,10 +13,15 @@
       "PATIENT": "Paciente"
     },
     "errors": {
-      "INVALID_ROLE": "O papel do usuário é inválido.",
-      "INVALID_LOGIN": "O login não pode ser vazio, ter números ou mais de 12 caracteres.",
-      "PASSWORD_POLICY_VIOLATION": "A senha deve ter de 8 a 128 caracteres e ser diferente do login e do e-mail.",
+      "LOGIN_EMPTY": "Informe o login.",
+      "LOGIN_TOO_LONG": "O login deve ter no máximo 12 caracteres.",
+      "LOGIN_HAS_NUMBERS": "O login não pode conter números.",
+      "PASSWORD_TOO_SHORT": "A senha deve ter pelo menos 8 caracteres.",
+      "PASSWORD_TOO_LONG": "A senha deve ter no máximo 128 caracteres.",
+      "PASSWORD_EQUALS_LOGIN": "A senha deve ser diferente do login.",
+      "PASSWORD_EQUALS_EMAIL": "A senha deve ser diferente do e-mail.",
       "PASSWORD_TOO_FEW_CHARACTER_TYPES": "A senha deve conter pelo menos três tipos de caracteres: minúsculas, maiúsculas, números e símbolos.",
+      "INVALID_ROLE": "O papel do usuário é inválido.",
       "EMAIL_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este e-mail.",
       "LOGIN_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este login."
     }

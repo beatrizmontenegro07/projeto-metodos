@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { createDatabase, IN_MEMORY_DATABASE_URL } from "@/db";
-import { UserValidationError } from "@/modules/users/errors";
+import { DuplicateUserError } from "@/modules/users/errors";
 import type { NewUserRecord, UserRepository } from "@/modules/users/user-repository";
 
 import { InMemoryUserRepository } from "./in-memory-user-repository";
@@ -51,7 +51,7 @@ describe.each(implementations)("%s", (_name, createRepository) => {
     await repository.add(record());
 
     await expect(repository.add(record({ login: "other" }))).rejects.toMatchObject({
-      constructor: UserValidationError,
+      constructor: DuplicateUserError,
       code: "EMAIL_ALREADY_REGISTERED",
     });
     expect(await repository.list()).toHaveLength(1);
@@ -61,7 +61,7 @@ describe.each(implementations)("%s", (_name, createRepository) => {
     await repository.add(record());
 
     await expect(repository.add(record({ email: "other@clinicore.com" }))).rejects.toMatchObject({
-      constructor: UserValidationError,
+      constructor: DuplicateUserError,
       code: "LOGIN_ALREADY_REGISTERED",
     });
     expect(await repository.list()).toHaveLength(1);
@@ -74,7 +74,7 @@ describe.each(implementations)("%s", (_name, createRepository) => {
     ]);
 
     const rejection = results.find((result) => result.status === "rejected");
-    expect(rejection?.reason).toMatchObject({ constructor: UserValidationError, code: "LOGIN_ALREADY_REGISTERED" });
+    expect(rejection?.reason).toMatchObject({ constructor: DuplicateUserError, code: "LOGIN_ALREADY_REGISTERED" });
     expect(await repository.list()).toHaveLength(1);
   });
 

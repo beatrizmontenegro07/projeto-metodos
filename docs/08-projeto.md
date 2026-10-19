@@ -17,7 +17,7 @@ src/
 │       ├── role.ts             ← enumeração: Role
 │       ├── rules.ts            ← validação de login, senha e papel
 │       ├── password.ts         ← hash da senha
-│       ├── errors.ts           ← exceções: UserValidationError, UserPersistenceError
+│       ├── errors.ts           ← exceções: InvalidLoginError, InvalidPasswordError, InvalidRoleError, DuplicateUserError, UserPersistenceError
 │       ├── user-repository.ts  ← interface: UserRepository
 │       └── user-controller.ts  ← controle: UserController
 ├── infra/              ← infra: implementações das interfaces de repositório
@@ -90,15 +90,29 @@ classDiagram
             +hashPassword(password) Promise~string~
         }
         class UserValidationError {
-            <<exception>>
+            <<abstract exception>>
             +UserValidationErrorCode code
         }
-        class UserValidationErrorCode {
-            <<enumeration>>
-            INVALID_ROLE
-            INVALID_LOGIN
-            PASSWORD_POLICY_VIOLATION
+        class InvalidLoginError {
+            <<exception>>
+            LOGIN_EMPTY
+            LOGIN_TOO_LONG
+            LOGIN_HAS_NUMBERS
+        }
+        class InvalidPasswordError {
+            <<exception>>
+            PASSWORD_TOO_SHORT
+            PASSWORD_TOO_LONG
+            PASSWORD_EQUALS_LOGIN
+            PASSWORD_EQUALS_EMAIL
             PASSWORD_TOO_FEW_CHARACTER_TYPES
+        }
+        class InvalidRoleError {
+            <<exception>>
+            INVALID_ROLE
+        }
+        class DuplicateUserError {
+            <<exception>>
             EMAIL_ALREADY_REGISTERED
             LOGIN_ALREADY_REGISTERED
         }
@@ -161,12 +175,17 @@ classDiagram
     UserRepository ..> NewUserRecord : recebe
     UserRepository ..> User : retorna
     User --> Role
-    rules ..> UserValidationError : lança
-    UserValidationError --> UserValidationErrorCode
+    UserValidationError <|-- InvalidLoginError
+    UserValidationError <|-- InvalidPasswordError
+    UserValidationError <|-- InvalidRoleError
+    UserValidationError <|-- DuplicateUserError
+    rules ..> InvalidLoginError : lança
+    rules ..> InvalidPasswordError : lança
+    rules ..> InvalidRoleError : lança
     UserRepository <|.. InMemoryUserRepository
     UserRepository <|.. SqliteUserRepository
-    InMemoryUserRepository ..> UserValidationError : lança (e-mail ou login repetido)
-    SqliteUserRepository ..> UserValidationError : lança (e-mail ou login repetido)
+    InMemoryUserRepository ..> DuplicateUserError : lança
+    SqliteUserRepository ..> DuplicateUserError : lança
     SqliteUserRepository ..> UserPersistenceError : converte falhas do banco
     SqliteUserRepository --> Database
     SqliteUserRepository ..> dbErrors : identifica e-mail ou login repetido
@@ -186,7 +205,7 @@ O `UserController` depende só da interface `UserRepository`. A fábrica escolhe
 | `memory` | `InMemoryUserRepository` | Coleção em RAM; os dados somem quando o processo termina |
 | `sqlite` | `SqliteUserRepository` | Tabela `users` no banco da `DATABASE_URL` (arquivo local ou Turso); os dados sobrevivem ao reinício |
 
-As duas implementações passam pelos mesmos testes de contrato (`user-repository.contract.test.ts`): mesmos códigos para e-mail e login repetidos, mesma ordem de listagem e nenhum hash de senha devolvido. Falhas do banco (arquivo inacessível, banco fora do ar, tabelas ausentes) são capturadas em `SqliteUserRepository.accessStorage` e convertidas em `UserPersistenceError` (NF-CON-01). No SQLite, e-mail e login repetidos são barrados pelos índices únicos da tabela `users`, inclusive em cadastros simultâneos. O e-mail é gravado em minúsculas (`normalizeEmail`). As regras de login e senha lançam `UserValidationError` com um código estável, que a interface traduz para a mensagem do idioma do usuário (`messages/pt-BR.json`, `users.errors.<código>`).
+As duas implementações passam pelos mesmos testes de contrato (`user-repository.contract.test.ts`): mesmos códigos para e-mail e login repetidos, mesma ordem de listagem e nenhum hash de senha devolvido. Falhas do banco (arquivo inacessível, banco fora do ar, tabelas ausentes) são capturadas em `SqliteUserRepository.accessStorage` e convertidas em `UserPersistenceError` (NF-CON-01). No SQLite, e-mail e login repetidos são barrados pelos índices únicos da tabela `users`, inclusive em cadastros simultâneos. O e-mail é gravado em minúsculas (`normalizeEmail`). As regras lançam uma exceção por campo (`InvalidLoginError`, `InvalidPasswordError`, `InvalidRoleError`) e os repositórios lançam `DuplicateUserError`, todas subclasses de `UserValidationError`. Cada caso tem um código próprio (ex.: `LOGIN_TOO_LONG`, `PASSWORD_EQUALS_EMAIL`), e a interface mostra a mensagem específica desse código no idioma do usuário (`messages/pt-BR.json`, `users.errors.<código>`).
 
 ## 3. Padrões de projeto utilizados
 
