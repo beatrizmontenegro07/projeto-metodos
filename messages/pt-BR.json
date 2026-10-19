@@ -2,10 +2,77 @@
   "metadata": {
     "description": "CRM ambulatorial para clínicas com interoperabilidade HL7 FHIR R4."
   },
+  "common": {
+    "toggleSidebar": "Mostrar ou esconder o menu",
+    "language": "Idioma",
+    "languages": {
+      "pt-BR": "Português",
+      "en": "English"
+    },
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Esconder senha"
+  },
+  "navigation": {
+    "menu": "Menu",
+    "home": "Início",
+    "patients": "Pacientes",
+    "users": "Usuários",
+    "signOut": "Sair"
+  },
+  "authPanel": {
+    "tagline": "CRM ambulatorial para clínicas.",
+    "description": "Pacientes, agenda e comunicação num só lugar, com interoperabilidade HL7 FHIR."
+  },
+  "signIn": {
+    "title": "Bem-vindo de volta",
+    "description": "Entre com seu login ou e-mail.",
+    "identifier": "Login ou e-mail",
+    "password": "Senha",
+    "submit": "Entrar",
+    "submitting": "Entrando…"
+  },
+  "setup": {
+    "title": "Crie o primeiro administrador",
+    "description": "Ainda não há usuários. Esta conta vai gerenciar usuários e pacientes.",
+    "submit": "Criar administrador",
+    "submitting": "Criando…",
+    "goToSignIn": "Ir para o login"
+  },
   "home": {
-    "tagline": "CRM ambulatorial para clínicas."
+    "title": "Início",
+    "greeting": "Olá, {name}",
+    "description": "O que está cadastrado no CliniCore agora.",
+    "noTotals": "Seu papel ainda não tem cadastros para mostrar aqui.",
+    "totals": {
+      "patients": "Pacientes",
+      "patientsFooter": "Ativos e inativos",
+      "users": "Usuários",
+      "usersFooter": "Todos os papéis"
+    },
+    "shortcuts": {
+      "newPatient": "Novo paciente",
+      "newUser": "Novo usuário"
+    }
+  },
+  "accessDenied": {
+    "title": "Acesso negado",
+    "description": "Seu papel não permite abrir esta página."
+  },
+  "errorPage": {
+    "title": "Algo deu errado",
+    "description": "Os dados não estão disponíveis agora. Tente novamente.",
+    "retry": "Tentar novamente"
   },
   "users": {
+    "fields": {
+      "name": "Nome completo",
+      "email": "E-mail",
+      "login": "Login",
+      "loginHint": "Até 12 caracteres, sem números.",
+      "password": "Senha",
+      "passwordHint": "De 8 a 128 caracteres, com três destes tipos: minúsculas, maiúsculas, números e símbolos.",
+      "role": "Papel"
+    },
     "roles": {
       "ADMIN": "Administrador",
       "RECEPTIONIST": "Recepcionista",

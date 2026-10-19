@@ -1,5 +1,7 @@
 import { jwtVerify, SignJWT } from "jose";
 
+export const SESSION_COOKIE = "session";
+
 /** RF06: a session lasts one 8-hour work shift. */
 export const SESSION_DURATION_IN_SECONDS = 8 * 60 * 60;
 

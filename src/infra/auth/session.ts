@@ -1,15 +1,14 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import type { NextRequest } from "next/server";
+import { redirect } from "next/navigation";
+import { connection, type NextRequest } from "next/server";
 import { cache } from "react";
 
 import { getFacade } from "@/infra/facade";
 import type { User } from "@/modules/users/user";
 
-import { createSessionToken, readSessionSecret, readSessionToken } from "./session-token";
-
-export const SESSION_COOKIE = "session";
+import { createSessionToken, readSessionSecret, readSessionToken, SESSION_COOKIE } from "./session-token";
 
 function sessionSecret(): Uint8Array {
   return readSessionSecret(process.env.SESSION_SECRET);
@@ -44,16 +43,21 @@ export async function findSessionUser(token: string | undefined): Promise<User |
 }
 
 /** The signed-in user of the current page or Server Action, read once per render. */
-export const getCurrentUser = cache(async (): Promise<User | undefined> =>
-  findSessionUser((await cookies()).get(SESSION_COOKIE)?.value),
-);
+export const getCurrentUser = cache(async (): Promise<User | undefined> => {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  // Checking the expiry reads the clock, so it waits for the real request instead of a prefetch.
+  await connection();
+  return findSessionUser(token);
+});
+
+/** The signed-in user of a page or Server Action; without a session, goes to the sign-in page. */
+export async function requireUser(): Promise<User> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  return user;
+}
 
 /** The signed-in user of an API request. */
 export function getRequestUser(request: NextRequest): Promise<User | undefined> {
   return findSessionUser(request.cookies.get(SESSION_COOKIE)?.value);
-}
-
-/** Optimistic check for the proxy: a valid signature, without reading storage. */
-export async function hasValidSessionToken(request: NextRequest): Promise<boolean> {
-  return (await readSessionToken(request.cookies.get(SESSION_COOKIE)?.value, sessionSecret())) !== undefined;
 }
