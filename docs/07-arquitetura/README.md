@@ -37,7 +37,7 @@ flowchart TB
         proxy["proxy.ts<br/>escolhe o idioma (cookie NEXT_LOCALE,<br/>navegador, pt-BR) e reescreve a URL"]
         subgraph ui["ui"]
             paginas["Páginas<br/>app/[locale]/ + shadcn/ui<br/>textos em messages/ (next-intl)"]
-            api["Rotas de API<br/>app/api/ — planejado"]
+            api["Rotas de API<br/>app/api/users · auth e patients — planejado"]
         end
         subgraph business["business"]
             modulos["Módulos por capacidade<br/>modules/users (UserController, regras, erros,<br/>interface UserRepository) · patients — planejado"]

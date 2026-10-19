@@ -25,5 +25,11 @@
       "EMAIL_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este e-mail.",
       "LOGIN_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este login."
     }
+  },
+  "api": {
+    "errors": {
+      "INVALID_REQUEST_BODY": "O corpo da requisição deve ser um JSON com nome, e-mail, login, senha e papel em texto.",
+      "STORAGE_UNAVAILABLE": "Não foi possível acessar os dados de usuários agora. Tente novamente."
+    }
   }
 }
