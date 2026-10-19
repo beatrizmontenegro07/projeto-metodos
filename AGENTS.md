@@ -21,21 +21,31 @@ Single Next.js (App Router) + TypeScript app, SQLite through Drizzle ORM, UI
 text through next-intl. See `docs/07-arquitetura/adr/0004-nextjs-typescript-sqlite.md`
 and `docs/07-arquitetura/adr/0005-ingles-no-codigo-e-i18n.md`.
 
-- `src/app/[locale]/`: pages and layouts (ui layer). URLs carry no locale:
-  `/patients` is rewritten internally to `[locale]/patients`.
+- `src/app/[locale]/`: pages, layouts, and Server Actions (ui layer). URLs
+  carry no locale: `/patients` is rewritten internally to
+  `[locale]/patients`. `(auth)/` holds the pages without a session (`/login`,
+  `/setup`); `(app)/` holds the signed-in shell and its pages.
 - `src/app/api/`: route handlers.
 - `src/components/ui/`: shadcn/ui components; add new ones with
-  `npx shadcn@latest add <component>`.
+  `npx shadcn add <component>`. Prefer shadcn/ui components and blocks
+  (login-04, sidebar-07, dashboard-01, the data-table pattern) over custom
+  markup. `src/components/` holds the app's own building blocks (sidebar,
+  page header, form fields).
 - `src/modules/<capability>/`: business rules per capability (e.g. `users`):
   types, validation, domain errors, and controllers. Tests sit next to the
   code as `*.test.ts`.
+- `src/modules/facade/`: `FacadeSingletonController`, the single entry point
+  of the business layer; `src/modules/auth/`: sign-in rules and role
+  permissions.
 - `src/infra/<capability>/`: storage implementations of the module's
   repository interface (e.g. `InMemoryUserRepository`, `SqliteUserRepository`)
-  and the factory that picks one at startup.
+  and the factory that picks one at startup. `src/infra/facade.ts` assembles
+  the facade; `src/infra/auth/` holds the session cookie.
 - `src/db/`: Drizzle schema (`schema.ts`) and the database client (`index.ts`).
 - `src/i18n/`: locales (`routing.ts`) and next-intl request config.
 - `src/proxy.ts`: picks the locale (`NEXT_LOCALE` cookie, then browser
-  language, then `pt-BR`) and rewrites page requests to it.
+  language, then `pt-BR`), sends requests without a valid session cookie to
+  `/login`, and rewrites page requests to the locale.
 - `messages/`: translation catalogs; `en.json` is the source.
 - `drizzle/`: generated SQL migrations, committed.
 - `docs/relatorio/codigos/`: PlantUML sources; rendered images in
