@@ -77,14 +77,23 @@ Por lidar com dados pessoais sensíveis, o sistema foi projetado sob os pilares 
 
 O mecanismo é escolhido na inicialização pela variável `STORAGE` ([ADR-0006](docs/07-arquitetura/adr/0006-repositorio-de-usuarios.md)):
 
-| `STORAGE` | Mecanismo | Classe |
+| `STORAGE` | Mecanismo | Classes |
 |---|---|---|
-| `memory` | Coleção em RAM — os dados somem quando o processo termina | `InMemoryUserRepository` |
-| `sqlite` | Banco SQLite na `DATABASE_URL` (padrão do `.env.sample`) | `SqliteUserRepository` |
+| `memory` | Coleções em RAM — os dados somem quando o processo termina | `InMemoryUserRepository`, `InMemoryPatientRepository` |
+| `sqlite` | Banco SQLite na `DATABASE_URL` (padrão do `.env.sample`) | `SqliteUserRepository`, `SqlitePatientRepository` |
 
 Com `sqlite`, a `DATABASE_URL` aponta para um arquivo local (`file:local.db`) ou para o Turso (`libsql://<banco>.turso.io`, com `DATABASE_AUTH_TOKEN`).
 
 Para rodar só em memória, sem banco nem migrações: `STORAGE=memory npm run dev`.
+
+### Usando o sistema
+
+1. No primeiro acesso, com o sistema vazio, `/login` leva a `/setup`, onde se cria o primeiro Administrador (RF16).
+2. O Administrador cadastra os demais usuários em **Usuários** e os pacientes em **Pacientes**; o Recepcionista vê só **Pacientes**. Médico e Paciente veem só a página inicial (NF-SEG-02).
+3. A página inicial mostra quantos usuários e pacientes estão cadastrados, conforme o papel (RF15).
+4. O idioma muda pelo menu no canto superior direito (ou pelos links da tela de login).
+
+As telas usam os componentes e blocos do [shadcn/ui](https://ui.shadcn.com) (login-04, sidebar-07, dashboard-01 e o padrão de data table).
 
 ### Testando as rotas de API
 
@@ -157,14 +166,16 @@ npm run build
 src/
 ├── app/
 │   ├── [locale]/   ← páginas; a URL não tem idioma (/login → [locale]/login)
-│   └── api/        ← rotas de API
-├── components/ui/  ← componentes shadcn/ui
+│   │   ├── (auth)/ ← login e primeiro Administrador
+│   │   └── (app)/  ← telas com sessão: início, pacientes e usuários
+│   └── api/        ← rotas de API (users, patients, auth)
+├── components/     ← blocos de tela e ui/ (componentes shadcn/ui)
 ├── db/             ← cliente do banco e esquema Drizzle
-├── infra/          ← mecanismos de armazenamento (RAM e SQLite) de cada capacidade
+├── infra/          ← fachada montada (facade.ts), sessão e mecanismos de armazenamento (RAM e SQLite)
 ├── i18n/           ← idiomas suportados e configuração do next-intl
 ├── lib/            ← utilitários compartilhados
-├── modules/        ← regras de negócio por capacidade (ex.: users)
-└── proxy.ts        ← escolhe o idioma e reescreve a rota
+├── modules/        ← regras de negócio por capacidade (facade, auth, users, patients)
+└── proxy.ts        ← escolhe o idioma, exige sessão e reescreve a rota
 messages/           ← catálogos de tradução (en.json é a fonte)
 drizzle/            ← migrações SQL geradas
 ```
