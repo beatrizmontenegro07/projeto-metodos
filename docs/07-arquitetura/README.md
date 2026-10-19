@@ -40,10 +40,11 @@ flowchart TB
             api["Rotas de API<br/>app/api/ — planejado"]
         end
         subgraph business["business"]
-            modulos["Módulos por capacidade<br/>modules/users (UserController, regras,<br/>erros) · patients — planejado"]
+            modulos["Módulos por capacidade<br/>modules/users (UserController, regras, erros,<br/>interface UserRepository) · patients — planejado"]
             fhirFacade["FHIR Facade<br/>Patient ↔ FHIR R4 — planejado"]
         end
         subgraph infra["infra"]
+            repositorios["infra/users<br/>InMemoryUserRepository (RAM) ·<br/>SqliteUserRepository · fábrica (STORAGE)"]
             db["db/<br/>esquema Drizzle, conexão libSQL,<br/>migrações em drizzle/"]
         end
 
@@ -52,10 +53,11 @@ flowchart TB
         api --> modulos
         api --> fhirFacade
         fhirFacade --> modulos
-        modulos --> db
+        repositorios -.->|implementa UserRepository| modulos
+        repositorios --> db
     end
 
-    banco[("SQLite [contêiner]<br/>:memory: · arquivo local · Turso")]
+    banco[("SQLite [contêiner]<br/>arquivo local · Turso")]
     externos["Sistemas externos de saúde"]
 
     navegador -->|HTTPS| proxy
@@ -67,10 +69,10 @@ flowchart TB
 | Camada | Pasta | Responsabilidade | Não pode depender de |
 |---|---|---|---|
 | ui | `src/app/`, `src/components/ui/`, `src/i18n/`, `messages/` | Telas, rotas de API, tradução dos textos e dos códigos de erro | — |
-| business | `src/modules/<capacidade>/` | Entidades, validação, erros de domínio e controles (`UserController`) | `src/app`, React |
-| infra | `src/db/` | Esquema, conexão, migrações e identificação de erros do banco | `src/modules`, `src/app` |
+| business | `src/modules/<capacidade>/` | Entidades, validação, erros de domínio, controles (`UserController`) e a interface do repositório (`UserRepository`) | `src/app`, `src/infra`, `src/db`, React |
+| infra | `src/infra/<capacidade>/`, `src/db/` | Implementações do repositório (coleção em RAM e SQLite), fábrica que escolhe uma na inicialização, esquema, conexão, migrações e identificação de erros do banco | `src/app` |
 
-Os controles recebem o `Database` pelo construtor: em produção, `getDatabase()` cria a conexão uma única vez a partir de `DATABASE_URL`; nos testes, cada caso usa um banco `:memory:` novo.
+Os controles recebem a interface `UserRepository` pelo construtor ([ADR-0006](adr/0006-repositorio-de-usuarios.md)). Em produção, `getUserRepository()` cria uma única implementação a partir da variável `STORAGE`: `InMemoryUserRepository` (coleção em RAM) ou `SqliteUserRepository` (banco na `DATABASE_URL`). Nos testes, o controle usa a coleção em RAM, e as duas implementações passam pelos mesmos testes de contrato.
 
 ## 9.3 Arquitetura física — implantação
 
@@ -104,18 +106,18 @@ flowchart LR
         next["next dev<br/>localhost:3000"]
         arquivo[("local.db<br/>DATABASE_URL=file:local.db")]
         vitest["npm test (Vitest)"]
-        memoria[("SQLite :memory:<br/>um banco por teste")]
+        memoria[("Coleção em RAM ou<br/>SQLite :memory:<br/>um por teste")]
     end
 
     dev --> next --> arquivo
     vitest --> memoria
 ```
 
-| Ambiente | `DATABASE_URL` | Onde os dados ficam |
-|---|---|---|
-| Testes | `:memory:` | Na RAM do processo; somem ao fim de cada teste |
-| Desenvolvimento | `file:local.db` | Arquivo local, fora do Git |
-| Produção | `libsql://<banco>.turso.io` | Turso |
+| Ambiente | `STORAGE` | `DATABASE_URL` | Onde os dados ficam |
+|---|---|---|---|
+| Testes | — | `:memory:` nos testes do SQLite | Coleção em RAM ou SQLite em memória; somem ao fim de cada teste |
+| Desenvolvimento | `sqlite` ou `memory` | `file:local.db` | Arquivo local, fora do Git, ou coleção em RAM |
+| Produção | `sqlite` | `libsql://<banco>.turso.io` | Turso |
 
 ## 9.4 Como cada requisito não funcional é atendido
 
@@ -123,9 +125,9 @@ Os requisitos estão em [`openspec/specs/rnf/`](../../openspec/specs/rnf/). Os q
 
 | RNF | Decisão / tática arquitetural | Onde | Situação |
 |---|---|---|---|
-| NF-SEG-01 Senha nunca exibida nem armazenada em texto puro | Só o hash scrypt com salt aleatório de 16 bytes é gravado (`users.password_hash`); o controle seleciona colunas públicas explícitas, sem a senha; erros de validação carregam um código, nunca a senha digitada | `modules/users/password.ts`, `user-controller.ts` | Implementado |
-| NF-MAN-01 Persistência substituível | O mecanismo (RAM, arquivo ou Turso) é escolhido na inicialização por `DATABASE_URL`, com o mesmo código de acesso a dados; o controle recebe o `Database` pelo construtor | `db/index.ts` · [ADR-0004](adr/0004-nextjs-typescript-sqlite.md) | Implementado |
-| NF-CON-01 Falha de armazenamento tratada | Toda operação do banco passa por `UserController.accessStorage`, que converte a falha em `UserPersistenceError` sem encerrar o processo; e-mail e login repetidos são barrados por índices únicos no banco | `modules/users/user-controller.ts` · [ADR-0002](adr/0002-unicidade-no-banco.md) | Implementado |
+| NF-SEG-01 Senha nunca exibida nem armazenada em texto puro | Só o hash scrypt com salt aleatório de 16 bytes é gravado (`users.password_hash`); os repositórios devolvem só os campos públicos, sem a senha nem o hash; erros de validação carregam um código, nunca a senha digitada | `modules/users/password.ts`, `infra/users/` | Implementado |
+| NF-MAN-01 Persistência substituível | O controle depende só da interface `UserRepository`; a fábrica escolhe na inicialização, pela variável `STORAGE`, a coleção em RAM ou o SQLite; testes de contrato garantem o mesmo comportamento nos dois | `modules/users/user-repository.ts`, `infra/users/` · [ADR-0006](adr/0006-repositorio-de-usuarios.md) | Implementado |
+| NF-CON-01 Falha de armazenamento tratada | Toda operação do banco passa por `SqliteUserRepository.accessStorage`, que converte a falha em `UserPersistenceError` sem encerrar o processo; e-mail e login repetidos são barrados por índices únicos no banco | `infra/users/sqlite-user-repository.ts` · [ADR-0002](adr/0002-unicidade-no-banco.md) | Implementado |
 | NF-USA-01 Operações encontradas em ≤ 10 s | Componentes padronizados do shadcn/ui; interface em pt-BR e en, com mensagens de erro traduzidas a partir de códigos estáveis | `components/ui/`, `messages/` · [ADR-0005](adr/0005-ingles-no-codigo-e-i18n.md) | Parcial: telas planejadas |
 | NF-SEG-02 Autenticação e autorização por papel (RBAC) | Papel do usuário como enumeração (`Role`); login com sessão e verificação do papel nas rotas | `modules/users/role.ts` | Parcial: login planejado |
 | NF-SEG-03 Tráfego criptografado (TLS 1.2+) | A Vercel só serve HTTPS; a conexão com o Turso usa `libsql://` sobre TLS | Implantação | Planejado (deploy) |

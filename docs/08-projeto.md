@@ -18,13 +18,18 @@ src/
 │       ├── rules.ts            ← validação de login, senha e papel
 │       ├── password.ts         ← hash da senha
 │       ├── errors.ts           ← exceções: UserValidationError, UserPersistenceError
-│       ├── user-controller.ts  ← controle: UserController
-│       └── user-controller.test.ts
+│       ├── user-repository.ts  ← interface: UserRepository
+│       └── user-controller.ts  ← controle: UserController
+├── infra/              ← infra: implementações das interfaces de repositório
+│   └── users/
+│       ├── in-memory-user-repository.ts  ← mecanismo 1: coleção em RAM
+│       ├── sqlite-user-repository.ts     ← mecanismo 2: banco SQLite
+│       └── user-repository-factory.ts    ← escolhe o mecanismo pela variável STORAGE
 ├── db/                 ← infra: esquema Drizzle (schema.ts), conexão (index.ts) e erros do banco (errors.ts)
 └── i18n/               ← ui: idiomas e textos traduzidos (messages/)
 ```
 
-**Regra de dependência:** `ui` → `business` → `infra`. A camada `business` não importa nada de `ui`; o `UserController` recebe o `Database` pelo construtor, então os testes usam um banco em memória.
+**Regra de dependência:** `ui` → `business` ← `infra`. A camada `business` não importa nada de `ui` nem de `infra`: o `UserController` recebe a interface `UserRepository` pelo construtor, e `infra` a implementa ([ADR-0006](07-arquitetura/adr/0006-repositorio-de-usuarios.md)).
 
 ## 2. Diagrama de classes de projeto
 
@@ -57,10 +62,21 @@ classDiagram
             PATIENT
         }
         class UserController {
-            -Database database
+            -UserRepository repository
             +add(newUser: NewUser) Promise~User~
             +list() Promise~User[]~
-            -accessStorage(operation) T
+        }
+        class UserRepository {
+            <<interface>>
+            +add(record: NewUserRecord) Promise~User~
+            +list() Promise~User[]~
+        }
+        class NewUserRecord {
+            +string name
+            +string email
+            +string login
+            +string passwordHash
+            +Role role
         }
         class rules {
             <<module>>
@@ -91,6 +107,29 @@ classDiagram
         }
     }
     namespace infra {
+        class InMemoryUserRepository {
+            -StoredUser[] storedUsers
+            -number nextId
+            +add(record: NewUserRecord) Promise~User~
+            +list() Promise~User[]~
+        }
+        class SqliteUserRepository {
+            -Database database
+            +add(record: NewUserRecord) Promise~User~
+            +list() Promise~User[]~
+            -accessStorage(operation) T
+        }
+        class userRepositoryFactory {
+            <<module>>
+            +readStorageMechanism(value) StorageMechanism
+            +createUserRepository(mechanism) Promise~UserRepository~
+            +getUserRepository() Promise~UserRepository~
+        }
+        class StorageMechanism {
+            <<enumeration>>
+            memory
+            sqlite
+        }
         class db {
             <<module>>
             +createDatabase(url, authToken) Promise~Database~
@@ -115,31 +154,39 @@ classDiagram
         }
     }
 
-    UserController --> Database
-    UserController ..> User : retorna
+    UserController --> UserRepository
     UserController ..> NewUser : recebe
     UserController ..> rules : valida com
     UserController ..> password : gera hash com
-    UserController ..> UserPersistenceError : converte falhas do banco
-    UserController ..> dbErrors : identifica e-mail ou login repetido
+    UserRepository ..> NewUserRecord : recebe
+    UserRepository ..> User : retorna
     User --> Role
     rules ..> UserValidationError : lança
-    UserController ..> UserValidationError : lança (e-mail ou login repetido)
     UserValidationError --> UserValidationErrorCode
+    UserRepository <|.. InMemoryUserRepository
+    UserRepository <|.. SqliteUserRepository
+    InMemoryUserRepository ..> UserValidationError : lança (e-mail ou login repetido)
+    SqliteUserRepository ..> UserValidationError : lança (e-mail ou login repetido)
+    SqliteUserRepository ..> UserPersistenceError : converte falhas do banco
+    SqliteUserRepository --> Database
+    SqliteUserRepository ..> dbErrors : identifica e-mail ou login repetido
+    userRepositoryFactory --> StorageMechanism
+    userRepositoryFactory ..> InMemoryUserRepository : cria se memory
+    userRepositoryFactory ..> SqliteUserRepository : cria se sqlite
     db ..> Database : cria
     Database ..> users : lê e grava
 ```
 
 ### Os dois mecanismos de persistência
 
-A escolha é feita uma única vez, na inicialização, pela variável `DATABASE_URL`, sem alterar o `UserController` (NF-MAN-01, [ADR-0004](07-arquitetura/adr/0004-nextjs-typescript-sqlite.md)):
+O `UserController` depende só da interface `UserRepository`. A fábrica escolhe a implementação uma única vez, na inicialização, pela variável `STORAGE` (NF-MAN-01, [ADR-0006](07-arquitetura/adr/0006-repositorio-de-usuarios.md)):
 
-| Mecanismo | `DATABASE_URL` | Comportamento |
+| `STORAGE` | Implementação | Comportamento |
 |---|---|---|
-| Memória (RAM) | `:memory:` | `createDatabase` aplica as migrações na conexão; os dados somem quando o processo termina |
-| Permanente | `file:local.db` (SQLite local) ou `libsql://<banco>.turso.io` (Turso) | Os dados sobrevivem ao reinício; o esquema é aplicado com `npm run db:migrate` |
+| `memory` | `InMemoryUserRepository` | Coleção em RAM; os dados somem quando o processo termina |
+| `sqlite` | `SqliteUserRepository` | Tabela `users` no banco da `DATABASE_URL` (arquivo local ou Turso); os dados sobrevivem ao reinício |
 
-Falhas do banco (arquivo inacessível, banco fora do ar, tabelas ausentes) são capturadas em `UserController.accessStorage` e convertidas em `UserPersistenceError` (NF-CON-01). E-mail e login repetidos são barrados pelos índices únicos da tabela `users` — inclusive em cadastros simultâneos — e a violação vira `UserValidationError` com `EMAIL_ALREADY_REGISTERED` ou `LOGIN_ALREADY_REGISTERED`. O e-mail é gravado em minúsculas (`normalizeEmail`). As regras de login e senha lançam `UserValidationError` com um código estável, que a interface traduz para a mensagem do idioma do usuário (`messages/pt-BR.json`, `users.errors.<código>`).
+As duas implementações passam pelos mesmos testes de contrato (`user-repository.contract.test.ts`): mesmos códigos para e-mail e login repetidos, mesma ordem de listagem e nenhum hash de senha devolvido. Falhas do banco (arquivo inacessível, banco fora do ar, tabelas ausentes) são capturadas em `SqliteUserRepository.accessStorage` e convertidas em `UserPersistenceError` (NF-CON-01). No SQLite, e-mail e login repetidos são barrados pelos índices únicos da tabela `users`, inclusive em cadastros simultâneos. O e-mail é gravado em minúsculas (`normalizeEmail`). As regras de login e senha lançam `UserValidationError` com um código estável, que a interface traduz para a mensagem do idioma do usuário (`messages/pt-BR.json`, `users.errors.<código>`).
 
 ## 3. Padrões de projeto utilizados
 
