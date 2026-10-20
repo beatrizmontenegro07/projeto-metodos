@@ -104,6 +104,13 @@ curl -b cookies.txt -X POST localhost:3000/api/users -H 'content-type: applicati
   -d '{"name":"Ana Silva","email":"ana@clinicore.com","login":"ana","password":"Secret@123","role":"RECEPTIONIST"}'
 curl -b cookies.txt localhost:3000/api/users
 
+# pacientes (Administrador ou Recepcionista)
+curl -b cookies.txt -X POST localhost:3000/api/patients -H 'content-type: application/json' \
+  -d '{"name":"Joana Souza Lima","cpf":"123.456.789-09","birthDate":"1985-03-12","gender":"FEMALE","phone":"(83) 98765-4321","legalBasis":"HEALTH_PROTECTION"}'
+curl -b cookies.txt 'localhost:3000/api/patients?search=joana&status=active'
+curl -b cookies.txt localhost:3000/api/patients/1
+curl -b cookies.txt -X PATCH localhost:3000/api/patients/1 -H 'content-type: application/json' -d '{"active":false}'
+
 # sair
 curl -b cookies.txt -X DELETE localhost:3000/api/auth/session
 ```

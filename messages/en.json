@@ -70,6 +70,7 @@
   "api": {
     "errors": {
       "INVALID_REQUEST_BODY": "The request body must be JSON with these text fields: {fields}.",
+      "INVALID_QUERY": "The {parameter} parameter must be one of: {values}.",
       "STORAGE_UNAVAILABLE": "The data is unavailable right now. Try again.",
       "UNAUTHENTICATED": "Sign in to continue.",
       "ACCESS_DENIED": "Your role does not allow this operation."
