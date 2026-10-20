@@ -2,10 +2,77 @@
   "metadata": {
     "description": "Outpatient CRM for clinics with HL7 FHIR R4 interoperability."
   },
+  "common": {
+    "toggleSidebar": "Show or hide the menu",
+    "language": "Language",
+    "languages": {
+      "pt-BR": "Português",
+      "en": "English"
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "navigation": {
+    "menu": "Menu",
+    "home": "Home",
+    "patients": "Patients",
+    "users": "Users",
+    "signOut": "Sign out"
+  },
+  "authPanel": {
+    "tagline": "Outpatient CRM for clinics.",
+    "description": "Patients, appointments and communication in one place, with HL7 FHIR interoperability."
+  },
+  "signIn": {
+    "title": "Welcome back",
+    "description": "Sign in with your login or e-mail.",
+    "identifier": "Login or e-mail",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…"
+  },
+  "setup": {
+    "title": "Create the first administrator",
+    "description": "No user exists yet. This account will manage users and patients.",
+    "submit": "Create administrator",
+    "submitting": "Creating…",
+    "goToSignIn": "Go to sign-in"
+  },
   "home": {
-    "tagline": "Outpatient CRM for clinics."
+    "title": "Home",
+    "greeting": "Hello, {name}",
+    "description": "What is registered in CliniCore right now.",
+    "noTotals": "Your role has no records to show here yet.",
+    "totals": {
+      "patients": "Patients",
+      "patientsFooter": "Active and inactive",
+      "users": "Users",
+      "usersFooter": "Every role"
+    },
+    "shortcuts": {
+      "newPatient": "New patient",
+      "newUser": "New user"
+    }
+  },
+  "accessDenied": {
+    "title": "Access denied",
+    "description": "Your role does not allow this page."
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "The data is unavailable right now. Try again.",
+    "retry": "Try again"
   },
   "users": {
+    "fields": {
+      "name": "Full name",
+      "email": "E-mail",
+      "login": "Login",
+      "loginHint": "Up to 12 characters, no numbers.",
+      "password": "Password",
+      "passwordHint": "8 to 128 characters with three of: lowercase, uppercase, numbers, symbols.",
+      "role": "Role"
+    },
     "roles": {
       "ADMIN": "Administrator",
       "RECEPTIONIST": "Receptionist",
