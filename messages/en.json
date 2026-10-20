@@ -64,6 +64,23 @@
     "retry": "Try again"
   },
   "users": {
+    "list": {
+      "title": "Users",
+      "description": "Everyone who can sign in to CliniCore, in registration order.",
+      "newUser": "New user",
+      "empty": "No users registered.",
+      "columns": {
+        "id": "#"
+      }
+    },
+    "new": {
+      "title": "New user",
+      "description": "The user signs in with the login or the e-mail and this password.",
+      "rolePlaceholder": "Choose the role",
+      "cancel": "Cancel",
+      "submit": "Register",
+      "submitting": "Registering…"
+    },
     "fields": {
       "name": "Full name",
       "email": "E-mail",

@@ -64,6 +64,23 @@
     "retry": "Tentar novamente"
   },
   "users": {
+    "list": {
+      "title": "Usuários",
+      "description": "Quem pode entrar no CliniCore, em ordem de cadastro.",
+      "newUser": "Novo usuário",
+      "empty": "Nenhum usuário cadastrado.",
+      "columns": {
+        "id": "#"
+      }
+    },
+    "new": {
+      "title": "Novo usuário",
+      "description": "O usuário entra com o login ou o e-mail e esta senha.",
+      "rolePlaceholder": "Escolha o papel",
+      "cancel": "Cancelar",
+      "submit": "Cadastrar",
+      "submitting": "Cadastrando…"
+    },
     "fields": {
       "name": "Nome completo",
       "email": "E-mail",
