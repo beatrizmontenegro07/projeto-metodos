@@ -69,8 +69,10 @@
   },
   "api": {
     "errors": {
-      "INVALID_REQUEST_BODY": "O corpo da requisição deve ser um JSON com nome, e-mail, login, senha e papel em texto.",
-      "STORAGE_UNAVAILABLE": "Não foi possível acessar os dados de usuários agora. Tente novamente."
+      "INVALID_REQUEST_BODY": "O corpo da requisição deve ser um JSON com estes campos em texto: {fields}.",
+      "STORAGE_UNAVAILABLE": "Não foi possível acessar os dados agora. Tente novamente.",
+      "UNAUTHENTICATED": "Entre no sistema para continuar.",
+      "ACCESS_DENIED": "Seu papel não permite esta operação."
     }
   }
 }

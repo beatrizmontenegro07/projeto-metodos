@@ -69,8 +69,10 @@
   },
   "api": {
     "errors": {
-      "INVALID_REQUEST_BODY": "The request body must be JSON with the name, e-mail, login, password and role as text.",
-      "STORAGE_UNAVAILABLE": "User data is unavailable right now. Try again."
+      "INVALID_REQUEST_BODY": "The request body must be JSON with these text fields: {fields}.",
+      "STORAGE_UNAVAILABLE": "The data is unavailable right now. Try again.",
+      "UNAUTHENTICATED": "Sign in to continue.",
+      "ACCESS_DENIED": "Your role does not allow this operation."
     }
   }
 }
