@@ -1,11 +1,16 @@
-import { asc } from "drizzle-orm";
+import { asc, count, eq, type SQL } from "drizzle-orm";
 
 import type { Database } from "@/db";
 import { findUniqueConstraintColumn } from "@/db/errors";
 import { users } from "@/db/schema";
 import { DuplicateUserError, type DuplicateUserErrorCode, UserPersistenceError } from "@/modules/users/errors";
 import type { User } from "@/modules/users/user";
-import type { NewUserRecord, UserRepository } from "@/modules/users/user-repository";
+import type {
+  CredentialsLookup,
+  NewUserRecord,
+  UserCredentials,
+  UserRepository,
+} from "@/modules/users/user-repository";
 
 const PUBLIC_COLUMNS = {
   id: users.id,
@@ -35,6 +40,32 @@ export class SqliteUserRepository implements UserRepository {
 
   list(): Promise<User[]> {
     return this.accessStorage(() => this.database.select(PUBLIC_COLUMNS).from(users).orderBy(asc(users.id)));
+  }
+
+  async findById(id: number): Promise<User | undefined> {
+    const [user] = await this.accessStorage(() =>
+      this.database.select(PUBLIC_COLUMNS).from(users).where(eq(users.id, id)),
+    );
+    return user;
+  }
+
+  async findCredentials({ login, email }: CredentialsLookup): Promise<UserCredentials | undefined> {
+    return (await this.findCredentialsWhere(eq(users.login, login))) ?? this.findCredentialsWhere(eq(users.email, email));
+  }
+
+  async count(): Promise<number> {
+    const [{ total }] = await this.accessStorage(() => this.database.select({ total: count() }).from(users));
+    return total;
+  }
+
+  private async findCredentialsWhere(condition: SQL): Promise<UserCredentials | undefined> {
+    const [row] = await this.accessStorage(() =>
+      this.database
+        .select({ user: PUBLIC_COLUMNS, passwordHash: users.passwordHash })
+        .from(users)
+        .where(condition),
+    );
+    return row;
   }
 
   /** Runs a database operation and turns its failures into user domain errors. */

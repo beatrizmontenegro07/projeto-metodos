@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { PATIENT_ERROR_CODES } from "@/modules/patients/errors";
 import { GENDERS } from "@/modules/patients/gender";
 import { LEGAL_BASES } from "@/modules/patients/legal-basis";
-import { USER_VALIDATION_ERROR_CODES } from "@/modules/users/errors";
+import { SIGN_IN_ERROR_CODES } from "@/modules/auth/errors";
+import { USER_ERROR_CODES } from "@/modules/users/errors";
 import { ROLES } from "@/modules/users/role";
 
 import sourceMessages from "../../messages/en.json";
@@ -28,9 +29,15 @@ describe("message catalogs", () => {
     expect(flattenKeys(await loadCatalog(locale)).sort()).toEqual(sourceKeys);
   });
 
-  it("translates every user validation error code", () => {
-    for (const code of USER_VALIDATION_ERROR_CODES) {
+  it("translates every user error code", () => {
+    for (const code of USER_ERROR_CODES) {
       expect(sourceKeys).toContain(`users.errors.${code}`);
+    }
+  });
+
+  it("translates every sign-in error code", () => {
+    for (const code of SIGN_IN_ERROR_CODES) {
+      expect(sourceKeys).toContain(`auth.errors.${code}`);
     }
   });
 
