@@ -46,6 +46,13 @@ import from `src/app`, `src/infra`, `src/db`, or React. Each module defines a
 repository interface (e.g. `UserRepository`); controllers receive it through
 the constructor, and `src/infra` implements it.
 
+Pages, Server Actions, and route handlers call only the facade
+(`getFacade()` from `src/infra/facade.ts`, which returns the
+`FacadeSingletonController` from `src/modules/facade/`), never a controller or
+a repository. Every facade operation done on behalf of a signed-in user takes
+that user and checks the role's permission (`src/modules/auth/permissions.ts`);
+add new use cases as facade methods the same way.
+
 ## Implementation rules
 
 - Write a failing test before changing behavior, then run it again after the
