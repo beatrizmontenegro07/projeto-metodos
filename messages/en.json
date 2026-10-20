@@ -63,6 +63,11 @@
     "description": "The data is unavailable right now. Try again.",
     "retry": "Try again"
   },
+  "notFoundPage": {
+    "title": "Page not found",
+    "description": "We could not find what you were looking for.",
+    "home": "Back to home"
+  },
   "users": {
     "list": {
       "title": "Users",
@@ -119,6 +124,75 @@
     }
   },
   "patients": {
+    "list": {
+      "title": "Patients",
+      "description": "Search by name or CPF and filter by status.",
+      "newPatient": "New patient",
+      "searchLabel": "Search patients",
+      "searchPlaceholder": "Search by name or CPF…",
+      "statusLabel": "Status",
+      "search": "Search",
+      "statuses": {
+        "all": "All statuses",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "empty": "No patients found.",
+      "emptyDescription": "Change the search or the status filter, or register a new patient.",
+      "showing": "Showing {shown} of {total} patients",
+      "page": "Page {page} of {pages}",
+      "previous": "Previous",
+      "next": "Next",
+      "edit": "Edit",
+      "columns": {
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "new": {
+      "title": "New patient",
+      "description": "The patient is linked to you and starts active.",
+      "submit": "Register",
+      "submitting": "Registering…"
+    },
+    "edit": {
+      "title": "Patient",
+      "createdBy": "Registered by {name}",
+      "submit": "Save",
+      "submitting": "Saving…",
+      "saved": {
+        "created": "Patient registered.",
+        "updated": "Changes saved."
+      }
+    },
+    "form": {
+      "cancel": "Cancel",
+      "viewExisting": "View patient"
+    },
+    "fields": {
+      "name": "Full name",
+      "cpf": "CPF",
+      "birthDate": "Date of birth",
+      "gender": "Sex",
+      "genderPlaceholder": "Choose the sex",
+      "phone": "Phone",
+      "email": "E-mail",
+      "address": "Address",
+      "optional": "Optional.",
+      "legalBasis": "Legal basis (LGPD)",
+      "legalBasisPlaceholder": "Choose the legal basis",
+      "legalBasisHint": "Why the clinic may process this patient's data."
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "deactivate": "Inactivate",
+      "reactivate": "Reactivate",
+      "confirmTitle": "Inactivate {name}?",
+      "confirmDescription": "The patient keeps all data and can be reactivated later.",
+      "confirm": "Inactivate",
+      "cancel": "Cancel"
+    },
     "genders": {
       "MALE": "Male",
       "FEMALE": "Female",
