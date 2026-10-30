@@ -67,6 +67,7 @@ Por lidar com dados pessoais sensíveis, o sistema foi projetado sob os pilares 
    cp .env.sample .env.local
    npm run db:migrate
    ```
+   Preencha `SESSION_SECRET` no `.env.local` com o resultado de `openssl rand -base64 32`.
 3. Inicie a aplicação em http://localhost:3000:
    ```bash
    npm run dev
@@ -85,17 +86,33 @@ Com `sqlite`, a `DATABASE_URL` aponta para um arquivo local (`file:local.db`) ou
 
 Para rodar só em memória, sem banco nem migrações: `STORAGE=memory npm run dev`.
 
-### Testando a rota de usuários
+### Testando as rotas de API
 
-Com o app rodando, a rota `/api/users` chama o `UserController`:
+As rotas chamam a fachada `FacadeSingletonController` ([ADR-0007](docs/07-arquitetura/adr/0007-fachada-unica.md)) e exigem sessão ([ADR-0008](docs/07-arquitetura/adr/0008-sessao-em-cookie-assinado.md)). Com o app rodando e o sistema vazio, crie o primeiro Administrador e guarde o cookie de sessão:
 
 ```bash
-# cadastrar
-curl -X POST localhost:3000/api/users -H 'content-type: application/json' \
-  -d '{"name":"Ana Silva","email":"ana@clinicore.com","login":"ana","password":"Secret@123","role":"ADMIN"}'
+# primeiro Administrador (só com o sistema vazio); já abre a sessão
+curl -c cookies.txt -X POST localhost:3000/api/auth/first-administrator -H 'content-type: application/json' \
+  -d '{"name":"Carla Souza","email":"carla@clinicore.com","login":"carla","password":"Secret@123"}'
 
-# listar
-curl localhost:3000/api/users
+# entrar com login ou e-mail
+curl -c cookies.txt -X POST localhost:3000/api/auth/session -H 'content-type: application/json' \
+  -d '{"identifier":"carla","password":"Secret@123"}'
+
+# cadastrar e listar usuários (só o Administrador)
+curl -b cookies.txt -X POST localhost:3000/api/users -H 'content-type: application/json' \
+  -d '{"name":"Ana Silva","email":"ana@clinicore.com","login":"ana","password":"Secret@123","role":"RECEPTIONIST"}'
+curl -b cookies.txt localhost:3000/api/users
+
+# pacientes (Administrador ou Recepcionista)
+curl -b cookies.txt -X POST localhost:3000/api/patients -H 'content-type: application/json' \
+  -d '{"name":"Joana Souza Lima","cpf":"123.456.789-09","birthDate":"1985-03-12","gender":"FEMALE","phone":"(83) 98765-4321","legalBasis":"HEALTH_PROTECTION"}'
+curl -b cookies.txt 'localhost:3000/api/patients?search=joana&status=active'
+curl -b cookies.txt localhost:3000/api/patients/1
+curl -b cookies.txt -X PATCH localhost:3000/api/patients/1 -H 'content-type: application/json' -d '{"active":false}'
+
+# sair
+curl -b cookies.txt -X DELETE localhost:3000/api/auth/session
 ```
 
 Cada erro volta com um código e uma mensagem específica, em pt-BR por padrão ou em inglês com `-H 'accept-language: en'`:
@@ -104,7 +121,7 @@ Cada erro volta com um código e uma mensagem específica, em pt-BR por padrão 
 { "error": { "code": "LOGIN_HAS_NUMBERS", "message": "O login não pode conter números." } }
 ```
 
-A rota ainda não exige login: a restrição do cadastro ao Administrador chega com a autenticação (UC04).
+Sem sessão, as rotas respondem 401 (`UNAUTHENTICATED`); com um papel sem permissão, 403 (`ACCESS_DENIED`).
 
 ### Esquema e migrações
 
@@ -128,7 +145,7 @@ npm run build
 ### Deploy na Vercel
 
 1. Crie um banco no [Turso](https://turso.tech) e gere um token de acesso.
-2. Na Vercel, defina `STORAGE=sqlite`, `DATABASE_URL` (`libsql://...`) e `DATABASE_AUTH_TOKEN` nas variáveis de ambiente do projeto.
+2. Na Vercel, defina `STORAGE=sqlite`, `DATABASE_URL` (`libsql://...`), `DATABASE_AUTH_TOKEN` e `SESSION_SECRET` (`openssl rand -base64 32`) nas variáveis de ambiente do projeto.
 3. Antes de publicar uma versão que altere o esquema, aplique as migrações no Turso:
    ```bash
    DATABASE_URL=libsql://... DATABASE_AUTH_TOKEN=... npm run db:migrate

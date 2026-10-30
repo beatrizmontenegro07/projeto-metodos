@@ -1,19 +1,9 @@
 import { getDatabase } from "@/db";
+import { readStorageMechanism, type StorageMechanism } from "@/infra/storage-mechanism";
 import type { UserRepository } from "@/modules/users/user-repository";
 
 import { InMemoryUserRepository } from "./in-memory-user-repository";
 import { SqliteUserRepository } from "./sqlite-user-repository";
-
-export const STORAGE_MECHANISMS = ["memory", "sqlite"] as const;
-
-export type StorageMechanism = (typeof STORAGE_MECHANISMS)[number];
-
-export function readStorageMechanism(value: string | undefined): StorageMechanism {
-  if (!STORAGE_MECHANISMS.includes(value as StorageMechanism)) {
-    throw new Error(`STORAGE must be one of: ${STORAGE_MECHANISMS.join(", ")}. Copy .env.sample to .env.local.`);
-  }
-  return value as StorageMechanism;
-}
 
 export async function createUserRepository(mechanism: StorageMechanism): Promise<UserRepository> {
   if (mechanism === "memory") return new InMemoryUserRepository();

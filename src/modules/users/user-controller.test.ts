@@ -4,6 +4,7 @@ import { InMemoryUserRepository } from "@/infra/users/in-memory-user-repository"
 
 import {
   DuplicateUserError,
+  FirstAdministratorExistsError,
   InvalidLoginError,
   InvalidPasswordError,
   InvalidRoleError,
@@ -153,5 +154,36 @@ describe("password rules (AWS IAM default policy)", () => {
     expect(repository.records[0]).not.toHaveProperty("password");
     expect(user).not.toHaveProperty("password");
     expect(user).not.toHaveProperty("passwordHash");
+  });
+});
+
+describe("creating the first administrator (RF16)", () => {
+  it("creates the first user as an administrator while no user exists", async () => {
+    const controller = new UserController(new InMemoryUserRepository());
+    const carla = { name: "Carla Souza", email: "carla@clinicore.com", login: "carla", password: "Secret@123" };
+
+    expect(await controller.hasUsers()).toBe(false);
+    expect(await controller.addFirstAdministrator(carla)).toMatchObject({ login: "carla", role: "ADMIN" });
+    expect(await controller.hasUsers()).toBe(true);
+  });
+
+  it("should refuse once a user exists", async () => {
+    const controller = new UserController(new InMemoryUserRepository());
+    await controller.add(validUser());
+
+    await expect(
+      controller.addFirstAdministrator({ name: "Carla", email: "carla@clinicore.com", login: "carla", password: "Secret@123" }),
+    ).rejects.toBeInstanceOf(FirstAdministratorExistsError);
+    expect(await controller.count()).toBe(1);
+  });
+
+  it("applies the login and password rules to the first administrator", async () => {
+    const controller = new UserController(new InMemoryUserRepository());
+
+    await expectValidationError(
+      controller.addFirstAdministrator({ name: "Carla", email: "carla@clinicore.com", login: "carla1", password: "Secret@123" }),
+      InvalidLoginError,
+      "LOGIN_HAS_NUMBERS",
+    );
   });
 });

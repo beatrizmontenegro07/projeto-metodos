@@ -24,6 +24,8 @@ function record(overrides: Partial<NewUserRecord> = {}): NewUserRecord {
   };
 }
 
+const ANA_PUBLIC = { id: 1, name: "Ana Silva", email: "ana@clinicore.com", login: "ana", role: "RECEPTIONIST" };
+
 describe.each(implementations)("%s", (_name, createRepository) => {
   let repository: UserRepository;
 
@@ -76,6 +78,38 @@ describe.each(implementations)("%s", (_name, createRepository) => {
     const rejection = results.find((result) => result.status === "rejected");
     expect(rejection?.reason).toMatchObject({ constructor: DuplicateUserError, code: "LOGIN_ALREADY_REGISTERED" });
     expect(await repository.list()).toHaveLength(1);
+  });
+
+  it("finds a user by identifier", async () => {
+    await repository.add(record());
+
+    expect(await repository.findById(1)).toEqual(ANA_PUBLIC);
+    expect(await repository.findById(2)).toBeUndefined();
+  });
+
+  it("finds the credentials by login or by e-mail", async () => {
+    await repository.add(record());
+    const credentials = { user: ANA_PUBLIC, passwordHash: "salt:key" };
+
+    expect(await repository.findCredentials({ login: "ana", email: "unknown" })).toEqual(credentials);
+    expect(await repository.findCredentials({ login: "unknown", email: "ana@clinicore.com" })).toEqual(credentials);
+    expect(await repository.findCredentials({ login: "bia", email: "bia@clinicore.com" })).toBeUndefined();
+  });
+
+  it("prefers the user whose login matches over the one whose e-mail matches", async () => {
+    await repository.add(record({ email: "ana@x.co", login: "other" }));
+    await repository.add(record({ email: "bruno@clinicore.com", login: "ana@x.co" }));
+
+    const credentials = await repository.findCredentials({ login: "ana@x.co", email: "ana@x.co" });
+
+    expect(credentials?.user.id).toBe(2);
+  });
+
+  it("counts the registered users", async () => {
+    expect(await repository.count()).toBe(0);
+    await repository.add(record());
+
+    expect(await repository.count()).toBe(1);
   });
 
   it("does not let returned or listed values change the stored user", async () => {

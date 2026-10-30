@@ -2,10 +2,94 @@
   "metadata": {
     "description": "Outpatient CRM for clinics with HL7 FHIR R4 interoperability."
   },
+  "common": {
+    "toggleSidebar": "Show or hide the menu",
+    "language": "Language",
+    "languages": {
+      "pt-BR": "Português",
+      "en": "English"
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "navigation": {
+    "menu": "Menu",
+    "home": "Home",
+    "patients": "Patients",
+    "users": "Users",
+    "signOut": "Sign out"
+  },
+  "authPanel": {
+    "tagline": "Outpatient CRM for clinics.",
+    "description": "Patients, appointments and communication in one place, with HL7 FHIR interoperability."
+  },
+  "signIn": {
+    "title": "Welcome back",
+    "description": "Sign in with your login or e-mail.",
+    "identifier": "Login or e-mail",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…"
+  },
+  "setup": {
+    "title": "Create the first administrator",
+    "description": "No user exists yet. This account will manage users and patients.",
+    "submit": "Create administrator",
+    "submitting": "Creating…",
+    "goToSignIn": "Go to sign-in"
+  },
   "home": {
-    "tagline": "Outpatient CRM for clinics."
+    "title": "Home",
+    "greeting": "Hello, {name}",
+    "description": "What is registered in CliniCore right now.",
+    "noTotals": "Your role has no records to show here yet.",
+    "totals": {
+      "patients": "Patients",
+      "patientsFooter": "Active and inactive",
+      "users": "Users",
+      "usersFooter": "Every role"
+    },
+    "shortcuts": {
+      "newPatient": "New patient",
+      "newUser": "New user"
+    }
+  },
+  "accessDenied": {
+    "title": "Access denied",
+    "description": "Your role does not allow this page."
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "The data is unavailable right now. Try again.",
+    "retry": "Try again"
   },
   "users": {
+    "list": {
+      "title": "Users",
+      "description": "Everyone who can sign in to CliniCore, in registration order.",
+      "newUser": "New user",
+      "empty": "No users registered.",
+      "columns": {
+        "id": "#"
+      }
+    },
+    "new": {
+      "title": "New user",
+      "description": "The user signs in with the login or the e-mail and this password.",
+      "rolePlaceholder": "Choose the role",
+      "cancel": "Cancel",
+      "submit": "Register",
+      "submitting": "Registering…"
+    },
+    "fields": {
+      "name": "Full name",
+      "email": "E-mail",
+      "login": "Login",
+      "loginHint": "Up to 12 characters, no numbers.",
+      "password": "Password",
+      "passwordHint": "8 to 128 characters with three of: lowercase, uppercase, numbers, symbols.",
+      "role": "Role"
+    },
     "roles": {
       "ADMIN": "Administrator",
       "RECEPTIONIST": "Receptionist",
@@ -23,13 +107,57 @@
       "PASSWORD_TOO_FEW_CHARACTER_TYPES": "The password must contain at least three character types: lowercase, uppercase, numbers, and symbols.",
       "INVALID_ROLE": "The user role is invalid.",
       "EMAIL_ALREADY_REGISTERED": "A user with this e-mail already exists.",
-      "LOGIN_ALREADY_REGISTERED": "A user with this login already exists."
+      "LOGIN_ALREADY_REGISTERED": "A user with this login already exists.",
+      "FIRST_ADMINISTRATOR_EXISTS": "The first administrator has already been created. Sign in with your account."
+    }
+  },
+  "auth": {
+    "errors": {
+      "SIGN_IN_IDENTIFIER_EMPTY": "Enter your login or e-mail.",
+      "SIGN_IN_PASSWORD_EMPTY": "Enter your password.",
+      "CREDENTIALS_INCORRECT": "Incorrect login or password."
+    }
+  },
+  "patients": {
+    "genders": {
+      "MALE": "Male",
+      "FEMALE": "Female",
+      "OTHER": "Other",
+      "UNKNOWN": "Unknown"
+    },
+    "legalBases": {
+      "CONSENT": "Data subject consent",
+      "HEALTH_PROTECTION": "Health protection",
+      "LEGAL_OBLIGATION": "Legal obligation",
+      "LIFE_PROTECTION": "Protection of life"
+    },
+    "errors": {
+      "PATIENT_NAME_EMPTY": "Enter the patient name.",
+      "PATIENT_NAME_TOO_LONG": "The patient name must have at most 120 characters.",
+      "CPF_EMPTY": "Enter the CPF.",
+      "CPF_WRONG_LENGTH": "The CPF must have 11 digits.",
+      "CPF_INVALID": "The CPF is invalid.",
+      "BIRTH_DATE_EMPTY": "Enter the date of birth.",
+      "BIRTH_DATE_INVALID": "The date of birth is invalid.",
+      "BIRTH_DATE_IN_FUTURE": "The date of birth cannot be in the future.",
+      "GENDER_INVALID": "The sex is invalid.",
+      "PHONE_EMPTY": "Enter the phone number.",
+      "PHONE_INVALID": "The phone number must have an area code and 8 or 9 digits.",
+      "PATIENT_EMAIL_INVALID": "The patient e-mail is invalid.",
+      "ADDRESS_TOO_LONG": "The address must have at most 200 characters.",
+      "LEGAL_BASIS_MISSING": "Enter the legal basis for processing the data.",
+      "LEGAL_BASIS_INVALID": "The legal basis is invalid.",
+      "CPF_ALREADY_REGISTERED": "A patient with this CPF already exists.",
+      "PATIENT_NOT_FOUND": "Patient not found."
     }
   },
   "api": {
     "errors": {
-      "INVALID_REQUEST_BODY": "The request body must be JSON with the name, e-mail, login, password and role as text.",
-      "STORAGE_UNAVAILABLE": "User data is unavailable right now. Try again."
+      "INVALID_REQUEST_BODY": "The request body must be JSON with these text fields: {fields}.",
+      "INVALID_QUERY": "The {parameter} parameter must be one of: {values}.",
+      "STORAGE_UNAVAILABLE": "The data is unavailable right now. Try again.",
+      "UNAUTHENTICATED": "Sign in to continue.",
+      "ACCESS_DENIED": "Your role does not allow this operation."
     }
   }
 }

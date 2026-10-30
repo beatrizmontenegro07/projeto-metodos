@@ -65,6 +65,19 @@ export class DuplicateUserError extends UserValidationError {
   }
 }
 
+/** RF16: the first administrator can be created only while no user exists. */
+export class FirstAdministratorExistsError extends Error {
+  override name = "FirstAdministratorExistsError";
+  readonly code = "FIRST_ADMINISTRATOR_EXISTS";
+
+  constructor() {
+    super("FIRST_ADMINISTRATOR_EXISTS");
+  }
+}
+
+/** Every user error code the UI translates at `users.errors.<code>`. */
+export const USER_ERROR_CODES = [...USER_VALIDATION_ERROR_CODES, "FIRST_ADMINISTRATOR_EXISTS"] as const;
+
 export class UserPersistenceError extends Error {
   override name = "UserPersistenceError";
 }

@@ -1,6 +1,11 @@
 import { DuplicateUserError } from "@/modules/users/errors";
 import type { User } from "@/modules/users/user";
-import type { NewUserRecord, UserRepository } from "@/modules/users/user-repository";
+import type {
+  CredentialsLookup,
+  NewUserRecord,
+  UserCredentials,
+  UserRepository,
+} from "@/modules/users/user-repository";
 
 type StoredUser = User & { passwordHash: string };
 
@@ -18,6 +23,21 @@ export class InMemoryUserRepository implements UserRepository {
 
   async list(): Promise<User[]> {
     return this.storedUsers.map(toPublicUser);
+  }
+
+  async findById(id: number): Promise<User | undefined> {
+    const storedUser = this.storedUsers.find((user) => user.id === id);
+    return storedUser && toPublicUser(storedUser);
+  }
+
+  async findCredentials({ login, email }: CredentialsLookup): Promise<UserCredentials | undefined> {
+    const storedUser =
+      this.storedUsers.find((user) => user.login === login) ?? this.storedUsers.find((user) => user.email === email);
+    return storedUser && { user: toPublicUser(storedUser), passwordHash: storedUser.passwordHash };
+  }
+
+  async count(): Promise<number> {
+    return this.storedUsers.length;
   }
 
   private ensureEmailAndLoginAreAvailable({ email, login }: NewUserRecord): void {

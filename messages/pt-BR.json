@@ -2,10 +2,94 @@
   "metadata": {
     "description": "CRM ambulatorial para clínicas com interoperabilidade HL7 FHIR R4."
   },
+  "common": {
+    "toggleSidebar": "Mostrar ou esconder o menu",
+    "language": "Idioma",
+    "languages": {
+      "pt-BR": "Português",
+      "en": "English"
+    },
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Esconder senha"
+  },
+  "navigation": {
+    "menu": "Menu",
+    "home": "Início",
+    "patients": "Pacientes",
+    "users": "Usuários",
+    "signOut": "Sair"
+  },
+  "authPanel": {
+    "tagline": "CRM ambulatorial para clínicas.",
+    "description": "Pacientes, agenda e comunicação num só lugar, com interoperabilidade HL7 FHIR."
+  },
+  "signIn": {
+    "title": "Bem-vindo de volta",
+    "description": "Entre com seu login ou e-mail.",
+    "identifier": "Login ou e-mail",
+    "password": "Senha",
+    "submit": "Entrar",
+    "submitting": "Entrando…"
+  },
+  "setup": {
+    "title": "Crie o primeiro administrador",
+    "description": "Ainda não há usuários. Esta conta vai gerenciar usuários e pacientes.",
+    "submit": "Criar administrador",
+    "submitting": "Criando…",
+    "goToSignIn": "Ir para o login"
+  },
   "home": {
-    "tagline": "CRM ambulatorial para clínicas."
+    "title": "Início",
+    "greeting": "Olá, {name}",
+    "description": "O que está cadastrado no CliniCore agora.",
+    "noTotals": "Seu papel ainda não tem cadastros para mostrar aqui.",
+    "totals": {
+      "patients": "Pacientes",
+      "patientsFooter": "Ativos e inativos",
+      "users": "Usuários",
+      "usersFooter": "Todos os papéis"
+    },
+    "shortcuts": {
+      "newPatient": "Novo paciente",
+      "newUser": "Novo usuário"
+    }
+  },
+  "accessDenied": {
+    "title": "Acesso negado",
+    "description": "Seu papel não permite abrir esta página."
+  },
+  "errorPage": {
+    "title": "Algo deu errado",
+    "description": "Os dados não estão disponíveis agora. Tente novamente.",
+    "retry": "Tentar novamente"
   },
   "users": {
+    "list": {
+      "title": "Usuários",
+      "description": "Quem pode entrar no CliniCore, em ordem de cadastro.",
+      "newUser": "Novo usuário",
+      "empty": "Nenhum usuário cadastrado.",
+      "columns": {
+        "id": "#"
+      }
+    },
+    "new": {
+      "title": "Novo usuário",
+      "description": "O usuário entra com o login ou o e-mail e esta senha.",
+      "rolePlaceholder": "Escolha o papel",
+      "cancel": "Cancelar",
+      "submit": "Cadastrar",
+      "submitting": "Cadastrando…"
+    },
+    "fields": {
+      "name": "Nome completo",
+      "email": "E-mail",
+      "login": "Login",
+      "loginHint": "Até 12 caracteres, sem números.",
+      "password": "Senha",
+      "passwordHint": "De 8 a 128 caracteres, com três destes tipos: minúsculas, maiúsculas, números e símbolos.",
+      "role": "Papel"
+    },
     "roles": {
       "ADMIN": "Administrador",
       "RECEPTIONIST": "Recepcionista",
@@ -23,13 +107,57 @@
       "PASSWORD_TOO_FEW_CHARACTER_TYPES": "A senha deve conter pelo menos três tipos de caracteres: minúsculas, maiúsculas, números e símbolos.",
       "INVALID_ROLE": "O papel do usuário é inválido.",
       "EMAIL_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este e-mail.",
-      "LOGIN_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este login."
+      "LOGIN_ALREADY_REGISTERED": "Já existe um usuário cadastrado com este login.",
+      "FIRST_ADMINISTRATOR_EXISTS": "O primeiro administrador já foi criado. Entre com sua conta."
+    }
+  },
+  "auth": {
+    "errors": {
+      "SIGN_IN_IDENTIFIER_EMPTY": "Informe o login ou o e-mail.",
+      "SIGN_IN_PASSWORD_EMPTY": "Informe a senha.",
+      "CREDENTIALS_INCORRECT": "Login ou senha incorretos."
+    }
+  },
+  "patients": {
+    "genders": {
+      "MALE": "Masculino",
+      "FEMALE": "Feminino",
+      "OTHER": "Outro",
+      "UNKNOWN": "Desconhecido"
+    },
+    "legalBases": {
+      "CONSENT": "Consentimento do titular",
+      "HEALTH_PROTECTION": "Tutela da saúde",
+      "LEGAL_OBLIGATION": "Cumprimento de obrigação legal",
+      "LIFE_PROTECTION": "Proteção da vida"
+    },
+    "errors": {
+      "PATIENT_NAME_EMPTY": "Informe o nome do paciente.",
+      "PATIENT_NAME_TOO_LONG": "O nome do paciente deve ter no máximo 120 caracteres.",
+      "CPF_EMPTY": "Informe o CPF.",
+      "CPF_WRONG_LENGTH": "O CPF deve ter 11 dígitos.",
+      "CPF_INVALID": "O CPF informado é inválido.",
+      "BIRTH_DATE_EMPTY": "Informe a data de nascimento.",
+      "BIRTH_DATE_INVALID": "A data de nascimento é inválida.",
+      "BIRTH_DATE_IN_FUTURE": "A data de nascimento não pode estar no futuro.",
+      "GENDER_INVALID": "O sexo informado é inválido.",
+      "PHONE_EMPTY": "Informe o telefone.",
+      "PHONE_INVALID": "O telefone deve ter DDD e 8 ou 9 dígitos.",
+      "PATIENT_EMAIL_INVALID": "O e-mail do paciente é inválido.",
+      "ADDRESS_TOO_LONG": "O endereço deve ter no máximo 200 caracteres.",
+      "LEGAL_BASIS_MISSING": "Informe a base legal do tratamento dos dados.",
+      "LEGAL_BASIS_INVALID": "A base legal informada é inválida.",
+      "CPF_ALREADY_REGISTERED": "Já existe um paciente cadastrado com este CPF.",
+      "PATIENT_NOT_FOUND": "Paciente não encontrado."
     }
   },
   "api": {
     "errors": {
-      "INVALID_REQUEST_BODY": "O corpo da requisição deve ser um JSON com nome, e-mail, login, senha e papel em texto.",
-      "STORAGE_UNAVAILABLE": "Não foi possível acessar os dados de usuários agora. Tente novamente."
+      "INVALID_REQUEST_BODY": "O corpo da requisição deve ser um JSON com estes campos em texto: {fields}.",
+      "INVALID_QUERY": "O parâmetro {parameter} deve ser um destes valores: {values}.",
+      "STORAGE_UNAVAILABLE": "Não foi possível acessar os dados agora. Tente novamente.",
+      "UNAUTHENTICATED": "Entre no sistema para continuar.",
+      "ACCESS_DENIED": "Seu papel não permite esta operação."
     }
   }
 }
