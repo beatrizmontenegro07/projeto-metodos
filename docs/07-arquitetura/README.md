@@ -34,26 +34,33 @@ flowchart TB
 
     subgraph app["Aplicativo CliniCore — Next.js + TypeScript [contêiner]"]
         direction TB
-        proxy["proxy.ts<br/>escolhe o idioma (cookie NEXT_LOCALE,<br/>navegador, pt-BR) e reescreve a URL"]
+        proxy["proxy.ts<br/>escolhe o idioma (cookie NEXT_LOCALE,<br/>navegador, pt-BR), manda para /login<br/>quem não tem sessão e reescreve a URL"]
         subgraph ui["ui"]
-            paginas["Páginas<br/>app/[locale]/ + shadcn/ui<br/>textos em messages/ (next-intl)"]
-            api["Rotas de API<br/>app/api/users · auth e patients — planejado"]
+            paginas["Páginas e Server Actions<br/>app/[locale]/ + shadcn/ui<br/>textos em messages/ (next-intl)"]
+            api["Rotas de API<br/>app/api/users · patients · auth"]
         end
         subgraph business["business"]
-            modulos["Módulos por capacidade<br/>modules/users (UserController, regras, erros,<br/>interface UserRepository) · patients — planejado"]
+            fachada["FacadeSingletonController<br/>modules/facade — entrada única,<br/>verifica o papel (ADR-0007)"]
+            modulos["Módulos por capacidade<br/>modules/users · patients · auth<br/>(controles, regras, erros, interfaces<br/>UserRepository e PatientRepository)"]
             fhirFacade["FHIR Facade<br/>Patient ↔ FHIR R4 — planejado"]
         end
         subgraph infra["infra"]
-            repositorios["infra/users<br/>InMemoryUserRepository (RAM) ·<br/>SqliteUserRepository · fábrica (STORAGE)"]
+            montagem["infra/facade.ts<br/>getFacade() com os repositórios<br/>escolhidos por STORAGE"]
+            sessao["infra/auth<br/>sessão em cookie assinado (ADR-0008)"]
+            repositorios["infra/users · infra/patients<br/>coleções em RAM · SQLite · fábricas"]
             db["db/<br/>esquema Drizzle, conexão libSQL,<br/>migrações em drizzle/"]
         end
 
         proxy --> paginas
-        paginas --> modulos
-        api --> modulos
-        api --> fhirFacade
-        fhirFacade --> modulos
-        repositorios -.->|implementa UserRepository| modulos
+        paginas --> montagem
+        api --> montagem
+        paginas --> sessao
+        api --> sessao
+        montagem --> fachada
+        fachada --> modulos
+        api -.-> fhirFacade
+        fhirFacade -.-> modulos
+        repositorios -.->|implementa as interfaces| modulos
         repositorios --> db
     end
 
@@ -68,11 +75,11 @@ flowchart TB
 
 | Camada | Pasta | Responsabilidade | Não pode depender de |
 |---|---|---|---|
-| ui | `src/app/`, `src/components/ui/`, `src/i18n/`, `messages/` | Telas, rotas de API, tradução dos textos e dos códigos de erro | — |
-| business | `src/modules/<capacidade>/` | Entidades, validação, erros de domínio, controles (`UserController`) e a interface do repositório (`UserRepository`) | `src/app`, `src/infra`, `src/db`, React |
-| infra | `src/infra/<capacidade>/`, `src/db/` | Implementações do repositório (coleção em RAM e SQLite), fábrica que escolhe uma na inicialização, esquema, conexão, migrações e identificação de erros do banco | `src/app` |
+| ui | `src/app/`, `src/components/`, `src/i18n/`, `messages/` | Telas, Server Actions, rotas de API, tradução dos textos e dos códigos de erro | — |
+| business | `src/modules/<capacidade>/` | Fachada única (`FacadeSingletonController`), entidades, validação, erros de domínio, permissões por papel, controles (`UserController`, `AuthenticationController`, `PatientController`) e as interfaces dos repositórios | `src/app`, `src/infra`, `src/db`, React |
+| infra | `src/infra/`, `src/db/` | Montagem da fachada (`getFacade`), sessão, implementações dos repositórios (coleção em RAM e SQLite), fábricas que escolhem uma na inicialização, esquema, conexão, migrações e identificação de erros do banco | `src/app` |
 
-Os controles recebem a interface `UserRepository` pelo construtor ([ADR-0006](adr/0006-repositorio-de-usuarios.md)). Em produção, `getUserRepository()` cria uma única implementação a partir da variável `STORAGE`: `InMemoryUserRepository` (coleção em RAM) ou `SqliteUserRepository` (banco na `DATABASE_URL`). Nos testes, o controle usa a coleção em RAM, e as duas implementações passam pelos mesmos testes de contrato.
+Telas, Server Actions e rotas de API chamam só a fachada, que verifica o papel do usuário em cada operação e delega ao controle ([ADR-0007](adr/0007-fachada-unica.md)). Os controles recebem a interface do repositório pelo construtor ([ADR-0006](adr/0006-repositorio-de-usuarios.md)). Em produção, `getFacade()` entrega à fachada as implementações escolhidas pela variável `STORAGE`: coleções em RAM (`InMemoryUserRepository`, `InMemoryPatientRepository`) ou SQLite (`SqliteUserRepository`, `SqlitePatientRepository`, banco na `DATABASE_URL`). Nos testes, os controles usam as coleções em RAM, e as implementações de cada entidade passam pelos mesmos testes de contrato. A sessão é um cookie assinado com `SESSION_SECRET` ([ADR-0008](adr/0008-sessao-em-cookie-assinado.md)).
 
 ## 9.3 Arquitetura física — implantação
 
@@ -125,12 +132,12 @@ Os requisitos estão em [`openspec/specs/rnf/`](../../openspec/specs/rnf/). Os q
 
 | RNF | Decisão / tática arquitetural | Onde | Situação |
 |---|---|---|---|
-| NF-SEG-01 Senha nunca exibida nem armazenada em texto puro | Só o hash scrypt com salt aleatório de 16 bytes é gravado (`users.password_hash`); os repositórios devolvem só os campos públicos, sem a senha nem o hash; erros de validação carregam um código, nunca a senha digitada | `modules/users/password.ts`, `infra/users/` | Implementado |
-| NF-MAN-01 Persistência substituível | O controle depende só da interface `UserRepository`; a fábrica escolhe na inicialização, pela variável `STORAGE`, a coleção em RAM ou o SQLite; testes de contrato garantem o mesmo comportamento nos dois | `modules/users/user-repository.ts`, `infra/users/` · [ADR-0006](adr/0006-repositorio-de-usuarios.md) | Implementado |
-| NF-CON-01 Falha de armazenamento tratada | Toda operação do banco passa por `SqliteUserRepository.accessStorage`, que converte a falha em `UserPersistenceError` sem encerrar o processo; e-mail e login repetidos são barrados por índices únicos no banco | `infra/users/sqlite-user-repository.ts` · [ADR-0002](adr/0002-unicidade-no-banco.md) | Implementado |
-| NF-USA-01 Operações encontradas em ≤ 10 s | Componentes padronizados do shadcn/ui; interface em pt-BR e en, com mensagens de erro traduzidas a partir de códigos estáveis | `components/ui/`, `messages/` · [ADR-0005](adr/0005-ingles-no-codigo-e-i18n.md) | Parcial: telas planejadas |
-| NF-SEG-02 Autenticação e autorização por papel (RBAC) | Papel do usuário como enumeração (`Role`); login com sessão e verificação do papel nas rotas | `modules/users/role.ts` | Parcial: login planejado |
+| NF-SEG-01 Senha nunca exibida nem armazenada em texto puro | Só o hash scrypt com salt aleatório de 16 bytes é gravado (`users.password_hash`); os repositórios devolvem só os campos públicos, e o hash sai apenas de `findCredentials`, para o login; erros de validação carregam um código, nunca a senha digitada; a tela nunca devolve a senha ao campo depois de uma recusa | `modules/users/password.ts`, `infra/users/` | Implementado |
+| NF-MAN-01 Persistência substituível | Os controles dependem só das interfaces `UserRepository` e `PatientRepository`; a variável `STORAGE` escolhe na inicialização as coleções em RAM ou o SQLite para todas as entidades; testes de contrato garantem o mesmo comportamento nos dois | `modules/*/…-repository.ts`, `infra/users/`, `infra/patients/` · [ADR-0006](adr/0006-repositorio-de-usuarios.md) | Implementado |
+| NF-CON-01 Falha de armazenamento tratada | Toda operação do banco passa por `accessStorage`, que converte a falha em `UserPersistenceError` ou `PatientPersistenceError` sem encerrar o processo; as rotas respondem 503 e as telas mostram uma mensagem com "Tentar novamente"; e-mail, login e CPF repetidos são barrados por índices únicos | `infra/*/sqlite-*-repository.ts`, `app/[locale]/(app)/error.tsx` · [ADR-0002](adr/0002-unicidade-no-banco.md) | Implementado |
+| NF-USA-01 Operações encontradas em ≤ 10 s | Menu lateral só com as áreas do papel, atalhos "Novo paciente" e "Novo usuário" na página inicial; componentes padronizados do shadcn/ui; interface em pt-BR e en, com a mensagem específica de cada regra ao lado do campo | `components/`, `app/[locale]/(app)/`, `messages/` · [ADR-0005](adr/0005-ingles-no-codigo-e-i18n.md) | Implementado; falta o teste com usuários |
+| NF-SEG-02 Autenticação e autorização por papel (RBAC) | Login por login ou e-mail com sessão em cookie assinado de 8 horas; o proxy manda para `/login` quem não tem sessão; a fachada verifica o papel em cada operação (`hasPermission`) e as rotas respondem 401 ou 403 | `modules/auth/`, `modules/facade/`, `infra/auth/`, `proxy.ts` · [ADR-0007](adr/0007-fachada-unica.md), [ADR-0008](adr/0008-sessao-em-cookie-assinado.md) | Implementado |
 | NF-SEG-03 Tráfego criptografado (TLS 1.2+) | A Vercel só serve HTTPS; a conexão com o Turso usa `libsql://` sobre TLS | Implantação | Planejado (deploy) |
-| NF-DES-01 Buscas em ≤ 2 s (p95) | Consultas SQL no mesmo processo, sem saltos de rede entre interface e servidor; índices nas colunas de busca; páginas pré-renderizadas na CDN | `db/schema.ts`, Vercel | Planejado (busca de pacientes) |
-| NF-PRI-01 Adequação à LGPD | Senhas só como hash; dados acessíveis apenas a usuários autenticados (NF-SEG-02); base legal registrada no cadastro do paciente; relatórios analíticos pseudonimizados; logs sem senha nem CPF | `modules/users/password.ts` | Parcial |
+| NF-DES-01 Buscas em ≤ 2 s (p95) | A busca de pacientes filtra no banco, numa só consulta, pela coluna `search_name` (nome sem acentos, indexada) ou pelo CPF; consultas no mesmo processo, sem saltos de rede entre interface e servidor; casca das páginas pré-renderizada na CDN | `infra/patients/sqlite-patient-repository.ts`, `db/schema.ts`, Vercel | Implementado para pacientes, sem medição com 10.000 registros; agenda planejada |
+| NF-PRI-01 Adequação à LGPD | Senhas só como hash; dados acessíveis apenas a usuários autenticados com o papel certo (NF-SEG-02); base legal obrigatória no cadastro do paciente (`legalBasis`); relatórios analíticos pseudonimizados; logs sem senha nem CPF | `modules/users/password.ts`, `modules/patients/legal-basis.ts` | Parcial: relatórios planejados |
 | NF-INT-01 Interoperabilidade HL7 FHIR R4 | FHIR Facade na camada business convertendo as entidades internas em recursos FHIR (`Patient`), exposta por rotas de API | `modules/` (planejado) | Planejado |

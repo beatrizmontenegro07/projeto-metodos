@@ -21,7 +21,7 @@ O sistema NÃO DEVE exibir a senha em listagens, respostas ou mensagens de erro,
 - **THEN** a mensagem de erro descreve a regra violada sem repetir a senha digitada
 
 ### Requirement: NF-SEG-02 — Autenticação e autorização por papel
-O sistema DEVE exigir autenticação por login e senha para qualquer funcionalidade, exceto a tela de login, e DEVE liberar a cada usuário apenas as funcionalidades do seu papel (RBAC), seguindo o princípio do menor privilégio (NF02 do documento de requisitos).
+O sistema DEVE exigir autenticação por login e senha para qualquer funcionalidade, exceto a tela de login, e DEVE liberar a cada usuário apenas as funcionalidades do seu papel (RBAC), seguindo o princípio do menor privilégio (NF02 do documento de requisitos): o Administrador gerencia usuários e pacientes, o Recepcionista gerencia pacientes, e o Médico e o Paciente acessam apenas a página inicial.
 
 **Prioridade:** Essencial
 **Casos de uso:** UC04, UC05, UC06
@@ -35,6 +35,20 @@ O sistema DEVE exigir autenticação por login e senha para qualquer funcionalid
 - **GIVEN** uma Recepcionista autenticada
 - **WHEN** ela tenta abrir a listagem de usuários, permitida só ao Administrador
 - **THEN** o sistema nega o acesso e não exibe nenhum usuário
+
+#### Scenario: Menu conforme o papel
+- **GIVEN** um Médico autenticado
+- **WHEN** ele abre a página inicial
+- **THEN** o menu não exibe "Usuários" nem "Pacientes"
+
+#### Scenario: API sem sessão
+- **WHEN** uma requisição sem sessão chega a `GET /api/users`
+- **THEN** o sistema responde com o status 401 e o código `UNAUTHENTICATED`, sem nenhum usuário
+
+#### Scenario: API sem permissão
+- **GIVEN** uma Recepcionista autenticada
+- **WHEN** ela envia `GET /api/users`
+- **THEN** o sistema responde com o status 403 e o código `ACCESS_DENIED`, sem nenhum usuário
 
 ### Requirement: NF-SEG-03 — Tráfego criptografado
 Todo o tráfego entre o navegador e o sistema, e entre o sistema e serviços externos (banco de dados hospedado e sistemas FHIR), DEVE usar HTTPS com TLS 1.2 ou superior (NF03 do documento de requisitos).

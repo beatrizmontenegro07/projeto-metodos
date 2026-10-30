@@ -15,44 +15,60 @@ skinparam rectangle {
     BorderColor #333333
 }
 
-' Atores principais (à esquerda)
-actor Paciente
-actor Recepcionista
-actor "Profissional de Saúde" as Profissional
+' Mesmo diagrama de docs/04-casos-de-uso/casos-de-uso.puml (Entrega 2).
 actor Administrador
+actor Recepcionista
+actor "Médico" as Medico
+actor Paciente
+actor "Serviço de mensagens\n<<sistema externo>>" as Mensagens
+actor "Sistema de saúde externo\n<<sistema externo>>" as SistemaExterno
 
-' Sistema / Limite
 rectangle CliniCore {
-    usecase "Agendar Consulta" as UC_Agendar
-    usecase "Reagendar Consulta" as UC_Reagendar
-    usecase "Cadastrar Paciente" as UC_Cadastrar
-    usecase "Registrar Atendimento\nBásico" as UC_Registrar
-    usecase "Autenticar Usuário" as UC_Autenticar
-    usecase "Gerenciar Profissionais\ne Clínica" as UC_GerenciarProf
-    usecase "Gerenciar Comunicações\ne Lembretes" as UC_GerenciarCom
+  usecase "UC04 Autenticar" as UC04
+  usecase "UC05 Cadastrar usuário" as UC05
+  usecase "UC06 Listar usuários" as UC06
+  usecase "UC12 Gerenciar profissionais\ne clínica" as UC12
+  usecase "UC01 Cadastrar paciente" as UC01
+  usecase "UC07 Editar paciente" as UC07
+  usecase "UC08 Inativar e reativar\npaciente" as UC08
+  usecase "UC09 Buscar pacientes" as UC09
+  usecase "UC10 Consultar totais\ncadastrados" as UC10
+  usecase "UC02 Agendar consulta" as UC02
+  usecase "UC11 Reagendar consulta" as UC11
+  usecase "UC13 Gerenciar comunicações\ne lembretes" as UC13
+  usecase "UC03 Registrar atendimento" as UC03
+  usecase "UC14 Exportar paciente\nem FHIR" as UC14
 }
 
-' Ator externo (posicionado automaticamente na base pelo motor de layout)
-actor "Gmail/WhatsApp\n<<sistema externo>>" as SistExterno
+Administrador --> UC05
+Administrador --> UC06
+Administrador --> UC12
+Administrador --> UC01
+Administrador --> UC07
+Administrador --> UC08
+Administrador --> UC09
+Administrador --> UC10
+Recepcionista --> UC01
+Recepcionista --> UC07
+Recepcionista --> UC08
+Recepcionista --> UC09
+Recepcionista --> UC10
+Recepcionista --> UC02
+Paciente --> UC02
+Medico --> UC03
+Administrador --> UC04
+Recepcionista --> UC04
+Medico --> UC04
+Paciente --> UC04
 
-' Relacionamentos dos Atores com os Casos de Uso
-Paciente --> UC_Agendar
-Recepcionista --> UC_Agendar
-Recepcionista --> UC_Cadastrar
-Profissional --> UC_Registrar
-Administrador --> UC_GerenciarProf
+UC11 ..> UC02 : <<extend>>
+UC02 ..> UC13 : <<include>>
+UC13 --> Mensagens
+UC14 --> SistemaExterno
 
-' Relacionamentos de Extensão e Inclusão (pontilhados)
-UC_Agendar ..> UC_Reagendar : <<extend>>
-
-UC_Agendar ..> UC_Autenticar : <<include>>
-UC_Cadastrar ..> UC_Autenticar : <<include>>
-UC_Registrar ..> UC_Autenticar : <<include>>
-UC_GerenciarProf ..> UC_Autenticar : <<include>>
-
-UC_Agendar ..> UC_GerenciarCom : <<include>>
-
-' Relacionamento do Ator Externo
-SistExterno --> UC_GerenciarCom
-
+' Todos os casos de uso, exceto UC14, incluem UC04; só alguns aparecem para manter o diagrama legível.
+UC01 ..> UC04 : <<include>>
+UC05 ..> UC04 : <<include>>
+UC02 ..> UC04 : <<include>>
+UC03 ..> UC04 : <<include>>
 @enduml
