@@ -1,9 +1,293 @@
 \section{Descrição da interface com o usuário}
-Esta seção apresenta os protótipos de interface (mockups) para o sistema CliniCore, com o objetivo de tangibilizar os requisitos funcionais descritos nas seções anteriores. Elas possuem caráter ilustrativo, servindo para facilitar a compreensão da disposição das informações, da ergonomia e do fluxo de navegação idealizado para a aplicação.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\textwidth]{images/mockups-interface.png}
-  \caption{Protótipos da interface do sistema CliniCore.}
-  \label{fig:mockups}
-\end{figure}
+\begingroup
+\setlength{\emergencystretch}{3em}
+\newsavebox{\interfaceWireframe}
+
+\subsection{TL01 — Cadastro de usuário}
+
+Rota: \path|/users/new|. Relacionada a: UC05 · RF07, RF08, RF09, NF-SEG-01
+
+\begin{center}
+
+\begin{lrbox}{\interfaceWireframe}
+\ttfamily\small
+\begin{tabular}{@{}l@{}}
+\verb`+-------------+------------------------------------------------------------------+` \\
+\verb`| CliniCore   | Menu | Usuários > Novo usuário                  Idioma Português |` \\
+\verb`|             +------------------------------------------------------------------+` \\
+\verb`| Menu        | Novo usuário                                                     |` \\
+\verb`|  Início     | O usuário entra com o login ou o e-mail e esta senha.            |` \\
+\verb`|  Pacientes  |                                                                  |` \\
+\verb`|  Usuários < | Nome completo [ Ana Silva                             ]          |` \\
+\verb`|             | E-mail        [ ana@clinicore.com                     ]          |` \\
+\verb`|             | Login         [ ana1                                  ]          |` \\
+\verb`|             | ! O login não pode conter números.                               |` \\
+\verb`|             | Senha         [ **********                         Ver ]         |` \\
+\verb`|             | De 8 a 128 caracteres, com três destes tipos: ...                |` \\
+\verb`|             | Papel         [ Recepcionista                        v ]         |` \\
+\verb`|             |                                                                  |` \\
+\verb`| CS Carla    |                              [ Cancelar ]  [ Cadastrar ]         |` \\
+\verb`+-------------+------------------------------------------------------------------+` \\
+\end{tabular}
+\end{lrbox}
+
+\resizebox{\textwidth}{!}{\usebox{\interfaceWireframe}}
+
+\end{center}
+
+\begin{itemize}[leftmargin=*,itemsep=0.3em]
+
+\item O papel é escolhido numa lista com os quatro papéis (Administrador, Recepcionista, Médico, Paciente).
+
+\item Uma recusa mostra, junto do campo, a mensagem da regra violada (RF07–RF09) e mantém os campos preenchidos, exceto a senha, que nunca volta para a tela (NF-SEG-01). O botão do olho mostra ou esconde a senha digitada.
+
+\item Após o cadastro, a tela volta para a TL02 com o novo usuário no fim da lista.
+
+\end{itemize}
+
+\subsection{TL02 — Listagem de usuários}
+
+Rota: \path|/users|. Relacionada a: UC06 · RF10, NF-SEG-01
+
+\begin{center}
+
+\begin{lrbox}{\interfaceWireframe}
+\ttfamily\small
+\begin{tabular}{@{}l@{}}
+\verb`+-------------+-----------------------------------------------------------------------+` \\
+\verb`| CliniCore   | Menu | Usuários                                      Idioma Português |` \\
+\verb`|             +-----------------------------------------------------------------------+` \\
+\verb`| Menu        | Usuários                                    [ + Novo usuário ]        |` \\
+\verb`|  Início     | Quem pode entrar no CliniCore, em ordem de cadastro.                  |` \\
+\verb`|  Pacientes  |                                                                       |` \\
+\verb`|  Usuários < | #  Nome completo   E-mail               Login  Papel                  |` \\
+\verb`|             | 1  Carla Souza     carla@clinicore.com  carla  (Administrador)        |` \\
+\verb`|             | 2  Ana Silva       ana@clinicore.com    ana    (Recepcionista)        |` \\
+\verb`|             |                                                                       |` \\
+\verb`|             | (sem usuários: "Nenhum usuário cadastrado.")                          |` \\
+\verb`+-------------+-----------------------------------------------------------------------+` \\
+\end{tabular}
+\end{lrbox}
+
+\resizebox{\textwidth}{!}{\usebox{\interfaceWireframe}}
+
+\end{center}
+
+\begin{itemize}[leftmargin=*,itemsep=0.3em]
+
+\item Ordem de cadastro, sem coluna de senha (RF10). O papel aparece como etiqueta.
+
+\item "+ Novo usuário" abre a TL01. O menu "Usuários" só aparece para o Administrador (NF-SEG-02).
+
+\end{itemize}
+
+\subsection{TL03 — Lista de pacientes}
+
+Rota: \path|/patients|. Relacionada a: UC09, UC08 · RF13, RF14, NF-DES-01
+
+\begin{center}
+
+\begin{lrbox}{\interfaceWireframe}
+\ttfamily\small
+\begin{tabular}{@{}l@{}}
+\verb`+--------------+---------------------------------------------------------------------------------------+` \\
+\verb`| CliniCore    | Menu | Pacientes                                                     Idioma Português |` \\
+\verb`|              +---------------------------------------------------------------------------------------+` \\
+\verb`| Menu         | Pacientes                                                    [ + Novo paciente ]      |` \\
+\verb`|  Início      | Busque pelo nome ou CPF e filtre pela situação.                                       |` \\
+\verb`|  Pacientes < |                                                                                       |` \\
+\verb`|  Usuários    | [ Buscar por nome ou CPF...   ] [ Todas as situações v ] [ Buscar ]                   |` \\
+\verb`|              |                                                                                       |` \\
+\verb`|              | Nome completo ^v    CPF             Telefone         Data de nascimento ^v Situação   |` \\
+\verb`|              | Álvaro Dias        987.654.321-00  (83) 3222-1100   05/01/1975          (Ativo)       |` \\
+\verb`|              |                                                     [ Editar] [ Inativar]             |` \\
+\verb`|              | Joana Souza Lima   123.456.789-09  (83) 98765-4321  12/03/1985          (Inativo)     |` \\
+\verb`|              |                                                     [ Editar] [ Reativar]             |` \\
+\verb`|              |                                                                                       |` \\
+\verb`|              | Mostrando 2 de 2 pacientes                Página 1 de 1  [ Anterior ] [ Próxima ]     |` \\
+\verb`+--------------+---------------------------------------------------------------------------------------+` \\
+\end{tabular}
+\end{lrbox}
+
+\resizebox{\textwidth}{!}{\usebox{\interfaceWireframe}}
+
+\end{center}
+
+\begin{itemize}[leftmargin=*,itemsep=0.3em]
+
+\item A busca encontra parte do nome, sem diferenciar maiúsculas, minúsculas e acentos ("joao" encontra "João"), ou parte do CPF, com ou sem pontuação. O filtro mostra todas as situações, só os ativos ou só os inativos. A busca e o filtro ficam no endereço (\path|/patients?search=joao&status=active|), então o resultado pode ser compartilhado.
+
+\item A lista vem em ordem alfabética do nome; as colunas "Nome completo" e "Data de nascimento" podem ser reordenadas. A tabela mostra 10 pacientes por página.
+
+\item O nome e "Editar" abrem o paciente na TL04. "Inativar" pede confirmação; "Reativar" não pede (UC08).
+
+\item Sem resultados, a tela mostra "Nenhum paciente encontrado." e sugere mudar a busca ou cadastrar um novo paciente.
+
+\end{itemize}
+
+\subsection{TL04 — Cadastro e edição de paciente}
+
+Rota: \path|/patients/new|, \path|/patients/<id>|. Relacionada a: UC01, UC07, UC08 · RF01, RF11, RF12, RF13, NF-PRI-01
+
+\begin{center}
+
+\begin{lrbox}{\interfaceWireframe}
+\ttfamily\small
+\begin{tabular}{@{}l@{}}
+\verb`+--------------+-----------------------------------------------------------------------+` \\
+\verb`| CliniCore    | Menu | Pacientes > Joana Souza Lima                  Idioma Português |` \\
+\verb`|              +-----------------------------------------------------------------------+` \\
+\verb`| Menu         | Joana Souza Lima (Ativo)                          [ Inativar]         |` \\
+\verb`|  Início      | Cadastrado por Ana Silva                                              |` \\
+\verb`|  Pacientes < |  Alterações salvas.                                                   |` \\
+\verb`|  Usuários    |                                                                       |` \\
+\verb`|              | Nome completo [ Joana Souza Lima                              ]       |` \\
+\verb`|              | CPF           [ 123.456.789-09 ]  Data de nascimento [12/03/1985]     |` \\
+\verb`|              | ! Já existe um paciente cadastrado com este CPF.                      |` \\
+\verb`|              | Ver paciente                                                          |` \\
+\verb`|              | Sexo          [ Feminino     v ]  Telefone [ (83) 98765-4321 ]        |` \\
+\verb`|              | E-mail        [               ]   Endereço [                 ]        |` \\
+\verb`|              | Opcional.                         Opcional.                           |` \\
+\verb`|              | Base legal (LGPD) [ Tutela da saúde                          v ]      |` \\
+\verb`|              | Por que a clínica pode tratar os dados deste paciente.                |` \\
+\verb`|              |                                                                       |` \\
+\verb`|              |                                       [ Cancelar ]  [ Salvar ]        |` \\
+\verb`+--------------+-----------------------------------------------------------------------+` \\
+\end{tabular}
+\end{lrbox}
+
+\resizebox{\textwidth}{!}{\usebox{\interfaceWireframe}}
+
+\end{center}
+
+\begin{itemize}[leftmargin=*,itemsep=0.3em]
+
+\item No cadastro (\path|/patients/new|), o título é "Novo paciente", a tela abre vazia, sem a situação, sem "Cadastrado por" e sem "Inativar", e o botão é "Cadastrar". Depois do cadastro, a tela abre o paciente criado com "Paciente cadastrado.".
+
+\item Sexo e base legal são escolhidos em listas: Masculino, Feminino, Outro e Desconhecido; Consentimento do titular, Tutela da saúde, Cumprimento de obrigação legal e Proteção da vida.
+
+\item Uma recusa mostra, junto do campo, a mensagem da regra violada (RF11) e mantém os valores digitados. Com CPF já cadastrado, o atalho "Ver paciente" abre o registro que já tem esse CPF (UC01 FE2).
+
+\item "Inativar" abre um diálogo de confirmação ("Inativar Joana Souza Lima?"). Um paciente inativo mostra a etiqueta "Inativo" e o botão "Reativar" (UC08).
+
+\item "Desfazer última alteração" volta os dados do paciente para o estado anterior à última edição; entra nesta tela na Sprint 5 e ainda não existe.
+
+\end{itemize}
+
+\subsection{TL05 — Login}
+
+Rota: \path|/login|. Relacionada a: UC04 · RF06, NF-SEG-02
+
+\begin{center}
+
+\begin{lrbox}{\interfaceWireframe}
+\ttfamily\small
+\begin{tabular}{@{}l@{}}
+\verb`+-----------------------------------+-------------------------------+` \\
+\verb`|       Bem-vindo de volta          |  CliniCore                    |` \\
+\verb`|  Entre com seu login ou e-mail.   |                               |` \\
+\verb`|                                   |                               |` \\
+\verb`| ! Login ou senha incorretos.      |                               |` \\
+\verb`| Login ou e-mail                   |                               |` \\
+\verb`| [ carla                        ]  | CRM ambulatorial para         |` \\
+\verb`| Senha                             | clínicas.                     |` \\
+\verb`| [ **********                Ver ] | Pacientes, agenda e           |` \\
+\verb`|                                   | comunicação num só lugar, ... |` \\
+\verb`| [            Entrar            ]  |                               |` \\
+\verb`+-----------------------------------+-------------------------------+` \\
+\verb`                  Português   English` \\
+\end{tabular}
+\end{lrbox}
+
+\resizebox{\textwidth}{!}{\usebox{\interfaceWireframe}}
+
+\end{center}
+
+\begin{itemize}[leftmargin=*,itemsep=0.3em]
+
+\item Cartão em duas colunas (bloco login-04 do shadcn/ui): o formulário à esquerda e o painel do CliniCore à direita, que some em telas estreitas.
+
+\item Login ou e-mail (o e-mail sem diferenciar maiúsculas) e senha, com o botão do olho. Credenciais erradas mostram sempre "Login ou senha incorretos.", sem dizer se o login existe.
+
+\item Sem usuários cadastrados, a tela leva à TL06. Quem já está com a sessão aberta vai para a TL07.
+
+\item Os links "Português" e "English" trocam o idioma de todas as telas.
+
+\end{itemize}
+
+\subsection{TL06 — Primeiro administrador}
+
+Rota: \path|/setup|. Relacionada a: UC05 (RF16)
+
+\begin{center}
+
+\begin{lrbox}{\interfaceWireframe}
+\ttfamily\small
+\begin{tabular}{@{}l@{}}
+\verb`+-----------------------------------+-----------------------+` \\
+\verb`|  Crie o primeiro administrador    |  CliniCore            |` \\
+\verb`| Ainda não há usuários. Esta conta |                       |` \\
+\verb`| vai gerenciar usuários e          |                       |` \\
+\verb`| pacientes.                        |                       |` \\
+\verb`| Nome completo  [               ]  | CRM ambulatorial para |` \\
+\verb`| E-mail         [               ]  | clínicas.             |` \\
+\verb`| Login          [               ]  |                       |` \\
+\verb`| Até 12 caracteres, sem números.   |                       |` \\
+\verb`| Senha          [            Ver ] |                       |` \\
+\verb`| [       Criar administrador    ]  |                       |` \\
+\verb`+-----------------------------------+-----------------------+` \\
+\verb`                  Português   English` \\
+\end{tabular}
+\end{lrbox}
+
+\resizebox{\textwidth}{!}{\usebox{\interfaceWireframe}}
+
+\end{center}
+
+\begin{itemize}[leftmargin=*,itemsep=0.3em]
+
+\item Só abre enquanto não há usuários; depois, leva à TL05. O usuário criado tem o papel Administrador, a sessão dele é aberta e a tela seguinte é a TL07.
+
+\item As regras e as mensagens de login e senha são as mesmas da TL01.
+
+\end{itemize}
+
+\subsection{TL07 — Início}
+
+Rota: \path|/|. Relacionada a: UC10 · RF15, NF-USA-01
+
+\begin{center}
+
+\begin{lrbox}{\interfaceWireframe}
+\ttfamily\small
+\begin{tabular}{@{}l@{}}
+\verb`+-------------+-------------------------------------------------------------------+` \\
+\verb`| CliniCore   | Menu | Início                                    Idioma Português |` \\
+\verb`|             +-------------------------------------------------------------------+` \\
+\verb`| Menu        | Olá, Carla Souza                                                  |` \\
+\verb`|  Início   < | O que está cadastrado no CliniCore agora.                         |` \\
+\verb`|  Pacientes  |                                                                   |` \\
+\verb`|  Usuários   | + Pacientes ---------+  + Usuários ----------+                    |` \\
+\verb`|             | | 5                  |  | 3                  |                    |` \\
+\verb`|             | | Ativos e inativos  |  | Todos os papéis    |                    |` \\
+\verb`|             | +--------------------+  +--------------------+                    |` \\
+\verb`|             |                                                                   |` \\
+\verb`|             | [ + Novo paciente ]  [  Novo usuário ]                            |` \\
+\verb`+-------------+-------------------------------------------------------------------+` \\
+\end{tabular}
+\end{lrbox}
+
+\resizebox{\textwidth}{!}{\usebox{\interfaceWireframe}}
+
+\end{center}
+
+\begin{itemize}[leftmargin=*,itemsep=0.3em]
+
+\item Os cartões mostram só os totais das áreas do papel (RF15): o Administrador vê pacientes e usuários; o Recepcionista, só pacientes; o Médico e o Paciente veem "Seu papel ainda não tem cadastros para mostrar aqui.".
+
+\item Os atalhos levam às tarefas mais comuns do papel em um clique (NF-USA-01): "Novo paciente" para Administrador e Recepcionista, "Novo usuário" para o Administrador.
+
+\end{itemize}
+
+\endgroup
