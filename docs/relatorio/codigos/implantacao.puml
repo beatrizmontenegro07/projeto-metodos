@@ -1,0 +1,23 @@
+@startuml implantacao
+left to right direction
+skinparam shadowing false
+node "Máquina local" {
+  artifact "Navegador" as Browser
+  node "Processo Next.js / Node.js" as App {
+    component "Interface + API + negócio" as System
+    component "Coleções RAM\nSTORAGE=memory" as RAM
+  }
+  database "Arquivo SQLite\nSTORAGE=sqlite\nDATABASE_URL=file:local.db" as DB
+}
+cloud "Turso — alternativa SQLite\nDATABASE_URL=libsql://..." as Turso
+Browser --> System : localhost:3000
+System --> RAM
+System --> DB
+System --> Turso : libSQL
+note bottom of App
+Um mecanismo escolhido na inicialização.
+RAM não persiste após encerrar o processo.
+Implantação Vercel/Turso planejada;
+publicação não verificada nesta revisão.
+end note
+@enduml

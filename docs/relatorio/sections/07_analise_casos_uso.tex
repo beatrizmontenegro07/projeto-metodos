@@ -1,9 +1,7 @@
-\section{Análise de casos de uso (diagrama de classes de análise)}
-O diagrama de classes de análise apresenta a estrutura conceitual do domínio do sistema, detalhando as entidades principais e as associações entre elas. Este modelo destaca o alinhamento estrutural do CRM com o padrão de interoperabilidade HL7 FHIR.
+\section{Análise de casos de uso}
+O diagrama de análise usa fronteiras, controles e entidades, sem atributos ou métodos. Representa somente o núcleo implementado até a Sprint 3: autenticação, usuários e pacientes. O vínculo ``cadastrado por'' associa cada paciente ao usuário responsável pelo cadastro.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\textwidth]{images/diagrama-classes-de-analise.png}
-  \caption{Diagrama de classes de análise.}
-  \label{fig:diagrama_classes}
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{images/diagrama-classes-de-analise.png}
+\caption{Classes de análise do núcleo implementado.}
 \end{figure}

@@ -1,0 +1,65 @@
+@startuml classes-de-projeto
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+top to bottom direction
+class "Telas / Server Actions / API" as UI <<boundary>>
+class "infra/facade.ts" as Assembly {
+  +getFacade()
+}
+class FacadeSingletonController <<Facade, Singleton>> {
+  -{static} instance: Promise<FacadeSingletonController>
+  -FacadeSingletonController(repositories)
+  +{static} getInstance(loadRepositories)
+  +signIn(credentials)
+  +createFirstAdministrator(newUser)
+  +addUser(actor, newUser)
+  +listUsers(actor)
+  +addPatient(actor, input)
+  +updatePatient(actor, id, input)
+  +getPatient(actor, id)
+  +searchPatients(actor, search)
+  +deactivatePatient(actor, id)
+  +reactivatePatient(actor, id)
+  +countRegisteredEntities(actor): RegisteredEntityCounts
+  -authorize(actor, permission)
+}
+class RegisteredEntityCounts {
+  users?: number
+  patients?: number
+}
+class UserController {
+  +add(newUser)
+  +addFirstAdministrator(newUser)
+  +hasUsers()
+  +list()
+  +findById(id)
+  +count()
+}
+class AuthenticationController {
+  +signIn(credentials)
+}
+class PatientController {
+  +add(input, createdBy)
+  +update(id, input)
+  +get(id)
+  +search(search)
+  +deactivate(id)
+  +reactivate(id)
+  +count()
+}
+interface UserRepository
+interface PatientRepository
+UI ..> Assembly
+Assembly ..> FacadeSingletonController : getInstance
+FacadeSingletonController *-- UserController
+FacadeSingletonController *-- AuthenticationController
+FacadeSingletonController *-- PatientController
+FacadeSingletonController ..> RegisteredEntityCounts
+UserController --> UserRepository
+AuthenticationController --> UserRepository
+PatientController --> PatientRepository
+note bottom of FacadeSingletonController
+Visão dos métodos principais da fachada.
+Papéis são verificados nas operações protegidas.
+end note
+@enduml
