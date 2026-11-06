@@ -1,47 +1,60 @@
-\section{Análise de Requisitos}
+\section{Análise de requisitos}
+
+As tabelas reproduzem os IDs, nomes, descrições, casos de uso e prioridades definidos em \path|openspec/specs/|.
+
+\newlength{\requirementsWidth}
 
 \subsection{Requisitos funcionais}
-\begin{table}[H]
-  \centering
-  \small
-  \begin{tabular}{|p{1cm}|p{3.5cm}|p{5cm}|p{2cm}|p{2cm}|}
-    \hline
-    \textbf{ID} & \textbf{Nome} & \textbf{Descrição} & \textbf{Casos de Uso} & \textbf{Prioridade} \\
-    \hline
-    RF01 & Cadastrar Paciente & O sistema deve permitir o cadastro, edição e inativação de pacientes, registrando dados demográficos, identificadores únicos (como CPF) e informações de contato. & UC01 & Essencial \\
-    \hline
-    RF02 & Gerenciar Profissionais e Clínica & O sistema deve manter o cadastro da organização (clínica), dos profissionais de saúde e seus respectivos papéis e especialidades. & UC01, UC02, UC03 & Essencial \\
-    \hline
-    RF03 & Agendar Consulta & O sistema deve permitir o agendamento, cancelamento e reagendamento de consultas com base na disponibilidade (agenda) dos profissionais. & UC02 & Essencial \\
-    \hline
-    RF04 & Registrar Atendimento e Interações Clínicas & O profissional de saúde deve ser capaz de registrar o início e fim de um encontro clínico presencial ou remoto, documentando informações básicas do atendimento e possíveis diagnósticos ou observações. & UC03 & Essencial \\
-    \hline
-    RF05 & Gerenciar Comunicações e Lembretes & O sistema deve registrar todas as interações com o paciente (ligações, e-mails, mensagens) e enviar solicitações de confirmação de agendamento automatizadas. & UC02 & Essencial \\
-    \hline
-    RF06 & Controle de Acesso e Perfil de Usuário & O sistema deve garantir que o acesso aos dados dos pacientes seja restrito aos usuários autenticados e de acordo com seus respectivos papéis de acesso (Recepcionista vs. Médico) & UC01, UC02, UC03 & Essencial \\
-    \hline
-  \end{tabular}
-\end{table}
+
+{\small
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{5pt}
+\setlength{\requirementsWidth}{\dimexpr\textwidth-10\tabcolsep-6\arrayrulewidth\relax}
+\begin{longtable}{|p{0.13\requirementsWidth}|p{0.19\requirementsWidth}|p{0.42\requirementsWidth}|p{0.12\requirementsWidth}|p{0.14\requirementsWidth}|}
+\hline
+\textbf{ID} & \textbf{Nome} & \textbf{Descrição} & \textbf{Casos de uso} & \textbf{Prioridade} \\ \hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Nome} & \textbf{Descrição} & \textbf{Casos de uso} & \textbf{Prioridade} \\ \hline
+\endhead
+\raggedright RF01 & \raggedright Cadastrar paciente & \raggedright O sistema DEVE permitir que o Recepcionista ou o Administrador cadastre um paciente informando nome completo, CPF, data de nascimento, sexo, telefone e base legal do tratamento dos dados e, opcionalmente, e-mail e endereço. O paciente é criado ativo e vinculado ao usuário que o cadastrou. O sistema DEVE recusar um CPF já cadastrado, mesmo em cadastros simultâneos, e informar o motivo de qualquer recusa. & \raggedright UC01 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF06 & \raggedright Autenticar & \raggedright O sistema DEVE permitir que um usuário cadastrado entre informando seu login ou seu e-mail (sem diferenciar maiúsculas de minúsculas no e-mail) e sua senha, mantendo a sessão por 8 horas ou até que ele saia, e DEVE recusar credenciais incorretas com a mesma mensagem, sem revelar se o login existe. & \raggedright UC04 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF07 & \raggedright Cadastrar usuário & \raggedright O sistema DEVE permitir que o Administrador cadastre usuários informando nome, e-mail, login, senha e papel (Administrador, Recepcionista, Médico ou Paciente), recusando e-mails (sem diferenciar maiúsculas de minúsculas) e logins já cadastrados, mesmo quando dois cadastros chegam ao mesmo tempo, e informando o motivo de qualquer recusa. & \raggedright UC05 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF08 & \raggedright Regras de login & \raggedright O sistema DEVE aceitar apenas logins não vazios, com no máximo 12 caracteres e sem números. & \raggedright UC05 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF09 & \raggedright Regras de senha & \raggedright O sistema DEVE aceitar apenas senhas que sigam a política de senha padrão do AWS IAM: de 8 a 128 caracteres, com pelo menos 3 dos 4 tipos (minúscula, maiúscula, número, símbolo) e diferentes do login e do e-mail. & \raggedright UC05 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF10 & \raggedright Listar usuários & \raggedright O sistema DEVE permitir que o Administrador liste todos os usuários cadastrados em ordem de cadastro, exibindo identificador, nome, e-mail, login e papel, sem exibir a senha. & \raggedright UC06 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF11 & \raggedright Regras dos dados do paciente & \raggedright O sistema DEVE aceitar, no cadastro e na edição, apenas: nome com 1 a 120 caracteres; CPF com 11 dígitos (com ou sem pontuação) e dígitos verificadores válidos; data de nascimento válida e não futura; sexo Masculino, Feminino, Outro ou Desconhecido; telefone com DDD e 8 ou 9 dígitos; e-mail, se informado, em formato válido; endereço, se informado, com até 200 caracteres; base legal Consentimento do titular, Tutela da saúde, Cumprimento de obrigação legal ou Proteção da vida. & \raggedright UC01, UC07 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF12 & \raggedright Editar paciente & \raggedright O sistema DEVE permitir que o Recepcionista ou o Administrador altere os dados de um paciente cadastrado, aplicando as mesmas regras de RF11 e recusando um CPF que pertença a outro paciente; a situação (ativo ou inativo) e o usuário que cadastrou não mudam na edição. & \raggedright UC07 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF13 & \raggedright Inativar e reativar paciente & \raggedright O sistema DEVE permitir que o Recepcionista ou o Administrador inative um paciente ativo e reative um paciente inativo, mantendo todos os seus dados; o sistema NÃO DEVE oferecer a exclusão definitiva de pacientes. & \raggedright UC08 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF14 & \raggedright Buscar pacientes & \raggedright O sistema DEVE permitir que o Recepcionista ou o Administrador liste os pacientes em ordem alfabética do nome, filtrando por parte do nome (sem diferenciar maiúsculas, minúsculas e acentos) ou por parte do CPF e pela situação (ativos, inativos ou todos), exibindo nome, CPF, telefone, data de nascimento e situação. & \raggedright UC09 & \raggedright Essencial \tabularnewline \hline
+\raggedright RF15 & \raggedright Totais cadastrados & \raggedright O sistema DEVE exibir na página inicial a quantidade de usuários e de pacientes cadastrados (pacientes ativos e inativos), mostrando a cada papel apenas os totais das áreas a que ele tem acesso (NF-SEG-02). & \raggedright UC10 & \raggedright Importante \tabularnewline \hline
+\raggedright RF16 & \raggedright Criar o primeiro Administrador & \raggedright Enquanto não houver nenhum usuário cadastrado, o sistema DEVE permitir criar o primeiro usuário, obrigatoriamente com o papel Administrador e seguindo as regras de RF07, RF08 e RF09; depois disso, NÃO DEVE permitir essa criação, e novos usuários só são cadastrados pelo Administrador (RF07). & \raggedright UC05 & \raggedright Essencial \tabularnewline \hline
+\end{longtable}
+}
+
+RF02 (gerenciar profissionais e clínica), RF03 (agendar, cancelar e reagendar consultas), RF04 (registrar atendimento) e RF05 (gerenciar comunicações e lembretes) permanecem previstos na visão do sistema e ainda não possuem especificações em OpenSpec.
 
 \subsection{Requisitos não funcionais}
-\begin{table}[H]
-  \centering
-  \small
-  \begin{tabular}{|p{1cm}|p{3cm}|p{3cm}|p{5cm}|p{2cm}|}
-    \hline
-    \textbf{ID} & \textbf{Categoria} & \textbf{Nome} & \textbf{Descrição} & \textbf{Prioridade} \\
-    \hline
-    NF01 & Usabilidade & Interface Intuitiva e Responsiva & A interface do usuário deve ser intuitiva e fácil de usar, logo, o usuário não pode demorar mais do que 10 segundos para encontrar qualquer operação do sistema & Essencial \\
-    \hline
-    NF02 & Segurança & Autenticação e Autorização & O acesso à plataforma exige autenticação por senha forte e controle de autorização baseado em papéis (RBAC - Role-Based Access Control) seguindo o princípio do menor privilégio. & Essencial \\
-    \hline
-    NF03 & Segurança & Criptografia de Dados & Todo o tráfego de dados entre a aplicação, o backend e APIs externas deve obrigatoriamente utilizar o protocolo HTTPS (TLS 1.2+) & Essencial \\
-    \hline
-    NF04 & Desempenho & Tempo de Resposta & O sistema deve retornar os resultados das buscas por pacientes e disponibilização de horários de agenda em no máximo 2 segundos para manter o fluxo rápido. & Importante \\
-    \hline
-    NF05 & Privacidade & Adequação à LGPD & O sistema deve tratar dados de saúde de forma segura, exigindo base legal, consentimento quando aplicável e permitindo a pseudo-anonimização em bases analíticas. & Essencial \\
-    \hline
-    NF06 & Interoperabilidade & Adoção do Padrão FHIR & O sistema deve suportar a serialização/deserialização de dados demográficos e agendamentos no formato JSON em estrita conformidade com a estrutura dos recursos do HL7 FHIR & Essencial \\
-    \hline
-  \end{tabular}
-\end{table}
+
+{\small
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{5pt}
+\setlength{\requirementsWidth}{\dimexpr\textwidth-10\tabcolsep-6\arrayrulewidth\relax}
+\begin{longtable}{|p{0.13\requirementsWidth}|p{0.19\requirementsWidth}|p{0.42\requirementsWidth}|p{0.12\requirementsWidth}|p{0.14\requirementsWidth}|}
+\hline
+\textbf{ID} & \textbf{Nome} & \textbf{Descrição} & \textbf{Casos de uso} & \textbf{Prioridade} \\ \hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Nome} & \textbf{Descrição} & \textbf{Casos de uso} & \textbf{Prioridade} \\ \hline
+\endhead
+\raggedright NF-CON-01 & \raggedright Falha de armazenamento tratada & \raggedright O sistema NÃO DEVE encerrar nem perder os dados já gravados quando o armazenamento permanente falhar (arquivo inacessível, banco fora do ar ou sem as tabelas); DEVE sinalizar a falha com um erro de persistência próprio, para que o usuário seja informado de que a operação não foi concluída. & \raggedright UC05, UC06 & \raggedright Essencial \tabularnewline \hline
+\raggedright NF-DES-01 & \raggedright Tempo de resposta das buscas & \raggedright O sistema DEVE retornar a busca de pacientes e a consulta de horários disponíveis na agenda em no máximo 2 segundos no percentil 95, com até 10.000 pacientes cadastrados (NF04 do documento de requisitos). & \raggedright UC01, UC02 & \raggedright Importante \tabularnewline \hline
+\raggedright NF-INT-01 & \raggedright Adoção do padrão HL7 FHIR R4 & \raggedright O sistema DEVE serializar e desserializar os dados demográficos dos pacientes e os agendamentos em JSON em conformidade com os recursos \path|Patient| e \path|Appointment| do HL7 FHIR R4 (NF06 do documento de requisitos). & \raggedright UC01, UC02 & \raggedright Essencial \tabularnewline \hline
+\raggedright NF-MAN-01 & \raggedright Persistência substituível & \raggedright O sistema DEVE permitir escolher, na inicialização, o mecanismo de armazenamento dos usuários entre uma coleção em memória (RAM) e um banco de dados SQLite (arquivo local ou Turso), pela variável \path|STORAGE| (\path|memory| ou \path|sqlite|), sem alterar o código das regras de negócio, que dependem apenas da interface \path|UserRepository|. & \raggedright UC05, UC06 & \raggedright Essencial \tabularnewline \hline
+\raggedright NF-PRI-01 & \raggedright Adequação à LGPD & \raggedright O sistema DEVE registrar a base legal (e o consentimento, quando a base legal for o consentimento) de cada paciente cadastrado e DEVE pseudonimizar os dados usados em relatórios e bases analíticas, substituindo nome e CPF por um identificador sem significado (NF05 do documento de requisitos). & \raggedright UC01 & \raggedright Essencial \tabularnewline \hline
+\raggedright NF-SEG-01 & \raggedright Senha nunca exibida nem armazenada em texto puro & \raggedright O sistema NÃO DEVE exibir a senha em listagens, respostas ou mensagens de erro, e NÃO DEVE armazená-la em texto puro: apenas o hash derivado com scrypt e salt aleatório de 16 bytes é gravado. & \raggedright UC05, UC06 & \raggedright Essencial \tabularnewline \hline
+\raggedright NF-SEG-02 & \raggedright Autenticação e autorização por papel & \raggedright O sistema DEVE exigir autenticação por login e senha para qualquer funcionalidade, exceto a tela de login, e DEVE liberar a cada usuário apenas as funcionalidades do seu papel (RBAC), seguindo o princípio do menor privilégio (NF02 do documento de requisitos): o Administrador gerencia usuários e pacientes, o Recepcionista gerencia pacientes, e o Médico e o Paciente acessam apenas a página inicial. & \raggedright UC04, UC05, UC06 & \raggedright Essencial \tabularnewline \hline
+\raggedright NF-SEG-03 & \raggedright Tráfego criptografado & \raggedright Todo o tráfego entre o navegador e o sistema, e entre o sistema e serviços externos (banco de dados hospedado e sistemas FHIR), DEVE usar HTTPS com TLS 1.2 ou superior (NF03 do documento de requisitos). & \raggedright UC04 & \raggedright Essencial \tabularnewline \hline
+\raggedright NF-USA-01 & \raggedright Operações fáceis de encontrar & \raggedright O sistema DEVE permitir que um usuário encontre, a partir da tela inicial, qualquer operação permitida ao seu papel em no máximo 10 segundos (NF01 do documento de requisitos). & \raggedright UC01, UC05, UC06 & \raggedright Essencial \tabularnewline \hline
+\end{longtable}
+}
