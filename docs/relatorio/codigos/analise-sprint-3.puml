@@ -1,0 +1,29 @@
+@startuml diagrama-classes-de-analise
+left to right direction
+hide members
+class TelaLogin <<boundary>>
+class TelaPrimeiroAdministrador <<boundary>>
+class TelaUsuarios <<boundary>>
+class RotaDeUsuarios <<boundary>>
+class RotaDeSessao <<boundary>>
+class TelaPacientes <<boundary>>
+class RotaDePacientes <<boundary>>
+class ControleAutenticacao <<control>>
+class ControladorDeUsuarios <<control>>
+class ControladorDePacientes <<control>>
+class Usuario <<entity>>
+class Papel <<entity>>
+class Paciente <<entity>>
+TelaLogin ..> ControleAutenticacao
+RotaDeSessao ..> ControleAutenticacao
+TelaPrimeiroAdministrador ..> ControladorDeUsuarios
+TelaUsuarios ..> ControladorDeUsuarios
+RotaDeUsuarios ..> ControladorDeUsuarios
+TelaPacientes ..> ControladorDePacientes
+RotaDePacientes ..> ControladorDePacientes
+ControleAutenticacao ..> Usuario
+ControladorDeUsuarios ..> Usuario
+ControladorDePacientes ..> Paciente
+Usuario "*" --> "1" Papel
+Paciente "*" --> "1" Usuario : cadastrado por
+@enduml
