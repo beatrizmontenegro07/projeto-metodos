@@ -53,13 +53,15 @@ Por lidar com dados pessoais sensíveis, o sistema foi projetado sob os pilares 
 ## 🚀 Como executar o projeto localmente
 
 ### Pré-requisitos
-- Node.js 22.12 ou superior
+- Node.js 24.21.0 (versão registrada em `.nvmrc`)
 
 ### Passos
 1. Clone o repositório e instale as dependências:
    ```bash
    git clone https://github.com/beatrizmontenegro07/projeto-metodos.git
    cd projeto-metodos
+   nvm install
+   nvm use
    npm install
    ```
 2. Configure o banco local e aplique as migrações:

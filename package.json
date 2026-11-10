@@ -2,6 +2,9 @@
   "name": "clinicore",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24.21.0 <25"
+  },
   "description": "Núcleo inicial do CliniCore para Métodos de Projeto de Software.",
   "scripts": {
     "dev": "next dev",
