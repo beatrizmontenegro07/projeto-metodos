@@ -17,7 +17,8 @@
     "home": "Início",
     "patients": "Pacientes",
     "users": "Usuários",
-    "signOut": "Sair"
+    "signOut": "Sair",
+    "reports": "Relatórios de acessos"
   },
   "authPanel": {
     "tagline": "CRM ambulatorial para clínicas.",
@@ -232,6 +233,31 @@
       "STORAGE_UNAVAILABLE": "Não foi possível acessar os dados agora. Tente novamente.",
       "UNAUTHENTICATED": "Entre no sistema para continuar.",
       "ACCESS_DENIED": "Seu papel não permite esta operação."
+    }
+  },
+  "reports": {
+    "title": "Relatórios de acessos",
+    "description": "Baixe a quantidade de acessos e o último acesso por usuário. As datas usam UTC; a data final não é incluída.",
+    "period": "Período (UTC)",
+    "start": "Data inicial (inclusiva, UTC)",
+    "end": "Data final (exclusiva, UTC)",
+    "format": "Formato",
+    "html": "HTML",
+    "csv": "CSV",
+    "download": "Baixar relatório",
+    "downloading": "Gerando…",
+    "total": "Total de acessos",
+    "columns": {
+      "userId": "ID do usuário",
+      "count": "Quantidade de acessos",
+      "lastAccess": "Último acesso (UTC)"
+    },
+    "errors": {
+      "REPORT_START_INVALID": "Informe uma data inicial válida em UTC.",
+      "REPORT_END_INVALID": "Informe uma data final válida em UTC.",
+      "REPORT_PERIOD_NOT_INCREASING": "A data final deve ser posterior à data inicial.",
+      "REPORT_FORMAT_INVALID": "Escolha HTML ou CSV.",
+      "DOWNLOAD_FAILED": "Não foi possível baixar o relatório. Tente novamente."
     }
   }
 }

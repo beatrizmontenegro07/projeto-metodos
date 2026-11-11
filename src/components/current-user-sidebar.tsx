@@ -1,4 +1,4 @@
-import { HouseIcon, ShieldUserIcon, UsersIcon } from "lucide-react";
+import { FileTextIcon, HouseIcon, ShieldUserIcon, UsersIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { requireUser } from "@/infra/auth/session";
@@ -8,7 +8,7 @@ import { AppSidebar } from "./app-sidebar";
 
 type NavigationEntry = {
   href: string;
-  titleKey: "home" | "patients" | "users";
+  titleKey: "home" | "patients" | "users" | "reports";
   icon: React.ReactNode;
   permission?: Permission;
 };
@@ -16,6 +16,7 @@ type NavigationEntry = {
 const NAVIGATION: NavigationEntry[] = [
   { href: "/", titleKey: "home", icon: <HouseIcon /> },
   { href: "/patients", titleKey: "patients", icon: <UsersIcon />, permission: "MANAGE_PATIENTS" },
+  { href: "/access-reports", titleKey: "reports", icon: <FileTextIcon />, permission: "GENERATE_ACCESS_REPORTS" },
   { href: "/users", titleKey: "users", icon: <ShieldUserIcon />, permission: "MANAGE_USERS" },
 ];
 

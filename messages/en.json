@@ -17,7 +17,8 @@
     "home": "Home",
     "patients": "Patients",
     "users": "Users",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "reports": "Access reports"
   },
   "authPanel": {
     "tagline": "Outpatient CRM for clinics.",
@@ -232,6 +233,31 @@
       "STORAGE_UNAVAILABLE": "The data is unavailable right now. Try again.",
       "UNAUTHENTICATED": "Sign in to continue.",
       "ACCESS_DENIED": "Your role does not allow this operation."
+    }
+  },
+  "reports": {
+    "title": "Access reports",
+    "description": "Download access counts and the last access per user. Dates use UTC; the end date is excluded.",
+    "period": "Period (UTC)",
+    "start": "Start date (inclusive, UTC)",
+    "end": "End date (exclusive, UTC)",
+    "format": "Format",
+    "html": "HTML",
+    "csv": "CSV",
+    "download": "Download report",
+    "downloading": "Generating…",
+    "total": "Total accesses",
+    "columns": {
+      "userId": "User ID",
+      "count": "Access count",
+      "lastAccess": "Last access (UTC)"
+    },
+    "errors": {
+      "REPORT_START_INVALID": "Enter a valid start date in UTC.",
+      "REPORT_END_INVALID": "Enter a valid end date in UTC.",
+      "REPORT_PERIOD_NOT_INCREASING": "The end date must be after the start date.",
+      "REPORT_FORMAT_INVALID": "Choose HTML or CSV.",
+      "DOWNLOAD_FAILED": "The report could not be downloaded. Try again."
     }
   }
 }
