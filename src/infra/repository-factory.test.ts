@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as database from "@/db";
 import type { Repositories } from "@/modules/facade/repositories";
 
+import { InMemoryAccessRecordRepository } from "./access-records/in-memory-access-record-repository";
+import { SqliteAccessRecordRepository } from "./access-records/sqlite-access-record-repository";
 import { InMemoryRepositoryFactory } from "./in-memory-repository-factory";
 import { InMemoryPatientRepository } from "./patients/in-memory-patient-repository";
 import { SqlitePatientRepository } from "./patients/sqlite-patient-repository";
@@ -32,6 +34,7 @@ describe("repository abstract factory", () => {
     expect(factory).toBeInstanceOf(InMemoryRepositoryFactory);
     expect(factory.createUserRepository()).toBeInstanceOf(InMemoryUserRepository);
     expect(factory.createPatientRepository()).toBeInstanceOf(InMemoryPatientRepository);
+    expect(factory.createAccessRecordRepository()).toBeInstanceOf(InMemoryAccessRecordRepository);
     expect(connect).not.toHaveBeenCalled();
   });
 
@@ -49,6 +52,10 @@ describe("repository abstract factory", () => {
     const patient = await patients.add({ name: "Joana", cpf: "12345678909", birthDate: "1985-03-12", gender: "FEMALE", phone: "83987654321", legalBasis: "HEALTH_PROTECTION", createdBy: author.id });
 
     expect((await patients.findById(patient.id))?.createdBy).toBe(author.id);
+    const accesses = factory.createAccessRecordRepository();
+    expect(accesses).toBeInstanceOf(SqliteAccessRecordRepository);
+    await accesses.add({ userId: author.id, occurredAt: "2026-11-11T12:00:00.000Z" });
+    expect(await accesses.list()).toHaveLength(1);
     expect(connect).toHaveBeenCalledTimes(1);
   });
 
@@ -64,6 +71,7 @@ describe("repository abstract factory", () => {
     const repositories = await first;
     expect(repositories.users).toBeInstanceOf(InMemoryUserRepository);
     expect(repositories.patients).toBeInstanceOf(InMemoryPatientRepository);
+    expect(repositories.accesses).toBeInstanceOf(InMemoryAccessRecordRepository);
     await repositories.users.add({ name: "Ana", email: "ana@example.com", login: "ana", passwordHash: "hash", role: "ADMIN" });
     expect(await (await later).users.count()).toBe(1);
   });

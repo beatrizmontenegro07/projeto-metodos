@@ -20,9 +20,11 @@ async function emptySystemFacade() {
   const { FacadeSingletonController } = await import("@/modules/facade/facade-singleton-controller");
   const { InMemoryUserRepository } = await import("@/infra/users/in-memory-user-repository");
   const { InMemoryPatientRepository } = await import("@/infra/patients/in-memory-patient-repository");
+  const { InMemoryAccessRecordRepository } = await import("@/infra/access-records/in-memory-access-record-repository");
   const facade = await FacadeSingletonController.getInstance(async () => ({
     users: new InMemoryUserRepository(),
     patients: new InMemoryPatientRepository(),
+    accesses: new InMemoryAccessRecordRepository(),
   }), { recordSignIn: vi.fn() });
   return async () => facade;
 }

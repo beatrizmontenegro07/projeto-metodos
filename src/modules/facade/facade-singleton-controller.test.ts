@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { InMemoryAccessRecordRepository } from "@/infra/access-records/in-memory-access-record-repository";
 import { InMemoryPatientRepository } from "@/infra/patients/in-memory-patient-repository";
 import { InMemoryUserRepository } from "@/infra/users/in-memory-user-repository";
 import type { PatientInput } from "@/modules/patients/patient";
@@ -32,7 +33,7 @@ async function loadFacadeClass() {
 }
 
 function memoryRepositories(): Repositories {
-  return { users: new InMemoryUserRepository(), patients: new InMemoryPatientRepository() };
+  return { users: new InMemoryUserRepository(), patients: new InMemoryPatientRepository(), accesses: new InMemoryAccessRecordRepository() };
 }
 
 describe("a single facade instance (Singleton)", () => {

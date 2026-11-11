@@ -131,13 +131,13 @@ describe("/api/users", () => {
 
 describe("/api/users when the storage fails", () => {
   it("answers 503 STORAGE_UNAVAILABLE", async () => {
-    const api = await createTestApi(({ InMemoryUserRepository, InMemoryPatientRepository, userErrors }) => {
+    const api = await createTestApi(({ InMemoryUserRepository, InMemoryPatientRepository, InMemoryAccessRecordRepository, userErrors }) => {
       class FailingUserRepository extends InMemoryUserRepository {
         override async list(): Promise<never> {
           throw new userErrors.UserPersistenceError("disk unavailable");
         }
       }
-      return { users: new FailingUserRepository(), patients: new InMemoryPatientRepository() };
+      return { users: new FailingUserRepository(), patients: new InMemoryPatientRepository(), accesses: new InMemoryAccessRecordRepository() };
     });
     const handlers = await loadHandlers(api);
     api.signInAs(api.admin);

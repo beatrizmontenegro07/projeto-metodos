@@ -1,4 +1,5 @@
 import { getDatabase } from "@/db";
+import type { AccessRecordRepository } from "@/modules/access-records/access-record-repository";
 import type { Repositories } from "@/modules/facade/repositories";
 import type { PatientRepository } from "@/modules/patients/patient-repository";
 import type { UserRepository } from "@/modules/users/user-repository";
@@ -9,6 +10,7 @@ import { readStorageMechanism, type StorageMechanism } from "./storage-mechanism
 
 /** Abstract Factory: creates one compatible family of persistence implementations. */
 export interface RepositoryFactory {
+  createAccessRecordRepository(): AccessRecordRepository;
   createUserRepository(): UserRepository;
   createPatientRepository(): PatientRepository;
 }
@@ -20,7 +22,7 @@ export async function createRepositoryFactory(mechanism: StorageMechanism): Prom
 
 async function createRepositories(): Promise<Repositories> {
   const factory = await createRepositoryFactory(readStorageMechanism(process.env.STORAGE));
-  return { users: factory.createUserRepository(), patients: factory.createPatientRepository() };
+  return { users: factory.createUserRepository(), patients: factory.createPatientRepository(), accesses: factory.createAccessRecordRepository() };
 }
 
 const globalScope = globalThis as typeof globalThis & {
