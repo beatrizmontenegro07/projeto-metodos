@@ -83,6 +83,7 @@ classDiagram
             -PatientController patients
             -FacadeSingletonController(repositories, logger)
             +getInstance(loadRepositories, logger) Promise~FacadeSingletonController~$
+            +generateAccessReport(actor, input, labels) Promise~ReportFile~
             +signIn(credentials) Promise~User~
             +findUser(id) Promise~User~
             +hasUsers() Promise~boolean~
@@ -117,6 +118,7 @@ classDiagram
             <<enumeration>>
             MANAGE_USERS
             MANAGE_PATIENTS
+            GENERATE_ACCESS_REPORTS
         }
         class AccessDeniedError {
             <<exception>>
@@ -617,4 +619,4 @@ A montagem em `infra/facade.ts` injeta o Adapter pela fachada. O controle transm
 
 ## Relatórios de acesso — Template Method
 
-`modules/access-reports/` contém o algoritmo comum e os formatos HTML/CSV. A fachada recebe período, formato e textos traduzidos e autoriza `GENERATE_ACCESS_REPORTS` apenas para ADMIN. O intervalo UTC é `[início, fim)`; datas `YYYY-MM-DD` representam meia-noite UTC e timestamps aceitos terminam em `Z`. Repetições contam separadamente, usuários sem acessos no período não aparecem, e o último acesso é o máximo cronológico. O algoritmo consulta somente os registros de acesso, sem credenciais ou dados de pacientes. A próxima camada adicionará tela e download.
+`modules/access-reports/` contém o algoritmo comum e os formatos HTML/CSV. A fachada recebe período, formato e textos traduzidos e autoriza `GENERATE_ACCESS_REPORTS` apenas para ADMIN. O intervalo UTC é `[início, fim)`; datas `YYYY-MM-DD` representam meia-noite UTC e timestamps aceitos terminam em `Z`. Repetições contam separadamente, usuários sem acessos no período não aparecem, e o último acesso é o máximo cronológico. O algoritmo consulta somente os registros de acesso, sem credenciais ou dados de pacientes. A tela `/access-reports` possui campos de início/fim UTC e formato, exibidos apenas ao Administrador. A API `GET /api/access-reports` chama exclusivamente a fachada e resolve o idioma com `resolveRequestLocale` por `translatorFor`. O anexo usa MIME do formato, nome fixo, `Cache-Control: private, no-store` e textos traduzidos. Falhas são JSON `{ error: { code, message } }`, com status 400/401/403/503.

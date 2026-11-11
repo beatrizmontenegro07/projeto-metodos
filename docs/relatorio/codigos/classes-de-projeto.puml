@@ -3,6 +3,9 @@ skinparam classAttributeIconSize 0
 skinparam shadowing false
 top to bottom direction
 class "Telas / Server Actions / API" as UI <<boundary>>
+class AccessReportsPage <<boundary>>
+class AccessReportsHandler <<boundary>>
+AccessReportsPage ..> AccessReportsHandler : solicita download
 package business {
 class FacadeSingletonController <<Facade, Singleton>> {
   -{static} instance: Promise<FacadeSingletonController>
@@ -153,4 +156,5 @@ note bottom of FacadeSingletonController
 Visão dos métodos principais da fachada.
 Papéis são verificados nas operações protegidas.
 end note
+AccessReportsHandler ..> business.FacadeSingletonController : generateAccessReport
 @enduml

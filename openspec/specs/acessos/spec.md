@@ -68,3 +68,9 @@ O sistema DEVE permitir ao Administrador gerar relatórios HTML e CSV por perío
 #### Scenario: Período inválido
 - **WHEN** o início ou o fim é inválido ou o início não antecede o fim
 - **THEN** o sistema recusa a geração com erro específico de período
+
+#### Scenario: Download protegido e traduzido
+- **GIVEN** um Administrador com idioma escolhido
+- **WHEN** solicita um relatório válido em `/access-reports` ou `GET /api/access-reports`
+- **THEN** recebe um anexo HTML/CSV com textos no idioma da requisição e sem cache compartilhado
+- **AND** requisições sem sessão recebem 401 e usuários sem permissão recebem 403

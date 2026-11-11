@@ -14,4 +14,4 @@
 
 Um novo formato implementa `render` e reutiliza o mesmo algoritmo, evitando divergências estatísticas entre formatos. O resultado contém conteúdo, tipo de mídia e extensão. Períodos vazios geram total zero; períodos inválidos geram erros específicos por campo; falhas de armazenamento são propagadas, sem emitir relatório vazio como se fosse válido.
 
-Nesta primeira camada, a geração é acessível pela fachada; a fronteira de download e sua tela serão adicionadas na próxima camada da stack. A coleta filtra os registros em memória após `list`; consultas por período no banco poderão ser introduzidas caso o volume exija.
+A geração é acessível pela fachada; `/access-reports` permite baixar o arquivo via `GET /api/access-reports`, com textos traduzidos, validação e proteção por papel. A API fornece `Content-Disposition: attachment` e desabilita cache. A coleta filtra os registros em memória após `list`; consultas por período no banco poderão ser introduzidas caso o volume exija.

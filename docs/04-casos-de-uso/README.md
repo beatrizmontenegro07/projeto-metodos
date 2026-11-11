@@ -67,7 +67,7 @@ flowchart LR
 
 Para o diagrama continuar legível, só algumas setas «include» até UC04 aparecem: **todos os casos de uso, exceto UC14, incluem UC04 Autenticar**, porque toda funcionalidade exige sessão (NF-SEG-02). O UC14 é usado por um sistema externo, não por uma pessoa.
 
-Quem acessa cada caso de uso segue a matriz de permissões do NF-SEG-02: o Administrador gerencia usuários e pacientes; o Recepcionista gerencia pacientes; o Médico e o Paciente acessam apenas a página inicial até que os casos de uso de agenda e atendimento sejam implementados.
+Quem acessa cada caso de uso segue a matriz de permissões do NF-SEG-02: o Administrador gerencia usuários e pacientes e gera relatórios de acesso; o Recepcionista gerencia pacientes; o Médico e o Paciente acessam apenas a página inicial até que os casos de uso de agenda e atendimento sejam implementados.
 
 ## Índice e rastreabilidade
 
@@ -86,7 +86,7 @@ Quem acessa cada caso de uso segue a matriz de permissões do NF-SEG-02: o Admin
 | UC11 Reagendar consulta | Recepcionista, Paciente | RF03, RF05 | Só na visão | — |
 | UC12 Gerenciar profissionais e clínica | Administrador | RF02 | Só na visão | — |
 | UC13 Gerenciar comunicações e lembretes | Serviço de mensagens | RF03, RF05 | Só na visão | — |
-| UC15 Gerar relatório de acessos | Administrador | RF18 | Business implementado; download na próxima camada | — |
+| UC15 Gerar relatório de acessos | Administrador | RF18 | Implementado (`/access-reports`, `GET /api/access-reports`) | — |
 | UC14 Exportar paciente em FHIR | Sistema de saúde externo | NF-INT-01 | Só na visão | — |
 
 As telas e as rotas de API chamam a camada de negócio pela fachada `FacadeSingletonController` (`src/modules/facade/`), que verifica a permissão do papel antes de cada operação. As telas citadas estão em [`06-interface/`](../06-interface/README.md).
@@ -95,4 +95,4 @@ As telas e as rotas de API chamam a camada de negócio pela fachada `FacadeSingl
 
 **UC04 — Registro de acesso (RF17):** depois de validar as credenciais, o controle persiste ID do usuário e data/hora UTC antes do log e da abertura da sessão. Recusas não gravam acessos; falhas de persistência exibem indisponibilidade (API 503, `STORAGE_UNAVAILABLE`) sem abrir sessão. O Adapter Pino permanece independente: uma exceção síncrona do log não apaga o registro nem impede o login. O cadastro inicial do administrador não conta como acesso; um registro indica credenciais aceitas, mesmo se a criação posterior do cookie falhar.
 
-**UC15 — Gerar relatório de acessos:** o Administrador informa início inclusivo, fim exclusivo (UTC) e formato HTML ou CSV. A fachada verifica a permissão, valida o período, calcula acessos e último acesso por ID de usuário e total geral. Períodos sem acessos retornam total zero; erros de início, fim, ordem ou formato são específicos; falhas de persistência são propagadas. A tela e o download serão adicionados na próxima camada.
+**UC15 — Gerar relatório de acessos:** o Administrador informa início inclusivo, fim exclusivo (UTC) e formato HTML ou CSV. A fachada verifica a permissão, valida o período, calcula acessos e último acesso por ID de usuário e total geral. Períodos sem acessos retornam total zero; erros de início, fim, ordem ou formato são específicos; falhas de persistência são propagadas. A tela `/access-reports` oferece período e formato; `GET /api/access-reports?start=...&end=...&format=html|csv` devolve anexo sem cache. API sem sessão retorna 401; sem permissão, 403; validação, 400; armazenamento indisponível, 503.

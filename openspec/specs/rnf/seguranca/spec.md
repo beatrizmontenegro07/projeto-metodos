@@ -21,7 +21,7 @@ O sistema NÃO DEVE exibir a senha em listagens, respostas ou mensagens de erro,
 - **THEN** a mensagem de erro descreve a regra violada sem repetir a senha digitada
 
 ### Requirement: NF-SEG-02 — Autenticação e autorização por papel
-O sistema DEVE exigir autenticação por login e senha para qualquer funcionalidade, exceto a tela de login, e DEVE liberar a cada usuário apenas as funcionalidades do seu papel (RBAC), seguindo o princípio do menor privilégio (NF02 do documento de requisitos): o Administrador gerencia usuários e pacientes, o Recepcionista gerencia pacientes, e o Médico e o Paciente acessam apenas a página inicial.
+O sistema DEVE exigir autenticação por login e senha para qualquer funcionalidade, exceto a tela de login, e DEVE liberar a cada usuário apenas as funcionalidades do seu papel (RBAC), seguindo o princípio do menor privilégio (NF02 do documento de requisitos): o Administrador gerencia usuários e pacientes e gera relatórios de acesso, o Recepcionista gerencia pacientes, e o Médico e o Paciente acessam apenas a página inicial.
 
 **Prioridade:** Essencial
 **Casos de uso:** UC04, UC05, UC06

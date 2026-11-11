@@ -5,8 +5,8 @@
 - [x] 1.4 Testar contratos, persistência em arquivo, recusas e indisponibilidade.
 - [x] 1.5 Atualizar casos de uso, diagramas e ADR.
 
-## 2. Relatórios (próxima branch)
+## 2. Relatórios
 - [x] 2.1 Implementar RF18 com Template Method, formatos HTML e CSV.
-- [ ] 2.2 Expor geração pela fachada com permissão de Administrador e download.
+- [x] 2.2 Expor geração pela fachada com permissão de Administrador e download.
 - [x] 2.3 Testar filtros, estatísticas, formatos e autorização.
-- [ ] 2.4 Atualizar diagramas e tabela de padrões com Template Method.
+- [x] 2.4 Atualizar diagramas e tabela de padrões com Template Method.
