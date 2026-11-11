@@ -27,5 +27,13 @@ O controle registra uma vez após verificar a senha. Recusas não geram evento d
 
 - Chamar Pino ou `console` no controle viola o isolamento da camada business; uma interface própria permite substituir o fornecedor e usar um espião nos testes.
 - O contrato recebe somente um ID, impedindo que o controle envie o usuário inteiro ou credenciais ao Adapter.
-- A saída stdout depende da coleta de logs do ambiente. Persistência consultável e relatórios de estatísticas são outra etapa da sprint.
+- A saída stdout depende da coleta de logs do ambiente. A persistência consultável é independente da saída do Pino, conforme o complemento abaixo; os relatórios serão implementados na próxima etapa.
 - Testes verificam o JSON produzido pelo Pino real, a integração pela fachada, as recusas de autenticação e a continuidade quando a emissão lança uma exceção.
+
+## Complemento: dados consultáveis para estatísticas (RF17)
+
+O log Pino não é a fonte de relatórios. `AccessRecordRepository` é um contrato de business com implementações RAM e SQLite selecionadas pela Abstract Factory. A tabela `access_records` guarda apenas ID do registro, FK do usuário e horário UTC; a migração é gerada por Drizzle.
+
+A autenticação persiste o acesso antes de chamar o Adapter e abrir sessão. Erros do banco são convertidos em `AccessRecordPersistenceError`: a API responde 503 e o formulário informa indisponibilidade, sem criar sessão. A falha síncrona apenas no log mantém a autenticação e o registro. Essa separação evita perder estatísticas quando o coletor de stdout não existe. Um acesso representa credenciais aceitas, e não garante que o cookie posterior foi criado.
+
+A consulta do Repository fornece registros à próxima etapa: relatórios HTML/CSV por período, especificados na change `relatorio-de-acessos`, ainda sem implementação nesta branch.

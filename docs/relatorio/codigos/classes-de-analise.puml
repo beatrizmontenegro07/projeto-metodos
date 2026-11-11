@@ -18,6 +18,9 @@ class Usuario {
   papel: Papel
 }
 class Papel <<enumeration>>
+class RegistroDeAcesso <<entity>>
+RegistroDeAcesso "*" --> "1" Usuario
+ControleAutenticacao ..> RegistroDeAcesso : registra credenciais aceitas
 class Paciente <<Patient>>
 class Profissional <<Practitioner>>
 class VinculoProfissional <<PractitionerRole>>

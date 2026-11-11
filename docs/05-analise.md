@@ -21,6 +21,9 @@ classDiagram
 
     class Usuario { <<entity>> }
     class Papel { <<entity>> }
+    class RegistroDeAcesso { <<entity>> }
+    ControleAutenticacao ..> RegistroDeAcesso : registra credenciais aceitas
+    RegistroDeAcesso "*" --> "1" Usuario
 
     Usuario "*" --> "1" Papel
 

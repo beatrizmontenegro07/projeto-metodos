@@ -30,9 +30,11 @@ flowchart LR
         UC11(["UC11 Reagendar consulta"])
         UC13(["UC13 Gerenciar comunicações e lembretes"])
         UC03(["UC03 Registrar atendimento"])
+        UC15(["UC15 Gerar relatório de acessos — planejado"])
         UC14(["UC14 Exportar paciente em FHIR"])
     end
 
+    Administrador --- UC15
     Administrador --- UC05
     Administrador --- UC06
     Administrador --- UC12
@@ -74,7 +76,7 @@ Quem acessa cada caso de uso segue a matriz de permissões do NF-SEG-02: o Admin
 | UC01 Cadastrar paciente | Recepcionista, Administrador | RF01, RF11, NF-PRI-01 | Implementado (`/patients/new`, `POST /api/patients`) | [uc01-cadastrar-paciente.md](uc01-cadastrar-paciente.md) |
 | UC02 Agendar consulta | Recepcionista, Paciente | RF03, RF05 | Só na visão | — |
 | UC03 Registrar atendimento | Médico | RF04 | Só na visão | — |
-| UC04 Autenticar | Todos | RF06, NF-SEG-02, NF-SEG-03 | Implementado (`/login`, `/api/auth/session`) | — |
+| UC04 Autenticar | Todos | RF06, RF17, NF-SEG-02, NF-SEG-03, NF-SEG-04 | Implementado (`/login`, `/api/auth/session`) | — |
 | UC05 Cadastrar usuário | Administrador | RF07, RF08, RF09, RF16, NF-SEG-01, NF-MAN-01, NF-CON-01 | Implementado (`/users/new`, `/setup`, `POST /api/users`, `POST /api/auth/first-administrator`) | [uc05-cadastrar-usuario.md](uc05-cadastrar-usuario.md) |
 | UC06 Listar usuários | Administrador | RF10, NF-SEG-01, NF-MAN-01, NF-CON-01 | Implementado (`/users`, `GET /api/users`) | — |
 | UC07 Editar paciente | Recepcionista, Administrador | RF11, RF12 | Implementado (`/patients/<id>`, `PUT /api/patients/<id>`) | [uc07-editar-paciente.md](uc07-editar-paciente.md) |
@@ -84,8 +86,11 @@ Quem acessa cada caso de uso segue a matriz de permissões do NF-SEG-02: o Admin
 | UC11 Reagendar consulta | Recepcionista, Paciente | RF03, RF05 | Só na visão | — |
 | UC12 Gerenciar profissionais e clínica | Administrador | RF02 | Só na visão | — |
 | UC13 Gerenciar comunicações e lembretes | Serviço de mensagens | RF03, RF05 | Só na visão | — |
+| UC15 Gerar relatório de acessos | Administrador | RF18 (change `relatorio-de-acessos`) | Planejado para a próxima branch | — |
 | UC14 Exportar paciente em FHIR | Sistema de saúde externo | NF-INT-01 | Só na visão | — |
 
 As telas e as rotas de API chamam a camada de negócio pela fachada `FacadeSingletonController` (`src/modules/facade/`), que verifica a permissão do papel antes de cada operação. As telas citadas estão em [`06-interface/`](../06-interface/README.md).
 
 **Regra:** depois da primeira entrega, IDs de casos de uso **não** são renumerados nem reaproveitados.
+
+**UC04 — Registro de acesso (RF17):** depois de validar as credenciais, o controle persiste ID do usuário e data/hora UTC antes do log e da abertura da sessão. Recusas não gravam acessos; falhas de persistência exibem indisponibilidade (API 503, `STORAGE_UNAVAILABLE`) sem abrir sessão. O Adapter Pino permanece independente: uma exceção síncrona do log não apaga o registro nem impede o login. O cadastro inicial do administrador não conta como acesso; um registro indica credenciais aceitas, mesmo se a criação posterior do cookie falhar.

@@ -186,6 +186,7 @@ classDiagram
     SqliteRepositoryFactory ..> SqliteAccessRecordRepository : cria
     AccessRecordRepository <|.. InMemoryAccessRecordRepository
     AccessRecordRepository <|.. SqliteAccessRecordRepository
+    AuthenticationController --> AccessRecordRepository : persiste acesso
     SqliteRepositoryFactory ..> SqliteUserRepository : cria
     SqliteRepositoryFactory ..> SqlitePatientRepository : cria
     FacadeSingletonController ..> Repositories : recebe
@@ -613,6 +614,3 @@ classDiagram
 ```
 
 A montagem em `infra/facade.ts` injeta o Adapter pela fachada. O controle transmite somente o ID do usuário; o Adapter produz `USER_SIGNED_IN` e Pino acrescenta o horário. O log vai para stdout e não garante persistência para relatórios. Falhas síncronas de emissão não recusam credenciais válidas (NF-SEG-04, [ADR-0010](07-arquitetura/adr/0010-adapter-de-log-de-acessos.md)).
-
-
-Nesta camada, o Repository dos acessos já pode ser criado pelas fábricas e testado isoladamente. Sua utilização durante a autenticação será integrada na próxima camada da stack.

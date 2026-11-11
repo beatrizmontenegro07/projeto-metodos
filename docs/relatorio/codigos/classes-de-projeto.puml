@@ -54,6 +54,7 @@ class AccessRecord <<entity>> {
   userId: number
   occurredAt: string
 }
+AuthenticationController --> AccessRecordRepository : grava antes do log
 AccessRecordRepository ..> AccessRecord
 AccessRecord "*" --> "1" User
 interface AccessLogger <<Target>> {
