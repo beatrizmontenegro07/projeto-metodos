@@ -14,6 +14,12 @@ export const users = sqliteTable("users", {
   role: text("role", { enum: ROLES }).notNull(),
 });
 
+export const accessRecords = sqliteTable("access_records", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull().references(() => users.id),
+  occurredAt: text("occurred_at").notNull(),
+}, (table) => [index("access_records_occurred_at_index").on(table.occurredAt)]);
+
 export const patients = sqliteTable(
   "patients",
   {
