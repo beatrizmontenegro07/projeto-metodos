@@ -1,3 +1,4 @@
+import { createAccessReport, type ReportInput, type ReportLabels } from "@/modules/access-reports/access-report";
 import type { AccessLogger } from "@/modules/auth/access-logger";
 import { AuthenticationController, type SignInCredentials } from "@/modules/auth/authentication-controller";
 import { AccessDeniedError } from "@/modules/auth/errors";
@@ -26,11 +27,13 @@ export class FacadeSingletonController {
   private readonly users: UserController;
   private readonly authentication: AuthenticationController;
   private readonly patients: PatientController;
+  private readonly accessRecords: Repositories["accesses"];
 
   private constructor(repositories: Repositories, logger: AccessLogger) {
     this.users = new UserController(repositories.users);
     this.authentication = new AuthenticationController(repositories.users, logger, repositories.accesses);
     this.patients = new PatientController(repositories.patients);
+    this.accessRecords = repositories.accesses;
   }
 
   /**
@@ -49,6 +52,11 @@ export class FacadeSingletonController {
 
   signIn(credentials: SignInCredentials): Promise<User> {
     return this.authentication.signIn(credentials);
+  }
+
+  async generateAccessReport(actor: User, input: ReportInput, labels: ReportLabels) {
+    this.authorize(actor, "GENERATE_ACCESS_REPORTS");
+    return createAccessReport(this.accessRecords, input, labels);
   }
 
   /** Looks up the user of a session; no permission applies. */

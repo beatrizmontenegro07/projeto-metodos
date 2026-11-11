@@ -80,6 +80,18 @@ describe("operations through the facade", () => {
     expect(await repositories.accesses.list()).toEqual([{ id: 1, userId: receptionist.id, occurredAt: expect.any(String) }]);
   });
 
+  it("allows only administrators to generate reports without reading records for denied roles", async () => {
+    const list = vi.spyOn(repositories.accesses, "list");
+    const input = { start: "2026-11-01", end: "2026-11-02", format: "html" };
+    const labels = { title: "Report", period: "Period", userId: "User", count: "Count", lastAccess: "Last", total: "Total" };
+    for (const actor of [receptionist, doctor, { ...admin, role: "PATIENT" as const }]) {
+      await expect(facade.generateAccessReport(actor, input, labels)).rejects.toMatchObject(ACCESS_DENIED);
+    }
+    expect(list).not.toHaveBeenCalled();
+    expect((await facade.generateAccessReport(admin, input, labels)).extension).toBe("html");
+    expect(list).toHaveBeenCalledOnce();
+  });
+
   it("registers a patient linked to the signed-in user", async () => {
     const patient = await facade.addPatient(receptionist, JOANA);
 
