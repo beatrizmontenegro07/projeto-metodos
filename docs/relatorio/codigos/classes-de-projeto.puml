@@ -45,6 +45,17 @@ class PatientController {
   +reactivate(id)
   +count()
 }
+interface AccessRecordRepository <<Repository>> {
+  +add(record): Promise<void>
+  +list(): Promise<AccessRecord[]>
+}
+class AccessRecord <<entity>> {
+  id: number
+  userId: number
+  occurredAt: string
+}
+AccessRecordRepository ..> AccessRecord
+AccessRecord "*" --> "1" User
 interface AccessLogger <<Target>> {
   +recordSignIn(userId)
 }
@@ -63,6 +74,7 @@ package infra {
   interface RepositoryFactory <<Abstract Factory>> {
     +createUserRepository(): UserRepository
     +createPatientRepository(): PatientRepository
+    +createAccessRecordRepository(): AccessRecordRepository
   }
   class InMemoryRepositoryFactory <<Concrete Factory>>
   class SqliteRepositoryFactory <<Concrete Factory>> {
@@ -76,6 +88,8 @@ package infra {
   class SqliteUserRepository
   class InMemoryPatientRepository
   class SqlitePatientRepository
+  class InMemoryAccessRecordRepository
+  class SqliteAccessRecordRepository
   class Database
   class PinoAccessLogger <<Adapter>> {
     -logger: Logger
@@ -91,6 +105,11 @@ Assembly ..> PinoAccessLogger : injeta pela fachada
 AuthenticationController --> AccessLogger
 AccessLogger <|.. PinoAccessLogger
 PinoAccessLogger --> Logger : adapta para info
+AccessRecordRepository <|.. InMemoryAccessRecordRepository
+AccessRecordRepository <|.. SqliteAccessRecordRepository
+InMemoryRepositoryFactory ..> InMemoryAccessRecordRepository : cria
+SqliteRepositoryFactory ..> SqliteAccessRecordRepository : cria
+SqliteAccessRecordRepository --> Database
 Assembly ..> Selection : getRepositories
 Selection ..> RepositoryFactory : monta a família
 Selection ..> InMemoryRepositoryFactory : STORAGE=memory
