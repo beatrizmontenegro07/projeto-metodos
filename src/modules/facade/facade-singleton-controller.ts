@@ -29,7 +29,7 @@ export class FacadeSingletonController {
 
   private constructor(repositories: Repositories, logger: AccessLogger) {
     this.users = new UserController(repositories.users);
-    this.authentication = new AuthenticationController(repositories.users, logger);
+    this.authentication = new AuthenticationController(repositories.users, logger, repositories.accesses);
     this.patients = new PatientController(repositories.patients);
   }
 

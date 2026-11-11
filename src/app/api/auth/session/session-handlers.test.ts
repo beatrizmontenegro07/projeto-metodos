@@ -56,6 +56,23 @@ describe("/api/auth/session", () => {
     expect(await response.json()).toMatchObject({ error: { code: "INVALID_REQUEST_BODY" } });
   });
 
+  it("answers 503 without opening a session when access recording fails", async () => {
+    const failing = await createTestApi(({ InMemoryUserRepository, InMemoryPatientRepository, InMemoryAccessRecordRepository, accessErrors }) => {
+      class FailingAccessRepository extends InMemoryAccessRecordRepository {
+        override async add(): Promise<void> {
+          throw new accessErrors.AccessRecordPersistenceError("Access storage unavailable");
+        }
+      }
+      return { users: new InMemoryUserRepository(), patients: new InMemoryPatientRepository(), accesses: new FailingAccessRepository() };
+    });
+    const { createSessionHandlers } = await import("./session-handlers");
+    const boundary = createSessionHandlers({ getFacade: failing.context.getFacade, startSession, endSession });
+    const response = await boundary.signIn(signInRequest({ identifier: "ana", password: "Secret@123" }));
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ error: { code: "STORAGE_UNAVAILABLE" } });
+    expect(startSession).not.toHaveBeenCalled();
+  });
+
   it("DELETE ends the session", async () => {
     const response = await handlers.signOut();
 

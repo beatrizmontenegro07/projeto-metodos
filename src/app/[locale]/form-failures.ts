@@ -1,5 +1,6 @@
 import "server-only";
 
+import { AccessRecordPersistenceError } from "@/modules/access-records/errors";
 import { AccessDeniedError, InvalidSignInIdentifierError, InvalidSignInPasswordError, SignInError } from "@/modules/auth/errors";
 import {
   DuplicatePatientError,
@@ -31,7 +32,7 @@ type Failure<Field extends string> = Omit<FormState<Field>, "values">;
 /** Errors every form shares; anything else is a bug and reaches the error page. */
 function commonFailure<Field extends string>(error: unknown): Failure<Field> {
   if (error instanceof AccessDeniedError) return { error: { scope: "api", code: "ACCESS_DENIED" } };
-  if (error instanceof UserPersistenceError || error instanceof PatientPersistenceError) {
+  if (error instanceof AccessRecordPersistenceError || error instanceof UserPersistenceError || error instanceof PatientPersistenceError) {
     return { error: { scope: "api", code: "STORAGE_UNAVAILABLE" } };
   }
   throw error;

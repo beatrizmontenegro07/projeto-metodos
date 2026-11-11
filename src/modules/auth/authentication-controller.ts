@@ -1,3 +1,4 @@
+import type { AccessRecordRepository } from "@/modules/access-records/access-record-repository";
 import { hashPassword, verifyPassword } from "@/modules/users/password";
 import { normalizeEmail } from "@/modules/users/rules";
 import type { User } from "@/modules/users/user";
@@ -20,6 +21,8 @@ export class AuthenticationController {
   constructor(
     private readonly repository: UserRepository,
     private readonly logger: AccessLogger,
+    private readonly accesses: AccessRecordRepository,
+    private readonly now: () => Date = () => new Date(),
   ) {}
 
   async signIn({ identifier, password }: SignInCredentials): Promise<User> {
@@ -34,6 +37,7 @@ export class AuthenticationController {
     unknownUserHash ??= hashPassword("unknown user");
     const passwordMatches = await verifyPassword(password, credentials?.passwordHash ?? (await unknownUserHash));
     if (!credentials || !passwordMatches) throw new IncorrectCredentialsError();
+    await this.accesses.add({ userId: credentials.user.id, occurredAt: this.now().toISOString() });
     try {
       this.logger.recordSignIn(credentials.user.id);
     } catch {
