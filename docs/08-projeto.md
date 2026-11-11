@@ -580,7 +580,7 @@ Preencha uma linha por padrão aplicado. Cada padrão relevante também tem um A
 | Repository | S4 | `UserRepository`, `PatientRepository`, `AccessRecordRepository` (contratos); `InMemoryUserRepository`, `SqliteUserRepository`, `InMemoryPatientRepository`, `SqlitePatientRepository`, `InMemoryAccessRecordRepository`, `SqliteAccessRecordRepository` (implementações) | Os controles dependem dos contratos de negócio, sem conhecer o armazenamento | [ADR-0006](07-arquitetura/adr/0006-repositorio-de-usuarios.md), [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md) |
 | Abstract Factory | S4 | `RepositoryFactory` (fábrica abstrata); `InMemoryRepositoryFactory`, `SqliteRepositoryFactory` (fábricas concretas); `UserRepository`, `PatientRepository`, `AccessRecordRepository` (produtos abstratos) | Cria uma família de repositórios compatíveis, selecionada uma vez por `STORAGE` | [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md) |
 | Adapter | S4 | `AuthenticationController` (cliente); `AccessLogger` (Target); `PinoAccessLogger` (Adapter); `Logger` do Pino (Adaptee) | Traduz eventos de autenticação para log JSON sem acoplar business à biblioteca | [ADR-0010](07-arquitetura/adr/0010-adapter-de-log-de-acessos.md) |
-| Template Method | S4 | | | |
+| Template Method | S4 | `AccessReportTemplate.generate` (Template Method), `render` (operação abstrata), `HtmlAccessReport` e `CsvAccessReport` (subclasses) | Reutiliza validação, filtragem e agregação de acessos em formatos diferentes | [ADR-0011](07-arquitetura/adr/0011-template-method-de-relatorios.md) |
 | Command | S5 | | | |
 | Memento | S5 | | | |
 
@@ -614,3 +614,7 @@ classDiagram
 ```
 
 A montagem em `infra/facade.ts` injeta o Adapter pela fachada. O controle transmite somente o ID do usuário; o Adapter produz `USER_SIGNED_IN` e Pino acrescenta o horário. O log vai para stdout e não garante persistência para relatórios. Falhas síncronas de emissão não recusam credenciais válidas (NF-SEG-04, [ADR-0010](07-arquitetura/adr/0010-adapter-de-log-de-acessos.md)).
+
+## Relatórios de acesso — Template Method
+
+`modules/access-reports/` contém o algoritmo comum e os formatos HTML/CSV. A fachada recebe período, formato e textos traduzidos e autoriza `GENERATE_ACCESS_REPORTS` apenas para ADMIN. O intervalo UTC é `[início, fim)`; datas `YYYY-MM-DD` representam meia-noite UTC e timestamps aceitos terminam em `Z`. Repetições contam separadamente, usuários sem acessos no período não aparecem, e o último acesso é o máximo cronológico. O algoritmo consulta somente os registros de acesso, sem credenciais ou dados de pacientes. A próxima camada adicionará tela e download.

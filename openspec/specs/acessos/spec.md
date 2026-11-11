@@ -39,3 +39,32 @@ O sistema DEVE gravar um registro com ID próprio, ID do usuário e data/hora UT
 - **GIVEN** um acesso persistido
 - **WHEN** o logger lança uma exceção síncrona
 - **THEN** o acesso continua consultável e a autenticação não é recusada por essa exceção
+
+### Requirement: RF18 — Gerar estatísticas de acesso
+O sistema DEVE permitir ao Administrador gerar relatórios HTML e CSV por período UTC `[início, fim)`, usando Template Method na camada business. DEVE exibir, por usuário com acessos no período, ID, quantidade e último acesso, além do total geral. NÃO DEVE expor credenciais ou dados de pacientes.
+
+**Prioridade:** Essencial
+**Casos de uso:** UC15
+
+#### Scenario: Dois formatos
+- **GIVEN** um Administrador e um período válido
+- **WHEN** ele solicita o relatório em HTML ou CSV
+- **THEN** os dois formatos apresentam as mesmas estatísticas calculadas dos registros persistidos
+
+#### Scenario: Limites e repetição
+- **GIVEN** acessos repetidos pelo mesmo usuário, inclusive nos limites do período
+- **WHEN** o relatório é gerado
+- **THEN** cada registro no início é incluído, cada registro no fim é excluído e repetições são contadas individualmente
+
+#### Scenario: Período vazio
+- **WHEN** não existem acessos no período
+- **THEN** o relatório apresenta total zero e nenhuma linha de usuário
+
+#### Scenario: Papel sem permissão
+- **GIVEN** um usuário sem papel Administrador
+- **WHEN** ele solicita o relatório
+- **THEN** o sistema nega a operação sem expor os registros
+
+#### Scenario: Período inválido
+- **WHEN** o início ou o fim é inválido ou o início não antecede o fim
+- **THEN** o sistema recusa a geração com erro específico de período

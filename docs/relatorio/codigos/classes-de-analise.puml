@@ -19,6 +19,8 @@ class Usuario {
 }
 class Papel <<enumeration>>
 class RegistroDeAcesso <<entity>>
+class ControleRelatorios <<control>>
+ControleRelatorios ..> RegistroDeAcesso : calcula estatísticas
 RegistroDeAcesso "*" --> "1" Usuario
 ControleAutenticacao ..> RegistroDeAcesso : registra credenciais aceitas
 class Paciente <<Patient>>

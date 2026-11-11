@@ -8,6 +8,7 @@ class FacadeSingletonController <<Facade, Singleton>> {
   -{static} instance: Promise<FacadeSingletonController>
   -FacadeSingletonController(repositories, logger)
   +{static} getInstance(loadRepositories, logger)
+  +generateAccessReport(actor, input, labels)
   +signIn(credentials)
   +createFirstAdministrator(newUser)
   +addUser(actor, newUser)
@@ -21,6 +22,17 @@ class FacadeSingletonController <<Facade, Singleton>> {
   +countRegisteredEntities(actor): RegisteredEntityCounts
   -authorize(actor, permission)
 }
+abstract class AccessReportTemplate <<Template Method>> {
+  +generate(input, labels)
+  -aggregate(records)
+  #{abstract} render(statistics, labels)
+}
+class HtmlAccessReport
+class CsvAccessReport
+AccessReportTemplate <|-- HtmlAccessReport
+AccessReportTemplate <|-- CsvAccessReport
+AccessReportTemplate --> AccessRecordRepository
+FacadeSingletonController ..> AccessReportTemplate : autoriza e gera
 class RegisteredEntityCounts {
   users?: number
   patients?: number
