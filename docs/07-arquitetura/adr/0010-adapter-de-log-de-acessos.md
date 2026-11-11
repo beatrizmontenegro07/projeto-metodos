@@ -2,7 +2,7 @@
 
 - **Status:** aceito
 - **Data:** 2026-11-11
-- **Requisitos relacionados:** RF06, NF-SEG-04, S4.3
+- **Requisitos relacionados:** RF06, RF17, RF18, NF-SEG-04, S4.3
 
 ## Contexto
 
@@ -27,7 +27,7 @@ O controle registra uma vez após verificar a senha. Recusas não geram evento d
 
 - Chamar Pino ou `console` no controle viola o isolamento da camada business; uma interface própria permite substituir o fornecedor e usar um espião nos testes.
 - O contrato recebe somente um ID, impedindo que o controle envie o usuário inteiro ou credenciais ao Adapter.
-- A saída stdout depende da coleta de logs do ambiente. A persistência consultável é independente da saída do Pino, conforme o complemento abaixo; os relatórios serão implementados na próxima etapa.
+- A saída stdout depende da coleta de logs do ambiente. Os relatórios HTML e CSV usam a persistência consultável, independente da saída do Pino, conforme o complemento abaixo.
 - Testes verificam o JSON produzido pelo Pino real, a integração pela fachada, as recusas de autenticação e a continuidade quando a emissão lança uma exceção.
 
 ## Complemento: dados consultáveis para estatísticas (RF17)
@@ -36,4 +36,4 @@ O log Pino não é a fonte de relatórios. `AccessRecordRepository` é um contra
 
 A autenticação persiste o acesso antes de chamar o Adapter e abrir sessão. Erros do banco são convertidos em `AccessRecordPersistenceError`: a API responde 503 e o formulário informa indisponibilidade, sem criar sessão. A falha síncrona apenas no log mantém a autenticação e o registro. Essa separação evita perder estatísticas quando o coletor de stdout não existe. Um acesso representa credenciais aceitas, e não garante que o cookie posterior foi criado.
 
-A consulta do Repository fornece registros à próxima etapa: relatórios HTML/CSV por período, especificados na change `relatorio-de-acessos`, ainda sem implementação nesta branch.
+A consulta do Repository fornece os registros aos relatórios HTML e CSV por período UTC, implementados com `AccessReportTemplate` e suas especializações na camada business (RF18, [ADR-0011](0011-template-method-de-relatorios.md)). A fachada verifica a permissão de Administrador antes de gerar as estatísticas. A tela `/access-reports` e a rota `GET /api/access-reports` oferecem o download traduzido, sem cache compartilhado, conforme a change `relatorio-de-acessos`.

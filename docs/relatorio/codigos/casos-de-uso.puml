@@ -15,7 +15,7 @@ skinparam rectangle {
     BorderColor #333333
 }
 
-' Mesmo diagrama de docs/04-casos-de-uso/casos-de-uso.puml (Entrega 2).
+' Mesmo diagrama de docs/04-casos-de-uso/casos-de-uso.puml.
 actor Administrador
 actor Recepcionista
 actor "Médico" as Medico
@@ -37,9 +37,11 @@ rectangle CliniCore {
   usecase "UC11 Reagendar consulta" as UC11
   usecase "UC13 Gerenciar comunicações\ne lembretes" as UC13
   usecase "UC03 Registrar atendimento" as UC03
+  usecase "UC15 Gerar relatório de acessos" as UC15
   usecase "UC14 Exportar paciente\nem FHIR" as UC14
 }
 
+Administrador --> UC15
 Administrador --> UC05
 Administrador --> UC06
 Administrador --> UC12
