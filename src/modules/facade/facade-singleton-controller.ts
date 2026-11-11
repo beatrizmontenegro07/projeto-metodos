@@ -1,3 +1,4 @@
+import type { AccessLogger } from "@/modules/auth/access-logger";
 import { AuthenticationController, type SignInCredentials } from "@/modules/auth/authentication-controller";
 import { AccessDeniedError } from "@/modules/auth/errors";
 import { hasPermission, type Permission } from "@/modules/auth/permissions";
@@ -26,19 +27,22 @@ export class FacadeSingletonController {
   private readonly authentication: AuthenticationController;
   private readonly patients: PatientController;
 
-  private constructor(repositories: Repositories) {
+  private constructor(repositories: Repositories, logger: AccessLogger) {
     this.users = new UserController(repositories.users);
-    this.authentication = new AuthenticationController(repositories.users);
+    this.authentication = new AuthenticationController(repositories.users, logger);
     this.patients = new PatientController(repositories.patients);
   }
 
   /**
    * Returns the only instance, creating it on the first call. The business layer cannot import
-   * the storage mechanisms, so the caller supplies them; later calls ignore `loadRepositories`.
+   * storage or logging implementations, so the caller supplies them; later calls reuse both.
    */
-  static getInstance(loadRepositories: () => Promise<Repositories>): Promise<FacadeSingletonController> {
+  static getInstance(
+    loadRepositories: () => Promise<Repositories>,
+    logger: AccessLogger,
+  ): Promise<FacadeSingletonController> {
     FacadeSingletonController.instance ??= loadRepositories().then(
-      (repositories) => new FacadeSingletonController(repositories),
+      (repositories) => new FacadeSingletonController(repositories, logger),
     );
     return FacadeSingletonController.instance;
   }

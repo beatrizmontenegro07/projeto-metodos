@@ -41,8 +41,8 @@ describe("a single facade instance (Singleton)", () => {
     const loadRepositories = vi.fn(async () => memoryRepositories());
 
     const [first, second] = await Promise.all([
-      Facade.getInstance(loadRepositories),
-      Facade.getInstance(loadRepositories),
+      Facade.getInstance(loadRepositories, { recordSignIn: vi.fn() }),
+      Facade.getInstance(loadRepositories, { recordSignIn: vi.fn() }),
     ]);
 
     expect(first).toBe(second);
@@ -52,13 +52,15 @@ describe("a single facade instance (Singleton)", () => {
 
 describe("operations through the facade", () => {
   let facade: FacadeSingletonController;
+  const recordSignIn = vi.fn();
   let admin: User;
   let receptionist: User;
   let doctor: User;
 
   beforeEach(async () => {
     const Facade = await loadFacadeClass();
-    facade = await Facade.getInstance(async () => memoryRepositories());
+    recordSignIn.mockClear();
+    facade = await Facade.getInstance(async () => memoryRepositories(), { recordSignIn });
     admin = await facade.createFirstAdministrator({
       name: "Carla Souza",
       email: "carla@clinicore.com",
@@ -71,6 +73,7 @@ describe("operations through the facade", () => {
 
   it("signs in through the authentication controller", async () => {
     expect(await facade.signIn({ identifier: "ana", password: "Secret@123" })).toEqual(receptionist);
+    expect(recordSignIn).toHaveBeenCalledExactlyOnceWith(receptionist.id);
   });
 
   it("registers a patient linked to the signed-in user", async () => {

@@ -23,7 +23,7 @@ async function emptySystemFacade() {
   const facade = await FacadeSingletonController.getInstance(async () => ({
     users: new InMemoryUserRepository(),
     patients: new InMemoryPatientRepository(),
-  }));
+  }), { recordSignIn: vi.fn() });
   return async () => facade;
 }
 

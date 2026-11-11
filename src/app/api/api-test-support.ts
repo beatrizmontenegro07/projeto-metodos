@@ -39,7 +39,7 @@ export async function createTestApi(
     InMemoryPatientRepository: (await import("@/infra/patients/in-memory-patient-repository")).InMemoryPatientRepository,
   };
   const { FacadeSingletonController } = await import("@/modules/facade/facade-singleton-controller");
-  const facade = await FacadeSingletonController.getInstance(async () => createRepositories(modules));
+  const facade = await FacadeSingletonController.getInstance(async () => createRepositories(modules), { recordSignIn: vi.fn() });
 
   const admin = await facade.createFirstAdministrator(staff("carla"));
   const receptionist = await facade.addUser(admin, { ...staff("ana"), role: "RECEPTIONIST" });
