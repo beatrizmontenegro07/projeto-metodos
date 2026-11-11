@@ -63,3 +63,24 @@ Todo o tráfego entre o navegador e o sistema, e entre o sistema e serviços ext
 #### Scenario: Cliente com TLS antigo
 - **WHEN** um cliente tenta se conectar oferecendo apenas TLS 1.1 ou inferior
 - **THEN** a conexão é recusada
+
+### Requirement: NF-SEG-04 — Log operacional de autenticação
+O sistema DEVE emitir um log estruturado para cada autenticação com credenciais aceitas, contendo o evento `USER_SIGNED_IN`, ID do usuário e horário. NÃO DEVE incluir senha, hash, login, e-mail ou dados de pacientes. Business DEVE depender de uma interface própria, adaptada à biblioteca de log em infra.
+
+**Prioridade:** Essencial
+**Casos de uso:** UC04
+
+#### Scenario: Credenciais aceitas
+- **GIVEN** um usuário cadastrado
+- **WHEN** suas credenciais são aceitas no login por tela ou API
+- **THEN** o sistema emite um único evento `USER_SIGNED_IN` em JSON no stdout, com ID e horário
+- **AND** não inclui credenciais ou dados pessoais além do ID
+
+#### Scenario: Credenciais recusadas
+- **WHEN** o login é recusado por campos vazios, usuário desconhecido ou senha incorreta
+- **THEN** o sistema não emite evento de autenticação bem-sucedida
+
+#### Scenario: Falha na emissão do log
+- **GIVEN** credenciais válidas
+- **WHEN** o logger lança uma exceção síncrona ao emitir o evento
+- **THEN** a autenticação continua válida, mesmo sem garantia de entrega do log

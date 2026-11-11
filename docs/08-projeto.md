@@ -22,10 +22,11 @@ src/
 ├── components/                  ← ui: blocos de tela (menu lateral, cabeçalho, campos) e ui/ (shadcn/ui)
 ├── modules/                     ← business: uma pasta por capacidade
 │   ├── facade/                  ← FacadeSingletonController e o tipo Repositories
-│   ├── auth/                    ← AuthenticationController, permissões por papel e erros de login
+│   ├── auth/                    ← AuthenticationController, AccessLogger, permissões por papel e erros de login
 │   ├── users/                   ← User, Role, regras, senha, erros, UserRepository e UserController
 │   └── patients/                ← Patient, Gender, LegalBasis, regras, erros, PatientRepository e PatientController
 ├── infra/                       ← infra
+│   ├── logging/                 ← PinoAccessLogger adapta eventos de autenticação para Pino
 │   ├── facade.ts                ← getFacade(): monta a fachada com os repositórios escolhidos por STORAGE
 │   ├── repository-factory.ts     ← RepositoryFactory, seleção por STORAGE e família única por processo
 │   ├── in-memory-repository-factory.ts ← família de coleções RAM
@@ -43,7 +44,7 @@ src/
 
 ## 2. Diagrama de classes de projeto
 
-### Estado atual: Sprint 4 — Repository e Abstract Factory
+### Estado atual: Sprint 4 — Repository, Abstract Factory e Adapter
 
 O diagrama está dividido em três partes: a visão geral com a fachada, o módulo de usuários com a autenticação e o módulo de pacientes. Uma classe que aparece em mais de uma parte é a mesma.
 
@@ -78,8 +79,8 @@ classDiagram
             -UserController users
             -AuthenticationController authentication
             -PatientController patients
-            -FacadeSingletonController(repositories)
-            +getInstance(loadRepositories) Promise~FacadeSingletonController~$
+            -FacadeSingletonController(repositories, logger)
+            +getInstance(loadRepositories, logger) Promise~FacadeSingletonController~$
             +signIn(credentials) Promise~User~
             +findUser(id) Promise~User~
             +hasUsers() Promise~boolean~
@@ -562,7 +563,38 @@ Preencha uma linha por padrão aplicado. Cada padrão relevante também tem um A
 | Facade | S3 | `FacadeSingletonController` (fachada); `UserController`, `AuthenticationController`, `PatientController` (subsistema); páginas, Server Actions e rotas de API (clientes) | As fronteiras chamam um só objeto, com um método por caso de uso, e a verificação do papel (NF-SEG-02) fica num só lugar; `countRegisteredEntities` informa quantas entidades estão cadastradas | [ADR-0007](07-arquitetura/adr/0007-fachada-unica.md) |
 | Repository | S4 | `UserRepository`, `PatientRepository` (contratos); `InMemoryUserRepository`, `SqliteUserRepository`, `InMemoryPatientRepository`, `SqlitePatientRepository` (implementações) | Os controles dependem dos contratos de negócio, sem conhecer o armazenamento | [ADR-0006](07-arquitetura/adr/0006-repositorio-de-usuarios.md), [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md) |
 | Abstract Factory | S4 | `RepositoryFactory` (fábrica abstrata); `InMemoryRepositoryFactory`, `SqliteRepositoryFactory` (fábricas concretas); `UserRepository`, `PatientRepository` (produtos abstratos) | Cria uma família de repositórios compatíveis, selecionada uma vez por `STORAGE` | [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md) |
-| Adapter | S4 | | | |
+| Adapter | S4 | `AuthenticationController` (cliente); `AccessLogger` (Target); `PinoAccessLogger` (Adapter); `Logger` do Pino (Adaptee) | Traduz eventos de autenticação para log JSON sem acoplar business à biblioteca | [ADR-0010](07-arquitetura/adr/0010-adapter-de-log-de-acessos.md) |
 | Template Method | S4 | | | |
 | Command | S5 | | | |
 | Memento | S5 | | | |
+
+### Adapter de log de autenticação
+
+```mermaid
+classDiagram
+    namespace business {
+        class AuthenticationController
+        class AccessLogger {
+            <<interface, Target>>
+            +recordSignIn(userId) void
+        }
+    }
+    namespace infra {
+        class PinoAccessLogger {
+            <<Adapter>>
+            -Logger logger
+            +recordSignIn(userId) void
+        }
+    }
+    namespace pino {
+        class Logger {
+            <<Adaptee>>
+            +info(object) void
+        }
+    }
+    AuthenticationController --> AccessLogger : usa após verificar senha
+    AccessLogger <|.. PinoAccessLogger
+    PinoAccessLogger --> Logger : adapta para info
+```
+
+A montagem em `infra/facade.ts` injeta o Adapter pela fachada. O controle transmite somente o ID do usuário; o Adapter produz `USER_SIGNED_IN` e Pino acrescenta o horário. O log vai para stdout e não garante persistência para relatórios. Falhas síncronas de emissão não recusam credenciais válidas (NF-SEG-04, [ADR-0010](07-arquitetura/adr/0010-adapter-de-log-de-acessos.md)).

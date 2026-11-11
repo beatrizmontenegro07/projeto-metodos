@@ -6,8 +6,8 @@ class "Telas / Server Actions / API" as UI <<boundary>>
 package business {
 class FacadeSingletonController <<Facade, Singleton>> {
   -{static} instance: Promise<FacadeSingletonController>
-  -FacadeSingletonController(repositories)
-  +{static} getInstance(loadRepositories)
+  -FacadeSingletonController(repositories, logger)
+  +{static} getInstance(loadRepositories, logger)
   +signIn(credentials)
   +createFirstAdministrator(newUser)
   +addUser(actor, newUser)
@@ -45,6 +45,9 @@ class PatientController {
   +reactivate(id)
   +count()
 }
+interface AccessLogger <<Target>> {
+  +recordSignIn(userId)
+}
 interface UserRepository <<Repository>>
 interface PatientRepository <<Repository>>
 class User <<entity>>
@@ -74,7 +77,20 @@ package infra {
   class InMemoryPatientRepository
   class SqlitePatientRepository
   class Database
+  class PinoAccessLogger <<Adapter>> {
+    -logger: Logger
+    +recordSignIn(userId)
+  }
 }
+package pino {
+  class Logger <<Adaptee>> {
+    +info(object)
+  }
+}
+Assembly ..> PinoAccessLogger : injeta pela fachada
+AuthenticationController --> AccessLogger
+AccessLogger <|.. PinoAccessLogger
+PinoAccessLogger --> Logger : adapta para info
 Assembly ..> Selection : getRepositories
 Selection ..> RepositoryFactory : monta a família
 Selection ..> InMemoryRepositoryFactory : STORAGE=memory
