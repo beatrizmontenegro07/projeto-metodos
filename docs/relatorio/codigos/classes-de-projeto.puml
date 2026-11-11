@@ -3,9 +3,7 @@ skinparam classAttributeIconSize 0
 skinparam shadowing false
 top to bottom direction
 class "Telas / Server Actions / API" as UI <<boundary>>
-class "infra/facade.ts" as Assembly {
-  +getFacade()
-}
+package business {
 class FacadeSingletonController <<Facade, Singleton>> {
   -{static} instance: Promise<FacadeSingletonController>
   -FacadeSingletonController(repositories)
@@ -47,8 +45,53 @@ class PatientController {
   +reactivate(id)
   +count()
 }
-interface UserRepository
-interface PatientRepository
+interface UserRepository <<Repository>>
+interface PatientRepository <<Repository>>
+class User <<entity>>
+class Patient <<entity>>
+UserRepository ..> User : retorna
+PatientRepository ..> Patient : retorna
+Patient "*" --> "1" User : cadastrado por
+}
+package infra {
+  class "infra/facade.ts" as Assembly {
+    +getFacade()
+  }
+  interface RepositoryFactory <<Abstract Factory>> {
+    +createUserRepository(): UserRepository
+    +createPatientRepository(): PatientRepository
+  }
+  class InMemoryRepositoryFactory <<Concrete Factory>>
+  class SqliteRepositoryFactory <<Concrete Factory>> {
+    -database: Database
+  }
+  class "repository-factory.ts" as Selection {
+    +createRepositoryFactory(mechanism): Promise<RepositoryFactory>
+    +getRepositories(): Promise<Repositories>
+  }
+  class InMemoryUserRepository
+  class SqliteUserRepository
+  class InMemoryPatientRepository
+  class SqlitePatientRepository
+  class Database
+}
+Assembly ..> Selection : getRepositories
+Selection ..> RepositoryFactory : monta a família
+Selection ..> InMemoryRepositoryFactory : STORAGE=memory
+Selection ..> SqliteRepositoryFactory : STORAGE=sqlite
+RepositoryFactory <|.. InMemoryRepositoryFactory
+RepositoryFactory <|.. SqliteRepositoryFactory
+InMemoryRepositoryFactory ..> InMemoryUserRepository : cria
+InMemoryRepositoryFactory ..> InMemoryPatientRepository : cria
+SqliteRepositoryFactory ..> SqliteUserRepository : cria
+SqliteRepositoryFactory ..> SqlitePatientRepository : cria
+SqliteRepositoryFactory --> Database : compartilha
+SqliteUserRepository --> Database
+SqlitePatientRepository --> Database
+UserRepository <|.. InMemoryUserRepository
+UserRepository <|.. SqliteUserRepository
+PatientRepository <|.. InMemoryPatientRepository
+PatientRepository <|.. SqlitePatientRepository
 UI ..> Assembly
 Assembly ..> FacadeSingletonController : getInstance
 FacadeSingletonController *-- UserController

@@ -27,10 +27,13 @@ src/
 │   └── patients/                ← Patient, Gender, LegalBasis, regras, erros, PatientRepository e PatientController
 ├── infra/                       ← infra
 │   ├── facade.ts                ← getFacade(): monta a fachada com os repositórios escolhidos por STORAGE
+│   ├── repository-factory.ts     ← RepositoryFactory, seleção por STORAGE e família única por processo
+│   ├── in-memory-repository-factory.ts ← família de coleções RAM
+│   ├── sqlite-repository-factory.ts ← família SQLite com conexão compartilhada
 │   ├── storage-mechanism.ts     ← lê a variável STORAGE (memory ou sqlite)
 │   ├── auth/                    ← sessão: token assinado (session-token.ts) e cookie (session.ts)
-│   ├── users/                   ← InMemoryUserRepository, SqliteUserRepository e a fábrica
-│   └── patients/                ← InMemoryPatientRepository, SqlitePatientRepository e a fábrica
+│   ├── users/                   ← InMemoryUserRepository e SqliteUserRepository
+│   └── patients/                ← InMemoryPatientRepository e SqlitePatientRepository
 ├── db/                          ← infra: esquema Drizzle (users, patients), conexão e erros do banco
 ├── i18n/                        ← ui: idiomas e textos traduzidos (messages/)
 └── proxy.ts                     ← escolhe o idioma e manda para /login quem não tem sessão
@@ -40,7 +43,7 @@ src/
 
 ## 2. Diagrama de classes de projeto
 
-### Estado atual: Sprint 3
+### Estado atual: Sprint 4 — Repository e Abstract Factory
 
 O diagrama está dividido em três partes: a visão geral com a fachada, o módulo de usuários com a autenticação e o módulo de pacientes. Uma classe que aparece em mais de uma parte é a mesma.
 
@@ -134,6 +137,18 @@ classDiagram
             <<module>>
             +readStorageMechanism(value) StorageMechanism
         }
+        class RepositoryFactory {
+            <<interface, Abstract Factory>>
+            +createUserRepository() UserRepository
+            +createPatientRepository() PatientRepository
+        }
+        class InMemoryRepositoryFactory
+        class SqliteRepositoryFactory
+        class repositoryFactory {
+            <<module>>
+            +createRepositoryFactory(mechanism) Promise~RepositoryFactory~
+            +getRepositories() Promise~Repositories~
+        }
         class InMemoryUserRepository
         class SqliteUserRepository
         class InMemoryPatientRepository
@@ -146,7 +161,17 @@ classDiagram
     apiRoutes ..> session : usuário da requisição
     session ..> facade : findUser
     facade ..> FacadeSingletonController : getInstance
-    facade ..> storageMechanism : STORAGE
+    facade ..> repositoryFactory : getRepositories
+    repositoryFactory ..> storageMechanism : STORAGE (uma vez)
+    repositoryFactory ..> RepositoryFactory : monta a família
+    repositoryFactory ..> InMemoryRepositoryFactory : seleciona se memory
+    repositoryFactory ..> SqliteRepositoryFactory : seleciona se sqlite
+    RepositoryFactory <|.. InMemoryRepositoryFactory
+    RepositoryFactory <|.. SqliteRepositoryFactory
+    InMemoryRepositoryFactory ..> InMemoryUserRepository : cria
+    InMemoryRepositoryFactory ..> InMemoryPatientRepository : cria
+    SqliteRepositoryFactory ..> SqliteUserRepository : cria
+    SqliteRepositoryFactory ..> SqlitePatientRepository : cria
     FacadeSingletonController ..> Repositories : recebe
     FacadeSingletonController --> UserController
     FacadeSingletonController --> AuthenticationController
@@ -285,10 +310,9 @@ classDiagram
             -Database database
             -accessStorage(operation) T
         }
-        class userRepositoryFactory {
-            <<module>>
-            +createUserRepository(mechanism) Promise~UserRepository~
-            +getUserRepository() Promise~UserRepository~
+        class RepositoryFactory {
+            <<interface, Abstract Factory>>
+            +createUserRepository() UserRepository
         }
         class sessionToken {
             <<module>>
@@ -327,8 +351,7 @@ classDiagram
     UserRepository <|.. SqliteUserRepository
     SqliteUserRepository ..> UserPersistenceError : converte falhas do banco
     SqliteUserRepository ..> users : lê e grava
-    userRepositoryFactory ..> InMemoryUserRepository : cria se memory
-    userRepositoryFactory ..> SqliteUserRepository : cria se sqlite
+    RepositoryFactory ..> UserRepository : cria (ver visão geral)
 ```
 
 O login (RF06) procura o usuário pelo login exato ou pelo e-mail normalizado (`findCredentials`) e compara a senha com o hash em tempo constante (`verifyPassword`). Login inexistente e senha errada dão o mesmo erro, `IncorrectCredentialsError`, e um login inexistente também passa pelo scrypt, para que o tempo de resposta não revele quem está cadastrado. A sessão é um JWT assinado num cookie `httpOnly`, com o id e o login do usuário e validade de 8 horas; a cada requisição o usuário é lido de novo pela fachada ([ADR-0008](07-arquitetura/adr/0008-sessao-em-cookie-assinado.md)).
@@ -469,10 +492,9 @@ classDiagram
             -Database database
             -accessStorage(operation) T
         }
-        class patientRepositoryFactory {
-            <<module>>
-            +createPatientRepository(mechanism) Promise~PatientRepository~
-            +getPatientRepository() Promise~PatientRepository~
+        class RepositoryFactory {
+            <<interface, Abstract Factory>>
+            +createPatientRepository() PatientRepository
         }
         class patients {
             <<table>>
@@ -514,15 +536,14 @@ classDiagram
     SqlitePatientRepository ..> DuplicatePatientError : lança
     SqlitePatientRepository ..> PatientPersistenceError : converte falhas do banco
     SqlitePatientRepository ..> patients : lê e grava
-    patientRepositoryFactory ..> InMemoryPatientRepository : cria se memory
-    patientRepositoryFactory ..> SqlitePatientRepository : cria se sqlite
+    RepositoryFactory ..> PatientRepository : cria (ver visão geral)
 ```
 
 O paciente guarda o CPF e o telefone só com os dígitos, e a coluna `search_name` guarda o nome em minúsculas e sem acentos (`toSearchKey`), usada na busca e na ordem alfabética (RF14). O repositório em RAM usa a mesma função, então os dois mecanismos devolvem a mesma lista. `Gender` segue o `AdministrativeGender` do FHIR R4 e `LegalBasis`, as bases legais da LGPD para dados de saúde (NF-PRI-01). A edição troca os dados, mas não muda a situação nem o autor (`createdBy`); a inativação só muda `active`, e não há exclusão (RF13).
 
 ### Os dois mecanismos de persistência
 
-Os controles dependem só das interfaces `UserRepository` e `PatientRepository`. A variável `STORAGE`, lida uma única vez na inicialização (`readStorageMechanism`), escolhe o mesmo mecanismo para as duas entidades (NF-MAN-01, [ADR-0006](07-arquitetura/adr/0006-repositorio-de-usuarios.md)):
+Os controles dependem só das interfaces `UserRepository` e `PatientRepository`. A variável `STORAGE`, lida uma única vez por `getRepositories`, seleciona uma implementação de `RepositoryFactory`: `InMemoryRepositoryFactory` ou `SqliteRepositoryFactory`. Essa Abstract Factory cria os dois produtos da mesma família. A família fica em `globalThis` para preservar as coleções durante hot reload; a fábrica SQLite recebe uma conexão compartilhada pelos dois repositórios (NF-MAN-01, [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md)):
 
 | `STORAGE` | Implementações | Comportamento |
 |---|---|---|
@@ -539,8 +560,8 @@ Preencha uma linha por padrão aplicado. Cada padrão relevante também tem um A
 |---|---|---|---|---|
 | Singleton | S3 | `FacadeSingletonController` (singleton: construtor privado, campo estático `instance`, `getInstance`) | Os controles e os repositórios são montados uma única vez por processo, e todas as telas e rotas usam a mesma instância | [ADR-0007](07-arquitetura/adr/0007-fachada-unica.md) |
 | Facade | S3 | `FacadeSingletonController` (fachada); `UserController`, `AuthenticationController`, `PatientController` (subsistema); páginas, Server Actions e rotas de API (clientes) | As fronteiras chamam um só objeto, com um método por caso de uso, e a verificação do papel (NF-SEG-02) fica num só lugar; `countRegisteredEntities` informa quantas entidades estão cadastradas | [ADR-0007](07-arquitetura/adr/0007-fachada-unica.md) |
-| Repository | S4 | | | |
-| Factory Method / Abstract Factory | S4 | | | |
+| Repository | S4 | `UserRepository`, `PatientRepository` (contratos); `InMemoryUserRepository`, `SqliteUserRepository`, `InMemoryPatientRepository`, `SqlitePatientRepository` (implementações) | Os controles dependem dos contratos de negócio, sem conhecer o armazenamento | [ADR-0006](07-arquitetura/adr/0006-repositorio-de-usuarios.md), [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md) |
+| Abstract Factory | S4 | `RepositoryFactory` (fábrica abstrata); `InMemoryRepositoryFactory`, `SqliteRepositoryFactory` (fábricas concretas); `UserRepository`, `PatientRepository` (produtos abstratos) | Cria uma família de repositórios compatíveis, selecionada uma vez por `STORAGE` | [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md) |
 | Adapter | S4 | | | |
 | Template Method | S4 | | | |
 | Command | S5 | | | |
