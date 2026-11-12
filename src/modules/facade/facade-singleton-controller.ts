@@ -1,3 +1,5 @@
+import { createAccessReport, type ReportInput, type ReportLabels } from "@/modules/access-reports/access-report";
+import type { AccessLogger } from "@/modules/auth/access-logger";
 import { AuthenticationController, type SignInCredentials } from "@/modules/auth/authentication-controller";
 import { AccessDeniedError } from "@/modules/auth/errors";
 import { hasPermission, type Permission } from "@/modules/auth/permissions";
@@ -25,26 +27,36 @@ export class FacadeSingletonController {
   private readonly users: UserController;
   private readonly authentication: AuthenticationController;
   private readonly patients: PatientController;
+  private readonly accessRecords: Repositories["accesses"];
 
-  private constructor(repositories: Repositories) {
+  private constructor(repositories: Repositories, logger: AccessLogger) {
     this.users = new UserController(repositories.users);
-    this.authentication = new AuthenticationController(repositories.users);
+    this.authentication = new AuthenticationController(repositories.users, logger, repositories.accesses);
     this.patients = new PatientController(repositories.patients);
+    this.accessRecords = repositories.accesses;
   }
 
   /**
    * Returns the only instance, creating it on the first call. The business layer cannot import
-   * the storage mechanisms, so the caller supplies them; later calls ignore `loadRepositories`.
+   * storage or logging implementations, so the caller supplies them; later calls reuse both.
    */
-  static getInstance(loadRepositories: () => Promise<Repositories>): Promise<FacadeSingletonController> {
+  static getInstance(
+    loadRepositories: () => Promise<Repositories>,
+    logger: AccessLogger,
+  ): Promise<FacadeSingletonController> {
     FacadeSingletonController.instance ??= loadRepositories().then(
-      (repositories) => new FacadeSingletonController(repositories),
+      (repositories) => new FacadeSingletonController(repositories, logger),
     );
     return FacadeSingletonController.instance;
   }
 
   signIn(credentials: SignInCredentials): Promise<User> {
     return this.authentication.signIn(credentials);
+  }
+
+  async generateAccessReport(actor: User, input: ReportInput, labels: ReportLabels) {
+    this.authorize(actor, "GENERATE_ACCESS_REPORTS");
+    return createAccessReport(this.accessRecords, input, labels);
   }
 
   /** Looks up the user of a session; no permission applies. */

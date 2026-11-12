@@ -7,6 +7,8 @@ import type { User } from "@/modules/users/user";
 import type { ApiContext } from "./api-responses";
 
 export type TestModules = {
+  InMemoryAccessRecordRepository: typeof import("@/infra/access-records/in-memory-access-record-repository").InMemoryAccessRecordRepository;
+  accessErrors: typeof import("@/modules/access-records/errors");
   userErrors: typeof import("@/modules/users/errors");
   InMemoryUserRepository: typeof import("@/infra/users/in-memory-user-repository").InMemoryUserRepository;
   InMemoryPatientRepository: typeof import("@/infra/patients/in-memory-patient-repository").InMemoryPatientRepository;
@@ -20,8 +22,8 @@ export type TestApi = {
   signInAs: (user: User | undefined) => void;
 };
 
-function memoryRepositories({ InMemoryUserRepository, InMemoryPatientRepository }: TestModules): Repositories {
-  return { users: new InMemoryUserRepository(), patients: new InMemoryPatientRepository() };
+function memoryRepositories({ InMemoryUserRepository, InMemoryPatientRepository, InMemoryAccessRecordRepository }: TestModules): Repositories {
+  return { users: new InMemoryUserRepository(), patients: new InMemoryPatientRepository(), accesses: new InMemoryAccessRecordRepository() };
 }
 
 /**
@@ -34,12 +36,14 @@ export async function createTestApi(
 ): Promise<TestApi> {
   vi.resetModules();
   const modules: TestModules = {
+    InMemoryAccessRecordRepository: (await import("@/infra/access-records/in-memory-access-record-repository")).InMemoryAccessRecordRepository,
+    accessErrors: await import("@/modules/access-records/errors"),
     userErrors: await import("@/modules/users/errors"),
     InMemoryUserRepository: (await import("@/infra/users/in-memory-user-repository")).InMemoryUserRepository,
     InMemoryPatientRepository: (await import("@/infra/patients/in-memory-patient-repository")).InMemoryPatientRepository,
   };
   const { FacadeSingletonController } = await import("@/modules/facade/facade-singleton-controller");
-  const facade = await FacadeSingletonController.getInstance(async () => createRepositories(modules));
+  const facade = await FacadeSingletonController.getInstance(async () => createRepositories(modules), { recordSignIn: vi.fn() });
 
   const admin = await facade.createFirstAdministrator(staff("carla"));
   const receptionist = await facade.addUser(admin, { ...staff("ana"), role: "RECEPTIONIST" });

@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { loadMessages } from "@/i18n/messages";
 import { resolveRequestLocale } from "@/i18n/request-locale";
+import { AccessRecordPersistenceError } from "@/modules/access-records/errors";
 import { AccessDeniedError } from "@/modules/auth/errors";
 import type { FacadeSingletonController } from "@/modules/facade/facade-singleton-controller";
 import { PatientPersistenceError } from "@/modules/patients/errors";
@@ -87,7 +88,7 @@ export async function respondAsSignedInUser(
     return await operation(await context.getFacade(), actor);
   } catch (error) {
     if (error instanceof AccessDeniedError) return apiErrorResponse(request, HTTP_FORBIDDEN, "ACCESS_DENIED");
-    if (error instanceof UserPersistenceError || error instanceof PatientPersistenceError) {
+    if (error instanceof AccessRecordPersistenceError || error instanceof UserPersistenceError || error instanceof PatientPersistenceError) {
       return apiErrorResponse(request, HTTP_SERVICE_UNAVAILABLE, "STORAGE_UNAVAILABLE");
     }
     const domainResponse = respondToDomainError(error, await translatorFor(request));

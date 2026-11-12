@@ -1,8 +1,10 @@
+import type { AccessRecordRepository } from "@/modules/access-records/access-record-repository";
 import { hashPassword, verifyPassword } from "@/modules/users/password";
 import { normalizeEmail } from "@/modules/users/rules";
 import type { User } from "@/modules/users/user";
 import type { UserRepository } from "@/modules/users/user-repository";
 
+import type { AccessLogger } from "./access-logger";
 import { IncorrectCredentialsError, InvalidSignInIdentifierError, InvalidSignInPasswordError } from "./errors";
 
 export type SignInCredentials = {
@@ -16,7 +18,12 @@ export type SignInCredentials = {
 let unknownUserHash: Promise<string> | undefined;
 
 export class AuthenticationController {
-  constructor(private readonly repository: UserRepository) {}
+  constructor(
+    private readonly repository: UserRepository,
+    private readonly logger: AccessLogger,
+    private readonly accesses: AccessRecordRepository,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   async signIn({ identifier, password }: SignInCredentials): Promise<User> {
     const trimmedIdentifier = identifier.trim();
@@ -30,6 +37,12 @@ export class AuthenticationController {
     unknownUserHash ??= hashPassword("unknown user");
     const passwordMatches = await verifyPassword(password, credentials?.passwordHash ?? (await unknownUserHash));
     if (!credentials || !passwordMatches) throw new IncorrectCredentialsError();
+    await this.accesses.add({ userId: credentials.user.id, occurredAt: this.now().toISOString() });
+    try {
+      this.logger.recordSignIn(credentials.user.id);
+    } catch {
+      // Operational logging is best effort: a log failure must not deny valid credentials.
+    }
     return credentials.user;
   }
 }

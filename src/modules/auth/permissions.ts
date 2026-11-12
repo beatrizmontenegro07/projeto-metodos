@@ -4,6 +4,7 @@ import type { Role } from "@/modules/users/role";
 const ROLES_BY_PERMISSION = {
   MANAGE_USERS: ["ADMIN"],
   MANAGE_PATIENTS: ["ADMIN", "RECEPTIONIST"],
+  GENERATE_ACCESS_REPORTS: ["ADMIN"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof ROLES_BY_PERMISSION;

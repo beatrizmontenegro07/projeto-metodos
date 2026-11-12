@@ -15,6 +15,13 @@
       "when": 1792444382298,
       "tag": "0001_create_patients",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794432581918,
+      "tag": "0002_past_guardsmen",
+      "breakpoints": true
     }
   ]
 }

@@ -21,6 +21,15 @@ classDiagram
 
     class Usuario { <<entity>> }
     class Papel { <<entity>> }
+    class RegistroDeAcesso { <<entity>> }
+    class ControleRelatorios { <<control>> }
+    class TelaRelatorios { <<boundary>> }
+    class RotaRelatorios { <<boundary>> }
+    TelaRelatorios ..> ControleRelatorios
+    RotaRelatorios ..> ControleRelatorios
+    ControleRelatorios ..> RegistroDeAcesso : calcula estatísticas
+    ControleAutenticacao ..> RegistroDeAcesso : registra credenciais aceitas
+    RegistroDeAcesso "*" --> "1" Usuario
 
     Usuario "*" --> "1" Papel
 
@@ -88,3 +97,5 @@ O modelo de domínio completo da clínica (Paciente, Profissional, Agenda, Agend
 | RotaDeUsuarios | rotas `/api/users` (`src/app/api/users/route.ts`) e `/api/auth/first-administrator` (`src/app/api/auth/first-administrator/route.ts`) | Implementado |
 | TelaPacientes | páginas `/patients`, `/patients/new` e `/patients/<id>` (`src/app/[locale]/(app)/patients/`) | Implementado |
 | RotaDePacientes | rotas `/api/patients` (`src/app/api/patients/route.ts`) e `/api/patients/[id]` (`src/app/api/patients/[id]/route.ts`) | Implementado |
+
+UC15 usa `ControleRelatorios`, realizado por `FacadeSingletonController.generateAccessReport` e `AccessReportTemplate`. A fachada autoriza o Administrador antes da leitura dos acessos; o controle gera as mesmas estatísticas para HTML e CSV (RF18). As fronteiras `TelaRelatorios` (`/access-reports`) e `RotaRelatorios` (`GET /api/access-reports`) oferecem o download ao Administrador.

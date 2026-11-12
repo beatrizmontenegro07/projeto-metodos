@@ -18,6 +18,15 @@ class Usuario {
   papel: Papel
 }
 class Papel <<enumeration>>
+class RegistroDeAcesso <<entity>>
+class ControleRelatorios <<control>>
+class TelaRelatorios <<boundary>>
+class RotaRelatorios <<boundary>>
+TelaRelatorios ..> ControleRelatorios
+RotaRelatorios ..> ControleRelatorios
+ControleRelatorios ..> RegistroDeAcesso : calcula estatísticas
+RegistroDeAcesso "*" --> "1" Usuario
+ControleAutenticacao ..> RegistroDeAcesso : registra credenciais aceitas
 class Paciente <<Patient>>
 class Profissional <<Practitioner>>
 class VinculoProfissional <<PractitionerRole>>

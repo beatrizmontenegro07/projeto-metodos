@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { InMemoryAccessRecordRepository } from "@/infra/access-records/in-memory-access-record-repository";
 import { InMemoryPatientRepository } from "@/infra/patients/in-memory-patient-repository";
 import { InMemoryUserRepository } from "@/infra/users/in-memory-user-repository";
 import type { PatientInput } from "@/modules/patients/patient";
@@ -32,7 +33,7 @@ async function loadFacadeClass() {
 }
 
 function memoryRepositories(): Repositories {
-  return { users: new InMemoryUserRepository(), patients: new InMemoryPatientRepository() };
+  return { users: new InMemoryUserRepository(), patients: new InMemoryPatientRepository(), accesses: new InMemoryAccessRecordRepository() };
 }
 
 describe("a single facade instance (Singleton)", () => {
@@ -41,8 +42,8 @@ describe("a single facade instance (Singleton)", () => {
     const loadRepositories = vi.fn(async () => memoryRepositories());
 
     const [first, second] = await Promise.all([
-      Facade.getInstance(loadRepositories),
-      Facade.getInstance(loadRepositories),
+      Facade.getInstance(loadRepositories, { recordSignIn: vi.fn() }),
+      Facade.getInstance(loadRepositories, { recordSignIn: vi.fn() }),
     ]);
 
     expect(first).toBe(second);
@@ -52,13 +53,17 @@ describe("a single facade instance (Singleton)", () => {
 
 describe("operations through the facade", () => {
   let facade: FacadeSingletonController;
+  let repositories: Repositories;
+  const recordSignIn = vi.fn();
   let admin: User;
   let receptionist: User;
   let doctor: User;
 
   beforeEach(async () => {
     const Facade = await loadFacadeClass();
-    facade = await Facade.getInstance(async () => memoryRepositories());
+    recordSignIn.mockClear();
+    repositories = memoryRepositories();
+    facade = await Facade.getInstance(async () => repositories, { recordSignIn });
     admin = await facade.createFirstAdministrator({
       name: "Carla Souza",
       email: "carla@clinicore.com",
@@ -71,6 +76,20 @@ describe("operations through the facade", () => {
 
   it("signs in through the authentication controller", async () => {
     expect(await facade.signIn({ identifier: "ana", password: "Secret@123" })).toEqual(receptionist);
+    expect(recordSignIn).toHaveBeenCalledExactlyOnceWith(receptionist.id);
+    expect(await repositories.accesses.list()).toEqual([{ id: 1, userId: receptionist.id, occurredAt: expect.any(String) }]);
+  });
+
+  it("allows only administrators to generate reports without reading records for denied roles", async () => {
+    const list = vi.spyOn(repositories.accesses, "list");
+    const input = { start: "2026-11-01", end: "2026-11-02", format: "html" };
+    const labels = { title: "Report", period: "Period", userId: "User", count: "Count", lastAccess: "Last", total: "Total" };
+    for (const actor of [receptionist, doctor, { ...admin, role: "PATIENT" as const }]) {
+      await expect(facade.generateAccessReport(actor, input, labels)).rejects.toMatchObject(ACCESS_DENIED);
+    }
+    expect(list).not.toHaveBeenCalled();
+    expect((await facade.generateAccessReport(admin, input, labels)).extension).toBe("html");
+    expect(list).toHaveBeenCalledOnce();
   });
 
   it("registers a patient linked to the signed-in user", async () => {

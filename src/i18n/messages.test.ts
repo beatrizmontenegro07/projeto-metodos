@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { REPORT_ERROR_CODES } from "@/modules/access-reports/errors";
 
 import { PATIENT_ERROR_CODES } from "@/modules/patients/errors";
 import { GENDERS } from "@/modules/patients/gender";
@@ -27,6 +28,10 @@ describe("message catalogs", () => {
 
   it.each(routing.locales)("%s has exactly the keys of the English source catalog", async (locale) => {
     expect(flattenKeys(await loadCatalog(locale)).sort()).toEqual(sourceKeys);
+  });
+
+  it("translates every report error code", () => {
+    for (const code of REPORT_ERROR_CODES) expect(sourceKeys).toContain(`reports.errors.${code}`);
   });
 
   it("translates every user error code", () => {

@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 
+import { AccessRecordPersistenceError } from "@/modules/access-records/errors";
 import { IncorrectCredentialsError, SignInError } from "@/modules/auth/errors";
 import type { FacadeSingletonController } from "@/modules/facade/facade-singleton-controller";
 import { UserPersistenceError } from "@/modules/users/errors";
@@ -53,7 +54,7 @@ async function signInFailureResponse(request: NextRequest, error: unknown): Prom
     const translate = await translatorFor(request);
     return errorResponse(status, error.code, translate(`auth.errors.${error.code}`));
   }
-  if (error instanceof UserPersistenceError) {
+  if (error instanceof AccessRecordPersistenceError || error instanceof UserPersistenceError) {
     return apiErrorResponse(request, HTTP_SERVICE_UNAVAILABLE, "STORAGE_UNAVAILABLE");
   }
   throw error;
