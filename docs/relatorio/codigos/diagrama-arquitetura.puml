@@ -11,10 +11,14 @@ node "Aplicativo Next.js / TypeScript" {
   package "business — modules" {
     component "FacadeSingletonController\nFacade + Singleton + autorização" as Facade
     component "UserController\nAuthenticationController\nPatientController" as Controllers
-    interface "UserRepository / PatientRepository" as Ports
+    component "AccessReportTemplate\nHtmlAccessReport / CsvAccessReport\nTemplate Method" as Reports
+    component "<<interface>>\nUserRepository / PatientRepository\nAccessRecordRepository" as Ports
+    component "<<interface>>\nAccessLogger (Target)" as LoggerPort
   }
   package "infra — infra, db" {
     component "Sessão em cookie assinado" as Session
+    component "RepositoryFactory\nAbstract Factory" as Factory
+    component "PinoAccessLogger\nAdapter" as Pino
     component "Coleções em RAM" as RAM
     component "Repositórios SQLite\nDrizzle ORM / libSQL" as SQL
   }
@@ -27,8 +31,14 @@ API --> Assembly
 Pages ..> Session
 API ..> Session
 Assembly --> Facade
-Assembly ..> RAM : STORAGE=memory
-Assembly ..> SQL : STORAGE=sqlite
+Assembly ..> Factory : getRepositories
+Factory ..> RAM : STORAGE=memory
+Factory ..> SQL : STORAGE=sqlite
+Assembly ..> Pino : injeta
+Facade --> Reports
+Reports --> Ports
+Controllers --> LoggerPort
+Pino ..|> LoggerPort
 Facade --> Controllers
 Controllers --> Ports
 RAM ..|> Ports

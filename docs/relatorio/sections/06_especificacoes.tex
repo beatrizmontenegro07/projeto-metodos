@@ -2,7 +2,7 @@
 
 \subsection{Descrição dos três casos de uso essenciais}
 
-Os casos detalhados correspondem às funcionalidades implementadas até a Sprint 3: cadastro de usuários, cadastro e edição de pacientes.
+Os casos detalhados correspondem às funcionalidades implementadas até a Sprint 3: cadastro de usuários, cadastro e edição de pacientes. O UC15, da Sprint 4, está descrito na subseção Relatório de acessos.
 
 \subsubsection{UC01 — Cadastrar paciente}
 
@@ -118,9 +118,79 @@ Em FE1 a FE4, o sistema mantém os valores digitados, exceto a senha, que nunca 
 \end{longtable}
 }
 
+\subsection{Relatório de acessos (Sprint 4)}
+
+A change \path|openspec/changes/relatorio-de-acessos/| define a capacidade \path|acessos|, com os requisitos RF17 (registro de acesso) e RF18 (relatórios). Os logs em stdout não garantem dados consultáveis para as estatísticas de acesso; por isso, cada autenticação aceita é persistida em RAM ou SQLite por Repository e Abstract Factory, o Adapter Pino continua como log operacional independente e os relatórios HTML e CSV são gerados por Template Method na camada business. Ficam fora do escopo a navegação por páginas, o IP, as tentativas recusadas, o logout e o cadastro inicial do administrador como acesso.
+
+\subsubsection{UC04: registro de acesso (RF17)}
+
+Depois de validar as credenciais, o controle persiste o ID do usuário e a data/hora UTC antes do log e da abertura da sessão. Recusas não gravam acessos; falhas de persistência exibem indisponibilidade (API 503, \path|STORAGE_UNAVAILABLE|) sem abrir sessão. O Adapter Pino permanece independente: uma exceção síncrona do log não apaga o registro nem impede o login. O cadastro inicial do administrador não conta como acesso; um registro indica credenciais aceitas, mesmo se a criação posterior do cookie falhar.
+
+\subsubsection{UC15: gerar relatório de acessos (RF18)}
+
+{\small
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{8pt}
+\begin{longtable}{|p{0.22\textwidth}|p{\dimexpr0.78\textwidth-4\tabcolsep-3\arrayrulewidth\relax}|}
+\hline
+\textbf{Campo} & \textbf{Descrição} \\ \hline
+\endfirsthead
+\hline
+\textbf{Campo} & \textbf{Descrição} \\ \hline
+\endhead
+\textbf{Identificador} & UC15 \\ \hline
+\textbf{Importância} & Essencial \\ \hline
+\textbf{Sumário} & Permite ao Administrador baixar as estatísticas de acesso de um período UTC em HTML ou CSV. \\ \hline
+\textbf{Atores} & Administrador \\ \hline
+\textbf{Pré-condições} & O ator está autenticado (UC04) com o papel Administrador. \\ \hline
+\textbf{Fluxo principal} & 1. O ator abre a tela \path|/access-reports|.\par\smallskip
+2. O ator informa o início inclusivo, o fim exclusivo (UTC) e o formato HTML ou CSV.\par\smallskip
+3. A tela solicita \path|GET /api/access-reports| com os parâmetros \path|start|, \path|end| e \path|format| (\path|html| ou \path|csv|).\par\smallskip
+4. A fachada verifica a permissão \path|GENERATE_ACCESS_REPORTS| e valida o período.\par\smallskip
+5. O sistema calcula, por ID de usuário com acessos no período, a quantidade de acessos e o último acesso, além do total geral.\par\smallskip
+6. O sistema devolve o arquivo como anexo, com os textos no idioma da requisição e sem cache compartilhado. \\ \hline
+\textbf{Fluxos alternativos} & \textbf{FA1}: Período sem acessos (passo 5): o relatório apresenta total zero e nenhuma linha de usuário. \\ \hline
+\textbf{Fluxos de exceção} & \textbf{FE1}: Período ou formato inválido (passo 4): erros específicos de início, fim, ordem ou formato; a API responde 400.\par\smallskip
+\textbf{FE2}: Sem sessão (passo 3): a API responde 401.\par\smallskip
+\textbf{FE3}: Papel sem permissão (passo 4): a operação é negada sem expor os registros; a API responde 403.\par\smallskip
+\textbf{FE4}: Armazenamento indisponível (passo 5): a falha é propagada, sem emitir relatório vazio como se fosse válido; a API responde 503. \\ \hline
+\textbf{Pós-condição} & O Administrador recebe um anexo HTML ou CSV com as mesmas estatísticas calculadas dos registros persistidos, sem credenciais nem dados de pacientes. \\ \hline
+\textbf{Requisitos} & RF17, RF18, NF-SEG-02 (\path|specs/acessos|) \\ \hline
+\end{longtable}
+}
+
+\subsubsection{Cenários da change}
+
+Os cenários reproduzem o delta \path|specs/acessos/spec.md| da change.
+
+{\small
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{|p{0.08\textwidth}|p{0.2\textwidth}|p{\dimexpr0.72\textwidth-6\tabcolsep-4\arrayrulewidth\relax}|}
+\hline
+\textbf{Req.} & \textbf{Cenário} & \textbf{Dado / Quando / Então} \\ \hline
+\endfirsthead
+\hline
+\textbf{Req.} & \textbf{Cenário} & \textbf{Dado / Quando / Então} \\ \hline
+\endhead
+RF17 & Login aceito & Dado um usuário cadastrado, quando suas credenciais são aceitas por tela ou API, então um registro com usuário e horário UTC é gravado antes da abertura da sessão e da tentativa de log Pino. \\ \hline
+RF17 & Login recusado & Quando o identificador ou a senha é inválido, então nenhum acesso é gravado. \\ \hline
+RF17 & Acessos repetidos & Dado um usuário já autenticado anteriormente, quando ele autentica novamente, inclusive no mesmo instante, então um novo registro é criado com outro ID. \\ \hline
+RF17 & SQLite e memória & Dados registros de acesso já gravados, quando a aplicação é reiniciada, então SQLite preserva os registros, enquanto a coleção RAM inicia vazia. \\ \hline
+RF17 & Falha na gravação & Quando a persistência do acesso falha após a validação das credenciais, então a operação falha com erro de persistência e nenhuma sessão é aberta; a API responde 503 com \path|STORAGE_UNAVAILABLE| e a tela usa a mensagem traduzida de indisponibilidade. \\ \hline
+RF17 & Falha apenas no log & Dado um acesso persistido, quando o logger lança uma exceção síncrona, então o acesso continua consultável e a autenticação não é recusada por essa exceção. \\ \hline
+RF18 & Dois formatos & Dados um Administrador e um período válido, quando ele solicita o relatório em HTML ou CSV, então os dois formatos apresentam as mesmas estatísticas calculadas dos registros persistidos. \\ \hline
+RF18 & Limites e repetição & Dados acessos repetidos pelo mesmo usuário, inclusive nos limites do período, quando o relatório é gerado, então cada registro no início é incluído, cada registro no fim é excluído e repetições são contadas individualmente. \\ \hline
+RF18 & Período vazio & Quando não existem acessos no período, então o relatório apresenta total zero e nenhuma linha de usuário. \\ \hline
+RF18 & Papel sem permissão & Dado um usuário sem papel Administrador, quando ele solicita o relatório, então o sistema nega a operação sem expor os registros. \\ \hline
+RF18 & Período inválido & Quando o início ou o fim é inválido ou o início não antecede o fim, então o sistema recusa a geração com erro específico de período. \\ \hline
+RF18 & Download protegido e traduzido & Dado um Administrador com idioma escolhido, quando solicita um relatório válido em \path|/access-reports| ou \path|GET /api/access-reports|, então recebe um anexo HTML/CSV com textos no idioma da requisição e sem cache compartilhado; requisições sem sessão recebem 401 e usuários sem permissão recebem 403. \\ \hline
+\end{longtable}
+}
+
 \subsection{Diagrama completo de casos de uso}
 
-O diagrama contempla os requisitos funcionais implementados e os casos previstos na visão do sistema.
+O diagrama contempla os requisitos funcionais implementados, incluindo o UC15 (Gerar relatório de acessos) da Sprint 4, e os casos previstos na visão do sistema.
 
 \begin{figure}[H]\centering
 
