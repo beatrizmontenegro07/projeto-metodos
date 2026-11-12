@@ -24,6 +24,8 @@
 
 \paragraph{LGPD} Lei Geral de Proteção de Dados (Lei nº 13.709/2018), que regula o tratamento de dados pessoais no Brasil.\par {\small\raggedright No código: —.\par}
 
+\paragraph{Log operacional} Evento emitido pelo Adapter de logging após a gravação de um acesso autenticado. Serve ao acompanhamento da execução; sua saída em stdout não garante armazenamento durável nem fornece os dados dos relatórios (NF-SEG-04, ADR-0010).\par {\small\raggedright No código: \path|AccessLogger|, \path|PinoAccessLogger|, \path|USER_SIGNED_IN|.\par}
+
 \paragraph{Login} Identificador único com que o usuário entra no sistema: não vazio, até 12 caracteres e sem números (RF08).\par {\small\raggedright No código: \path|login|.\par}
 
 \paragraph{Médico} Profissional de saúde com papel de atendimento no sistema.\par {\small\raggedright No código: \path|DOCTOR|.\par}
@@ -34,13 +36,21 @@
 
 \paragraph{Papel} Conjunto de funcionalidades a que um usuário tem acesso: Administrador, Recepcionista, Médico ou Paciente.\par {\small\raggedright No código: \path|Role|.\par}
 
+\paragraph{Período do relatório} Intervalo UTC com início inclusivo e fim exclusivo, usado para selecionar os registros de acesso. O início deve anteceder o fim; datas sem horário representam meia-noite UTC (RF18).\par {\small\raggedright No código: \path|ReportInput.start|, \path|ReportInput.end|.\par}
+
 \paragraph{Profissional de Saúde} Colaborador da clínica autorizado a realizar atendimentos, ver a agenda de consultas e registrar anotações no histórico do paciente.\par {\small\raggedright No código: \path|Practitioner|.\par}
 
 \paragraph{Pseudonimização} Troca de dados que identificam o paciente (nome, CPF) por um identificador sem significado, para uso em relatórios e análises (NF-PRI-01).\par {\small\raggedright No código: —.\par}
 
+\paragraph{Quantidade de acessos} Número de registros de acesso de um usuário dentro do período do relatório. Autenticações repetidas contam individualmente, inclusive quando têm o mesmo horário; o total geral soma os registros de todos os usuários no período (RF18).\par {\small\raggedright No código: \path|UserStatistics.count|, \path|Statistics.total|.\par}
+
 \paragraph{RBAC} \emph{Role-Based Access Control}: controle de acesso em que cada papel libera um conjunto fixo de funcionalidades (NF-SEG-02).\par {\small\raggedright No código: \path|Role|.\par}
 
 \paragraph{Recepcionista} Usuário de linha de frente que gerencia filas, agendamentos, contatos e o cadastro demográfico dos pacientes.\par {\small\raggedright No código: \path|RECEPTIONIST|.\par}
+
+\paragraph{Registro de acesso} Registro com ID próprio, ID do usuário e data/hora UTC de credenciais aceitas, gravado antes do log operacional e da abertura da sessão. Permanece registrado se a criação posterior do cookie falhar. Não mede navegação, não inclui tentativas recusadas nem o cadastro inicial do Administrador e não contém credenciais ou dados de pacientes. Segue o armazenamento em memória ou permanente escolhido para a aplicação (RF17).\par {\small\raggedright No código: \path|AccessRecord|, \path|AccessRecordRepository|, tabela \path|access_records|.\par}
+
+\paragraph{Relatório de acessos} Estatísticas que o Administrador gera em HTML ou CSV a partir dos registros de acesso de um período UTC. Exibe ID, quantidade de acessos e último acesso por usuário com registros no período, além do total geral. Um período sem acessos produz total zero e nenhuma linha de usuário (RF18, UC15).\par {\small\raggedright No código: \path|AccessReportTemplate|, \path|HtmlAccessReport|, \path|CsvAccessReport|, \path|FacadeSingletonController.generateAccessReport|.\par}
 
 \paragraph{Senha} Segredo do usuário, de 8 a 128 caracteres, com pelo menos 3 tipos de caractere e diferente do login e do e-mail (RF09). Só o hash é armazenado.\par {\small\raggedright No código: \path|password| / \path|password_hash|.\par}
 
@@ -48,4 +58,8 @@
 
 \paragraph{Sexo} Sexo administrativo do paciente, nos valores do padrão FHIR: Masculino, Feminino, Outro ou Desconhecido (RF11).\par {\small\raggedright No código: \path|gender| (\path|MALE|, \path|FEMALE|, \path|OTHER|, \path|UNKNOWN|).\par}
 
+\paragraph{Último acesso} Maior data/hora entre os registros de um usuário dentro do período do relatório, independentemente da ordem de gravação. É exibida em UTC (RF18).\par {\small\raggedright No código: \path|UserStatistics.lastAccess|.\par}
+
 \paragraph{Usuário} Pessoa cadastrada no sistema com nome, e-mail, login, senha e um papel.\par {\small\raggedright No código: \path|User|.\par}
+
+\paragraph{UTC} Tempo Universal Coordenado, referência usada para gravar horários de acesso e interpretar os limites do relatório. Os horários são representados em ISO 8601 com sufixo Z, sem conversão para o horário local do usuário.\par {\small\raggedright No código: \path|AccessRecord.occurredAt|, \path|ReportInput.start|, \path|ReportInput.end|.\par}

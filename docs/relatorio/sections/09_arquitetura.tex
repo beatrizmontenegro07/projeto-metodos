@@ -1,14 +1,14 @@
 \section{Arquitetura}
 \subsection{Arquitetura lógica}
-O CliniCore é um monolito modular em Next.js (App Router) e TypeScript. Páginas, Server Actions e rotas de API pertencem à camada de interface. A camada de negócio contém a fachada, os controles, as regras, as exceções e as interfaces dos repositórios. A infraestrutura implementa essas interfaces com coleções em RAM ou SQLite por Drizzle ORM. As dependências são \textbf{ui $\rightarrow$ business $\leftarrow$ infra}; os controles não importam Drizzle nem SQLite.
+O CliniCore é um monolito modular em Next.js (App Router) e TypeScript. Páginas, Server Actions e rotas de API pertencem à camada de interface. A camada de negócio contém a fachada, os controles, as regras, as exceções e as interfaces dos repositórios. A infraestrutura implementa essas interfaces com coleções em RAM ou SQLite por Drizzle ORM. As dependências são \textbf{ui $\rightarrow$ business $\leftarrow$ infra}; os controles não importam Drizzle nem SQLite. Na Sprint 4, a infraestrutura passou a montar os repositórios por uma Abstract Factory (\path|RepositoryFactory|) e a fornecer o Adapter \path|PinoAccessLogger| para a interface \path|AccessLogger| da camada de negócio; os relatórios de acesso são gerados em business por \path|AccessReportTemplate|, que lê \path|AccessRecordRepository|.
 
 \begin{figure}[H]\centering
 \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{images/diagrama-arquitetura.png}
-\caption{Arquitetura lógica implementada até a Sprint 3.}
+\caption{Arquitetura lógica implementada até a Sprint 4.}
 \end{figure}
 
 \subsection{Execução e persistência}
-Na execução local, o navegador acessa o aplicativo Next.js. A variável \path|STORAGE|, lida na inicialização, seleciona \path|memory| (coleções em RAM, perdidas ao encerrar o processo) ou \path|sqlite| (banco definido por \path|DATABASE_URL|). SQLite pode usar arquivo local ou conexão libSQL com Turso. SQLite com endereço \path|:memory:| aparece nos testes de infraestrutura e não é o mecanismo RAM da aplicação.
+Na execução local, o navegador acessa o aplicativo Next.js. A variável \path|STORAGE|, lida na inicialização, seleciona \path|memory| (coleções em RAM, perdidas ao encerrar o processo) ou \path|sqlite| (banco definido por \path|DATABASE_URL|). SQLite pode usar arquivo local ou conexão libSQL com Turso. SQLite com endereço \path|:memory:| aparece nos testes de infraestrutura e não é o mecanismo RAM da aplicação. A mesma família de repositórios atende usuários, pacientes e registros de acesso: no modo SQLite, todos usam a mesma conexão e as tabelas \path|users|, \path|patients| e \path|access_records|; no modo RAM, os registros de acesso somem ao encerrar o processo. O log operacional do Pino é escrito em JSON no stdout e não é a fonte dos relatórios.
 
 \begin{figure}[H]\centering
 \includegraphics[width=\textwidth,height=0.65\textheight,keepaspectratio]{images/implantacao.png}
