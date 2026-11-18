@@ -1,7 +1,7 @@
 \section{Projeto}
 \sloppy
 
-Esta seção reúne o projeto detalhado da Sprint 4 (Padrões 2), espelhando \path|docs/08-projeto.md| e os ADRs em \path|docs/07-arquitetura/adr/|. Os nomes de classes são os do código, em inglês (ADR-0005).
+Esta seção reúne o projeto detalhado das Sprints 4 (Padrões 2) e 5 (Padrões 3), espelhando \path|docs/08-projeto.md| e os ADRs em \path|docs/07-arquitetura/adr/|. Os nomes de classes são os do código, em inglês (ADR-0005).
 
 \subsection{Divisão de pacotes}
 
@@ -17,11 +17,11 @@ As camadas da disciplina (\textbf{ui}, \textbf{business} e \textbf{infra}) corre
 \textbf{Camada} & \textbf{Pasta} & \textbf{Conteúdo} \\ \hline
 \endhead
 ui & \path|src/app/|, \path|src/components/|, \path|src/i18n/| & Telas (inclusive \path|/access-reports|), Server Actions, rotas de API (inclusive \path|GET /api/access-reports|) e textos traduzidos. \\ \hline
-business & \path|src/modules/facade/| & \path|FacadeSingletonController| e o tipo \path|Repositories|. \\ \hline
+business & \path|src/modules/facade/| & \path|FacadeSingletonController|, o tipo \path|Repositories| e \path|commands/| (\path|Command|, \path|CommandInvoker| e os comandos concretos). \\ \hline
 business & \path|src/modules/access-records/| & \path|AccessRecord|, \path|AccessRecordRepository| e erro de persistência. \\ \hline
 business & \path|src/modules/access-reports/| & \path|AccessReportTemplate|, \path|HtmlAccessReport| e \path|CsvAccessReport|. \\ \hline
 business & \path|src/modules/auth/| & \path|AuthenticationController|, \path|AccessLogger|, permissões por papel e erros de login. \\ \hline
-business & \path|src/modules/users/|, \path|src/modules/patients/| & Entidades, regras, erros, interfaces dos repositórios e controles. \\ \hline
+business & \path|src/modules/users/|, \path|src/modules/patients/| & Entidades, regras, erros, interfaces dos repositórios e controles; em \path|patients/|, também o Memento (\path|PatientMemento| e \path|PatientUpdateHistory|). \\ \hline
 infra & \path|src/infra/repository-factory.ts| & \path|RepositoryFactory|, seleção por \path|STORAGE| e família única por processo. \\ \hline
 infra & \path|src/infra/in-memory-repository-factory.ts|, \path|src/infra/sqlite-repository-factory.ts| & Famílias de repositórios em RAM e SQLite (conexão compartilhada). \\ \hline
 infra & \path|src/infra/users/|, \path|src/infra/patients/|, \path|src/infra/access-records/| & Repositórios RAM e SQLite de cada entidade. \\ \hline
@@ -32,12 +32,12 @@ infra & \path|src/infra/facade.ts|, \path|src/infra/auth/|, \path|src/db/| & Mon
 
 \subsection{Diagrama de classes de projeto}
 
-O diagrama separa as camadas \textbf{business} e \textbf{infra} para todas as entidades persistidas (\path|User|, \path|Patient| e \path|AccessRecord|). Em business ficam a fachada, os controles, as entidades, as interfaces dos repositórios, o Target \path|AccessLogger| e o Template Method dos relatórios. Em infra ficam a montagem da fachada, a Abstract Factory com as famílias RAM e SQLite, as implementações dos repositórios e o Adapter de log. A biblioteca Pino aparece como pacote externo (Adaptee).
+O diagrama separa as camadas \textbf{business} e \textbf{infra} para todas as entidades persistidas (\path|User|, \path|Patient| e \path|AccessRecord|). Em business ficam a fachada, os controles, as entidades, as interfaces dos repositórios, o Target \path|AccessLogger| e o Template Method dos relatórios. Em infra ficam a montagem da fachada, a Abstract Factory com as famílias RAM e SQLite, as implementações dos repositórios e o Adapter de log. A biblioteca Pino aparece como pacote externo (Adaptee). Na Sprint 5, a fachada passou a ser o cliente do padrão Command: o pacote \path|commands| reúne a interface \path|Command|, o \path|CommandInvoker| e os comandos concretos, e o Memento do paciente (\path|PatientMemento| e \path|PatientUpdateHistory|) aparece ligado a \path|PatientController|.
 
 \begin{landscape}
 \begin{figure}[H]\centering
 \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{images/classes-de-projeto.png}
-\caption{Classes de projeto da Sprint 4, com as camadas business e infra.}
+\caption{Classes de projeto da Sprint 5, com as camadas business e infra, o Command e o Memento.}
 \end{figure}
 \end{landscape}
 
@@ -77,6 +77,45 @@ O Adapter converte \path|recordSignIn(id)| em \path|info({ event: "USER_SIGNED_I
 
 \path|AccessReportTemplate.generate| é o Template Method: valida o período UTC, consulta \path|AccessRecordRepository|, filtra \path|[início, fim)|, agrega por usuário e chama a operação abstrata \path|render|. \path|HtmlAccessReport| e \path|CsvAccessReport| especializam somente a renderização. A contagem inclui registros repetidos, o último acesso é o máximo cronológico, as linhas são ordenadas por ID e o total geral conta todos os registros do período. HTML escapa texto; CSV usa campos entre aspas, escape de aspas e CRLF. Os textos chegam por \path|ReportLabels|, o que permite a tradução na fronteira sem dependência de next-intl em business. Um novo formato implementa \path|render| e reutiliza o mesmo algoritmo (ADR-0011).
 
+\subsubsection{Command (Sprint 5)}
+
+Cada operação de \path|FacadeSingletonController| virou um comando. A fachada verifica o papel, cria o comando concreto ligado ao seu receptor e aos argumentos da chamada e o entrega a \path|CommandInvoker.execute|, que conhece só a interface \path|Command| (ADR-0012). As assinaturas públicas da fachada não mudaram, e ela continua Singleton.
+
+{\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{0.2\textwidth}|p{\dimexpr0.8\textwidth-4\tabcolsep-3\arrayrulewidth\relax}|}
+\hline
+\textbf{Papel} & \textbf{Participante} \\ \hline
+Command & \path|Command<Result>|, com \path|execute(): Promise<Result>| \\ \hline
+ConcreteCommand & um por operação: \path|SignInCommand|, \path|FindUserCommand|, \path|HasUsersCommand|, \path|CreateFirstAdministratorCommand|, \path|AddUserCommand|, \path|ListUsersCommand|, \path|AddPatientCommand|, \path|UpdatePatientCommand|, \path|UndoPatientUpdateCommand|, \path|CanUndoPatientUpdateCommand|, \path|DeactivatePatientCommand|, \path|ReactivatePatientCommand|, \path|GetPatientCommand|, \path|SearchPatientsCommand|, \path|GenerateAccessReportCommand| e \path|CountRegisteredEntitiesCommand| \\ \hline
+Invoker & \path|CommandInvoker| \\ \hline
+Receiver & \path|UserController|, \path|AuthenticationController|, \path|PatientController| e o Template Method dos relatórios (\path|createAccessReport|) \\ \hline
+Client & \path|FacadeSingletonController|, que cria os comandos; telas, Server Actions e rotas de API continuam chamando só a fachada \\ \hline
+\end{longtable}
+}
+
+\subsubsection{Memento (Sprint 5)}
+
+O Memento permite desfazer a última alteração do paciente (RF19, ADR-0013). \path|UpdatePatientCommand| pede um memento ao Originator, executa a edição e, só se ela for aceita, entrega o memento ao Caretaker. \path|UndoPatientUpdateCommand| pega o memento do topo, pede ao Originator que o restaure e só então o remove; sem memento, lança \path|NoUpdateToUndoError| (\path|NO_UPDATE_TO_UNDO|).
+
+{\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|p{0.2\textwidth}|p{\dimexpr0.8\textwidth-4\tabcolsep-3\arrayrulewidth\relax}|}
+\hline
+\textbf{Papel} & \textbf{Participante} \\ \hline
+Originator & \path|PatientController|: \path|createMemento(id)| e \path|restore(memento)| \\ \hline
+Memento & \path|PatientMemento|: id do paciente e cópia congelada dos dados que a edição substitui, lida só por \path|getState()| \\ \hline
+Caretaker & \path|PatientUpdateHistory|: uma pilha de mementos por paciente, guardada pela fachada \\ \hline
+\end{longtable}
+}
+
+O histórico fica na memória do processo, dentro da instância única da fachada, para os dois mecanismos de \path|STORAGE|; reiniciar o servidor apaga o histórico, não os dados. Na tela \path|/patients/<id>|, o botão ``Desfazer última alteração'' aparece quando \path|canUndoPatientUpdate| é verdadeiro; a API é \path|POST /api/patients/<id>/undo|.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth,height=0.45\textheight,keepaspectratio]{images/command-memento.png}
+\caption{Command e Memento na camada business (Sprint 5).}
+\end{figure}
+
 \subsection{Tabela de padrões}
 
 {\small
@@ -95,10 +134,10 @@ O Adapter converte \path|recordSignIn(id)| em \path|info({ event: "USER_SIGNED_I
 \raggedright Abstract Factory & S4 & \raggedright \path|RepositoryFactory| (fábrica abstrata); \path|InMemoryRepositoryFactory|, \path|SqliteRepositoryFactory| (fábricas concretas); os três repositórios (produtos abstratos) & \raggedright Cria uma família de repositórios compatíveis, selecionada uma vez por \path|STORAGE| & 0009 \tabularnewline \hline
 \raggedright Adapter & S4 & \raggedright \path|AuthenticationController| (cliente); \path|AccessLogger| (Target); \path|PinoAccessLogger| (Adapter); \path|Logger| do Pino (Adaptee) & \raggedright Traduz eventos de autenticação para log JSON sem acoplar business à biblioteca & 0010 \tabularnewline \hline
 \raggedright Template Method & S4 & \raggedright \path|AccessReportTemplate.generate| (Template Method), \path|render| (operação abstrata), \path|HtmlAccessReport| e \path|CsvAccessReport| (subclasses) & \raggedright Reutiliza validação, filtragem e agregação de acessos em formatos diferentes & 0011 \tabularnewline \hline
+\raggedright Command & S5 & \raggedright \path|Command| (Command); um comando concreto por operação da fachada (ConcreteCommand); \path|CommandInvoker| (Invoker); controles e Template Method dos relatórios (Receiver); \path|FacadeSingletonController| (Client) & \raggedright Cada operação da fachada vira um objeto executado de forma uniforme, e a edição pode guardar o estado para o desfazer & 0012 \tabularnewline \hline
+\raggedright Memento & S5 & \raggedright \path|PatientController| (Originator); \path|PatientMemento| (Memento); \path|PatientUpdateHistory| (Caretaker) & \raggedright Desfazer a última alteração do paciente sem expor o estado fora do Originator & 0013 \tabularnewline \hline
 \end{longtable}
 }
-
-Command e Memento estão previstos para a Sprint 5.
 
 \subsection{Decisões de arquitetura da Sprint 4}
 
@@ -107,3 +146,9 @@ Command e Memento estão previstos para a Sprint 5.
 \paragraph{ADR-0010: Adapter para log de autenticações com Pino.} Importar uma biblioteca de log no controle acoplaria business à API externa. Decisão: Adapter de objeto, com \path|AccessLogger| em business e \path|PinoAccessLogger| em infra. O contrato recebe somente um ID, impedindo o envio de credenciais ao Adapter. Complemento: o log Pino não é a fonte dos relatórios; \path|AccessRecordRepository| persiste cada acesso antes do log e da sessão, e falhas do banco viram \path|AccessRecordPersistenceError| (API 503, sem sessão).
 
 \paragraph{ADR-0011: Template Method para relatórios de acesso.} \path|AccessReportTemplate.generate| fixa o algoritmo comum e \path|HtmlAccessReport| e \path|CsvAccessReport| especializam \path|render|, evitando divergências estatísticas entre formatos. A fachada verifica \path|GENERATE_ACCESS_REPORTS| (somente ADMIN) antes de validar a entrada ou consultar os dados. Períodos vazios geram total zero; períodos inválidos geram erros específicos por campo; falhas de armazenamento são propagadas. A coleta filtra os registros em memória após \path|list|; consultas por período no banco poderão ser introduzidas caso o volume exija.
+
+\subsection{Decisões de arquitetura da Sprint 5}
+
+\paragraph{ADR-0012: fachada baseada em Command.} A Sprint 5 pede que a fachada use Command. Decisão: cada operação vira um comando concreto, executado por \path|CommandInvoker|; a fachada é o cliente, verifica o papel antes de criar o comando e continua sendo a única entrada da camada business. Alternativas descartadas: fronteiras criando os comandos (espalharia a verificação de papel pela camada ui) e autorização dentro do Invoker. Consequência: um novo caso de uso é um novo comando e um método na fachada, sem mudar o Invoker.
+
+\paragraph{ADR-0013: Memento para desfazer a última atualização do paciente.} \path|PatientController| é o Originator, \path|PatientMemento| guarda uma cópia imutável dos dados e \path|PatientUpdateHistory| é o Caretaker, com uma pilha por paciente. O memento só entra no histórico depois de uma edição aceita e só sai depois de uma restauração bem sucedida. Alternativas descartadas: tabela de histórico no banco (exige migração e não é pedida agora), estado guardado no próprio comando e um único memento global. Consequência: o histórico se perde ao reiniciar o servidor e, com várias instâncias, cada uma tem o seu.
