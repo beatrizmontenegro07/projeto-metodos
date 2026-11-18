@@ -21,11 +21,11 @@ src/
 │       └── patients/            ← /api/patients e /api/patients/[id]
 ├── components/                  ← ui: blocos de tela (menu lateral, cabeçalho, campos) e ui/ (shadcn/ui)
 ├── modules/                     ← business: uma pasta por capacidade
-│   ├── facade/                  ← FacadeSingletonController e o tipo Repositories
+│   ├── facade/                  ← FacadeSingletonController, o tipo Repositories e commands/ (Command, CommandInvoker e os comandos concretos)
 │   ├── access-records/          ← AccessRecord, AccessRecordRepository e erro de persistência
 │   ├── auth/                    ← AuthenticationController, AccessLogger, permissões por papel e erros de login
 │   ├── users/                   ← User, Role, regras, senha, erros, UserRepository e UserController
-│   └── patients/                ← Patient, Gender, LegalBasis, regras, erros, PatientRepository e PatientController
+│   └── patients/                ← Patient, Gender, LegalBasis, regras, erros, PatientRepository, PatientController e o Memento (PatientMemento, PatientUpdateHistory)
 ├── infra/                       ← infra
 │   ├── access-records/          ← repositórios de acessos RAM e SQLite
 │   ├── logging/                 ← PinoAccessLogger adapta eventos de autenticação para Pino
@@ -46,7 +46,7 @@ src/
 
 ## 2. Diagrama de classes de projeto
 
-### Estado atual: Sprint 4 — Repository, Abstract Factory e Adapter
+### Estado atual: Sprint 5 (Command e Memento)
 
 O diagrama está dividido em três partes: a visão geral com a fachada, o módulo de usuários com a autenticação e o módulo de pacientes. Uma classe que aparece em mais de uma parte é a mesma.
 
@@ -76,8 +76,10 @@ classDiagram
     }
     namespace business {
         class FacadeSingletonController {
-            <<Facade, Singleton>>
+            <<Facade, Singleton, Client>>
             -Promise~FacadeSingletonController~ instance$
+            -CommandInvoker invoker
+            -PatientUpdateHistory patientUpdates
             -UserController users
             -AuthenticationController authentication
             -PatientController patients
@@ -92,6 +94,8 @@ classDiagram
             +listUsers(actor) Promise~User[]~
             +addPatient(actor, input) Promise~Patient~
             +updatePatient(actor, id, input) Promise~Patient~
+            +undoPatientUpdate(actor, id) Promise~Patient~
+            +canUndoPatientUpdate(actor, id) Promise~boolean~
             +deactivatePatient(actor, id) Promise~Patient~
             +reactivatePatient(actor, id) Promise~Patient~
             +getPatient(actor, id) Promise~Patient~
@@ -127,6 +131,9 @@ classDiagram
         class UserController
         class AuthenticationController
         class PatientController
+        class CommandInvoker {
+            <<Invoker>>
+        }
         class AccessRecordRepository {
             <<interface>>
             +add(record) Promise~void~
@@ -198,6 +205,7 @@ classDiagram
     FacadeSingletonController ..> permissions : verifica o papel
     FacadeSingletonController ..> AccessDeniedError : lança
     FacadeSingletonController ..> RegisteredEntityCounts : retorna
+    FacadeSingletonController *-- CommandInvoker : executa cada operação (ver 2.4)
     permissions --> Permission
     UserController --> UserRepository
     AuthenticationController --> UserRepository
@@ -560,6 +568,100 @@ classDiagram
 
 O paciente guarda o CPF e o telefone só com os dígitos, e a coluna `search_name` guarda o nome em minúsculas e sem acentos (`toSearchKey`), usada na busca e na ordem alfabética (RF14). O repositório em RAM usa a mesma função, então os dois mecanismos devolvem a mesma lista. `Gender` segue o `AdministrativeGender` do FHIR R4 e `LegalBasis`, as bases legais da LGPD para dados de saúde (NF-PRI-01). A edição troca os dados, mas não muda a situação nem o autor (`createdBy`); a inativação só muda `active`, e não há exclusão (RF13).
 
+#### 2.4 Command e Memento (Sprint 5)
+
+Cada método da fachada cria um comando concreto, ligado ao seu receptor, e o executa pelo `CommandInvoker` ([ADR-0012](07-arquitetura/adr/0012-fachada-com-command.md)). A edição de paciente guarda um Memento antes de alterar os dados, e o desfazer o restaura ([ADR-0013](07-arquitetura/adr/0013-memento-para-desfazer-atualizacao.md)). O mesmo diagrama em PlantUML está em `docs/relatorio/codigos/command-memento.puml`.
+
+```mermaid
+classDiagram
+    direction LR
+
+    namespace business {
+        class FacadeSingletonController {
+            <<Facade, Singleton, Client>>
+            -CommandInvoker invoker
+            -PatientUpdateHistory patientUpdates
+            +updatePatient(actor, id, input) Promise~Patient~
+            +undoPatientUpdate(actor, id) Promise~Patient~
+            +canUndoPatientUpdate(actor, id) Promise~boolean~
+        }
+        class Command~Result~ {
+            <<interface, Command>>
+            +execute() Promise~Result~
+        }
+        class CommandInvoker {
+            <<Invoker>>
+            +execute(command) Promise~Result~
+        }
+        class UpdatePatientCommand {
+            <<ConcreteCommand>>
+            -number id
+            -PatientInput input
+            +execute() Promise~Patient~
+        }
+        class UndoPatientUpdateCommand {
+            <<ConcreteCommand>>
+            -number id
+            +execute() Promise~Patient~
+        }
+        class CanUndoPatientUpdateCommand {
+            <<ConcreteCommand>>
+            +execute() Promise~boolean~
+        }
+        class OtherCommands {
+            <<ConcreteCommand>>
+            SignIn, FindUser, HasUsers, CreateFirstAdministrator
+            AddUser, ListUsers, AddPatient, GetPatient, SearchPatients
+            DeactivatePatient, ReactivatePatient
+            GenerateAccessReport, CountRegisteredEntities
+        }
+        class PatientController {
+            <<Receiver, Originator>>
+            +update(id, input) Promise~Patient~
+            +createMemento(id) Promise~PatientMemento~
+            +restore(memento) Promise~Patient~
+        }
+        class PatientMemento {
+            <<Memento>>
+            +number patientId
+            -Readonly~PatientData~ state
+            +getState() Readonly~PatientData~
+        }
+        class PatientUpdateHistory {
+            <<Caretaker>>
+            -Map~number, PatientMemento[]~ stacks
+            +push(memento) void
+            +peek(patientId) PatientMemento
+            +pop(patientId) PatientMemento
+            +has(patientId) boolean
+        }
+        class NoUpdateToUndoError {
+            <<exception>>
+            NO_UPDATE_TO_UNDO
+        }
+    }
+
+    FacadeSingletonController *-- CommandInvoker
+    FacadeSingletonController *-- PatientUpdateHistory
+    FacadeSingletonController ..> Command : cria
+    CommandInvoker ..> Command : execute
+    Command <|.. UpdatePatientCommand
+    Command <|.. UndoPatientUpdateCommand
+    Command <|.. CanUndoPatientUpdateCommand
+    Command <|.. OtherCommands
+    UpdatePatientCommand --> PatientController : createMemento e update
+    UpdatePatientCommand --> PatientUpdateHistory : push após sucesso
+    UndoPatientUpdateCommand --> PatientController : restore
+    UndoPatientUpdateCommand --> PatientUpdateHistory : peek e pop
+    UndoPatientUpdateCommand ..> NoUpdateToUndoError : lança
+    CanUndoPatientUpdateCommand --> PatientUpdateHistory : has
+    OtherCommands --> PatientController : Receiver
+    PatientController ..> PatientMemento : cria e lê
+    PatientUpdateHistory o-- PatientMemento
+```
+
+Os outros receptores de `OtherCommands` são `UserController`, `AuthenticationController` e `createAccessReport` (Template Method). A fachada verifica o papel antes de criar o comando. A tela `/patients/<id>` mostra "Desfazer última alteração" quando `canUndoPatientUpdate` é verdadeiro e chama a Server Action `undoPatientUpdate`; a API é `POST /api/patients/<id>/undo`.
+
 ### Os dois mecanismos de persistência
 
 Os controles dependem só das interfaces `UserRepository`, `PatientRepository` e `AccessRecordRepository`. A variável `STORAGE`, lida uma única vez por `getRepositories`, seleciona uma implementação de `RepositoryFactory`: `InMemoryRepositoryFactory` ou `SqliteRepositoryFactory`. Essa Abstract Factory cria os três produtos da mesma família. A família fica em `globalThis` para preservar as coleções durante hot reload; a fábrica SQLite recebe uma conexão compartilhada pelos três repositórios (NF-MAN-01, [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md)):
@@ -583,8 +685,8 @@ Preencha uma linha por padrão aplicado. Cada padrão relevante também tem um A
 | Abstract Factory | S4 | `RepositoryFactory` (fábrica abstrata); `InMemoryRepositoryFactory`, `SqliteRepositoryFactory` (fábricas concretas); `UserRepository`, `PatientRepository`, `AccessRecordRepository` (produtos abstratos) | Cria uma família de repositórios compatíveis, selecionada uma vez por `STORAGE` | [ADR-0009](07-arquitetura/adr/0009-fabrica-abstrata-de-repositorios.md) |
 | Adapter | S4 | `AuthenticationController` (cliente); `AccessLogger` (Target); `PinoAccessLogger` (Adapter); `Logger` do Pino (Adaptee) | Traduz eventos de autenticação para log JSON sem acoplar business à biblioteca | [ADR-0010](07-arquitetura/adr/0010-adapter-de-log-de-acessos.md) |
 | Template Method | S4 | `AccessReportTemplate.generate` (Template Method), `render` (operação abstrata), `HtmlAccessReport` e `CsvAccessReport` (subclasses) | Reutiliza validação, filtragem e agregação de acessos em formatos diferentes | [ADR-0011](07-arquitetura/adr/0011-template-method-de-relatorios.md) |
-| Command | S5 | | | |
-| Memento | S5 | | | |
+| Command | S5 | `Command<Result>` (Command); `UpdatePatientCommand`, `UndoPatientUpdateCommand` e um comando por operação da fachada (ConcreteCommand); `CommandInvoker` (Invoker); `UserController`, `AuthenticationController`, `PatientController`, `createAccessReport` (Receiver); `FacadeSingletonController` (Client) | Cada operação da fachada vira um objeto executado de forma uniforme por um Invoker, e a edição de paciente pode guardar o estado para o desfazer | [ADR-0012](07-arquitetura/adr/0012-fachada-com-command.md) |
+| Memento | S5 | `PatientController` (Originator); `PatientMemento` (Memento); `PatientUpdateHistory` (Caretaker) | Desfazer a última alteração do paciente (RF19) sem expor o estado fora do Originator | [ADR-0013](07-arquitetura/adr/0013-memento-para-desfazer-atualizacao.md) |
 
 ### Adapter de log de autenticação
 
