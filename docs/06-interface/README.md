@@ -122,7 +122,7 @@ Relacionada a: UC01, UC07, UC08 · RF01, RF11, RF12, RF13, NF-PRI-01
 - Sexo e base legal são escolhidos em listas: Masculino, Feminino, Outro e Desconhecido; Consentimento do titular, Tutela da saúde, Cumprimento de obrigação legal e Proteção da vida.
 - Uma recusa mostra, junto do campo, a mensagem da regra violada (RF11) e mantém os valores digitados. Com CPF já cadastrado, o atalho "Ver paciente" abre o registro que já tem esse CPF (UC01 FE2).
 - "Inativar" abre um diálogo de confirmação ("Inativar Joana Souza Lima?"). Um paciente inativo mostra a etiqueta "Inativo" e o botão "Reativar" (UC08).
-- "Desfazer última alteração" volta os dados do paciente para o estado anterior à última edição; entra nesta tela na Sprint 5 e ainda não existe.
+- "Desfazer última alteração" volta os dados do paciente para o estado anterior à última edição (RF19, UC07 FA4). O botão aparece ao lado de "Inativar" só quando há uma edição para desfazer; depois de usado, a tela informa "Última alteração desfeita.".
 
 ## TL05 — Login
 
