@@ -48,6 +48,17 @@ export async function updatePatient(
   redirect(`/patients/${patientId}?saved=updated`);
 }
 
+/** UC07 FA4 (RF19): undoes the patient's last update and reopens the record with a notice. */
+export async function undoPatientUpdate(patientId: number): Promise<{ error?: FormError }> {
+  const actor = await requireUser();
+  try {
+    await (await getFacade()).undoPatientUpdate(actor, patientId);
+  } catch (error) {
+    return { error: patientFailure(error).error };
+  }
+  redirect(`/patients/${patientId}?saved=undone`);
+}
+
 /** UC08: inactivates or reactivates the patient and refreshes the screen that asked. */
 export async function setPatientActive(patientId: number, active: boolean): Promise<{ error?: FormError }> {
   const actor = await requireUser();

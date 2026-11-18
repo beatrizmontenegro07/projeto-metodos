@@ -151,6 +151,24 @@ describe("/api/patients", () => {
       expect(await reactivated.json()).toMatchObject({ active: true });
     });
 
+    it("POST undo puts back the data from before the last PUT (RF19)", async () => {
+      await handlers.update(jsonRequest(`${PATIENTS_URL}/1`, "PUT", { ...JOANA, phone: "(83) 3222-1100" }), "1");
+
+      const response = await handlers.undoUpdate(new NextRequest(`${PATIENTS_URL}/1/undo`, { method: "POST" }), "1");
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({ id: 1, phone: "83987654321" });
+    });
+
+    it("POST undo answers 409 NO_UPDATE_TO_UNDO when nothing was updated", async () => {
+      const response = await handlers.undoUpdate(new NextRequest(`${PATIENTS_URL}/1/undo`, { method: "POST" }), "1");
+
+      expect(response.status).toBe(409);
+      expect(await response.json()).toEqual({
+        error: { code: "NO_UPDATE_TO_UNDO", message: "Não há alteração deste paciente para desfazer." },
+      });
+    });
+
     it("PATCH answers 400 when active is not a boolean", async () => {
       const response = await handlers.changeStatus(jsonRequest(`${PATIENTS_URL}/1`, "PATCH", { active: "no" }), "1");
 

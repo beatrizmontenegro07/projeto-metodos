@@ -12,6 +12,7 @@ import {
   InvalidPatientEmailError,
   InvalidPatientNameError,
   InvalidPhoneError,
+  NoUpdateToUndoError,
   PatientNotFoundError,
   PatientPersistenceError,
   PatientValidationError,
@@ -87,7 +88,9 @@ const PATIENT_FIELD_BY_ERROR: [errorClass: abstract new (...args: never[]) => Pa
 ];
 
 export function patientFailure(error: unknown): Failure<PatientField> {
-  if (error instanceof PatientNotFoundError) return { error: { scope: "patients", code: error.code } };
+  if (error instanceof PatientNotFoundError || error instanceof NoUpdateToUndoError) {
+    return { error: { scope: "patients", code: error.code } };
+  }
   if (!(error instanceof PatientValidationError)) return commonFailure(error);
   const field = PATIENT_FIELD_BY_ERROR.find(([errorClass]) => error instanceof errorClass)?.[1];
   return { error: { scope: "patients", code: error.code }, field };
