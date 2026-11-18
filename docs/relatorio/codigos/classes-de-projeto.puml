@@ -7,8 +7,10 @@ class AccessReportsPage <<boundary>>
 class AccessReportsHandler <<boundary>>
 AccessReportsPage ..> AccessReportsHandler : solicita download
 package business {
-class FacadeSingletonController <<Facade, Singleton>> {
+class FacadeSingletonController <<Facade, Singleton, Client>> {
   -{static} instance: Promise<FacadeSingletonController>
+  -invoker: CommandInvoker
+  -patientUpdates: PatientUpdateHistory
   -FacadeSingletonController(repositories, logger)
   +{static} getInstance(loadRepositories, logger)
   +generateAccessReport(actor, input, labels)
@@ -18,6 +20,8 @@ class FacadeSingletonController <<Facade, Singleton>> {
   +listUsers(actor)
   +addPatient(actor, input)
   +updatePatient(actor, id, input)
+  +undoPatientUpdate(actor, id)
+  +canUndoPatientUpdate(actor, id)
   +getPatient(actor, id)
   +searchPatients(actor, search)
   +deactivatePatient(actor, id)
@@ -35,7 +39,7 @@ class CsvAccessReport
 AccessReportTemplate <|-- HtmlAccessReport
 AccessReportTemplate <|-- CsvAccessReport
 AccessReportTemplate --> AccessRecordRepository
-FacadeSingletonController ..> AccessReportTemplate : autoriza e gera
+FacadeSingletonController ..> AccessReportTemplate : autoriza e gera (por comando)
 class RegisteredEntityCounts {
   users?: number
   patients?: number
@@ -59,7 +63,63 @@ class PatientController {
   +deactivate(id)
   +reactivate(id)
   +count()
+  +createMemento(id): PatientMemento
+  +restore(memento): Patient
 }
+package commands <<Command>> {
+interface "Command<Result>" as Command <<Command>> {
+  +execute(): Promise<Result>
+}
+class CommandInvoker <<Invoker>> {
+  +execute(command: Command): Promise<Result>
+}
+class UpdatePatientCommand <<ConcreteCommand>> {
+  -id: number
+  -input: PatientInput
+  +execute(): Promise<Patient>
+}
+class UndoPatientUpdateCommand <<ConcreteCommand>> {
+  -id: number
+  +execute(): Promise<Patient>
+}
+class CanUndoPatientUpdateCommand <<ConcreteCommand>>
+class "AddPatientCommand\nGetPatientCommand\nSearchPatientsCommand\nDeactivatePatientCommand\nReactivatePatientCommand" as PatientCommands <<ConcreteCommand>>
+class "SignInCommand\nFindUserCommand\nHasUsersCommand\nCreateFirstAdministratorCommand\nAddUserCommand\nListUsersCommand" as UserCommands <<ConcreteCommand>>
+class "GenerateAccessReportCommand\nCountRegisteredEntitiesCommand" as ReportCommands <<ConcreteCommand>>
+}
+class PatientMemento <<Memento>> {
+  +patientId: number
+  -state: Readonly<PatientData>
+  +getState(): Readonly<PatientData>
+}
+class PatientUpdateHistory <<Caretaker>> {
+  -stacks: Map<number, PatientMemento[]>
+  +push(memento)
+  +peek(patientId)
+  +pop(patientId)
+  +has(patientId)
+}
+Command <|.. UpdatePatientCommand
+Command <|.. UndoPatientUpdateCommand
+Command <|.. CanUndoPatientUpdateCommand
+Command <|.. PatientCommands
+Command <|.. UserCommands
+Command <|.. ReportCommands
+CommandInvoker ..> Command : execute
+FacadeSingletonController *-- CommandInvoker
+FacadeSingletonController ..> Command : cria e entrega ao Invoker
+FacadeSingletonController *-- PatientUpdateHistory
+UpdatePatientCommand --> PatientController : Receiver e Originator
+UndoPatientUpdateCommand --> PatientController : restore
+PatientCommands --> PatientController : Receiver
+UserCommands --> UserController : Receiver
+UserCommands --> AuthenticationController : Receiver
+ReportCommands --> AccessReportTemplate : Receiver
+UpdatePatientCommand --> PatientUpdateHistory : push
+UndoPatientUpdateCommand --> PatientUpdateHistory : peek e pop
+CanUndoPatientUpdateCommand --> PatientUpdateHistory : has
+PatientController ..> PatientMemento : cria e restaura
+PatientUpdateHistory o-- "*" PatientMemento
 interface AccessRecordRepository <<Repository>> {
   +add(record): Promise<void>
   +list(): Promise<AccessRecord[]>
@@ -155,6 +215,7 @@ PatientController --> PatientRepository
 note bottom of FacadeSingletonController
 Visão dos métodos principais da fachada.
 Papéis são verificados nas operações protegidas.
+Cada método cria um ConcreteCommand e o executa pelo CommandInvoker.
 end note
 AccessReportsHandler ..> business.FacadeSingletonController : generateAccessReport
 @enduml
