@@ -163,8 +163,11 @@
       "submitting": "Salvando…",
       "saved": {
         "created": "Paciente cadastrado.",
-        "updated": "Alterações salvas."
-      }
+        "updated": "Alterações salvas.",
+        "undone": "Última alteração desfeita."
+      },
+      "undo": "Desfazer última alteração",
+      "undoing": "Desfazendo…"
     },
     "form": {
       "cancel": "Cancelar",
@@ -223,7 +226,8 @@
       "LEGAL_BASIS_MISSING": "Informe a base legal do tratamento dos dados.",
       "LEGAL_BASIS_INVALID": "A base legal informada é inválida.",
       "CPF_ALREADY_REGISTERED": "Já existe um paciente cadastrado com este CPF.",
-      "PATIENT_NOT_FOUND": "Paciente não encontrado."
+      "PATIENT_NOT_FOUND": "Paciente não encontrado.",
+      "NO_UPDATE_TO_UNDO": "Não há alteração deste paciente para desfazer."
     }
   },
   "api": {

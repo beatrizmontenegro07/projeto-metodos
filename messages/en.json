@@ -163,8 +163,11 @@
       "submitting": "Saving…",
       "saved": {
         "created": "Patient registered.",
-        "updated": "Changes saved."
-      }
+        "updated": "Changes saved.",
+        "undone": "Last change undone."
+      },
+      "undo": "Undo last change",
+      "undoing": "Undoing…"
     },
     "form": {
       "cancel": "Cancel",
@@ -223,7 +226,8 @@
       "LEGAL_BASIS_MISSING": "Enter the legal basis for processing the data.",
       "LEGAL_BASIS_INVALID": "The legal basis is invalid.",
       "CPF_ALREADY_REGISTERED": "A patient with this CPF already exists.",
-      "PATIENT_NOT_FOUND": "Patient not found."
+      "PATIENT_NOT_FOUND": "Patient not found.",
+      "NO_UPDATE_TO_UNDO": "There is no change to this patient to undo."
     }
   },
   "api": {

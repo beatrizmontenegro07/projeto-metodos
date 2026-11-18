@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 
 import {
   DuplicatePatientError,
+  NoUpdateToUndoError,
   PatientNotFoundError,
   PatientValidationError,
 } from "@/modules/patients/errors";
@@ -90,6 +91,16 @@ export function createPatientsHandlers(context: ApiContext) {
       );
     },
 
+    /** RF19: `POST /api/patients/{id}/undo` puts back the data from before the last update. */
+    undoUpdate(request: NextRequest, id: string): Promise<Response> {
+      return respondAsSignedInUser(
+        request,
+        context,
+        async (facade, actor) => Response.json(await facade.undoPatientUpdate(actor, toPatientId(id))),
+        patientErrorResponse,
+      );
+    },
+
     /** RF13: `{ "active": false }` inactivates the patient and `{ "active": true }` reactivates it. */
     changeStatus(request: NextRequest, id: string): Promise<Response> {
       return respondAsSignedInUser(
@@ -128,6 +139,9 @@ function toPatientId(id: string): number {
 function patientErrorResponse(error: unknown, translate: Translate): Response | undefined {
   if (error instanceof PatientNotFoundError) {
     return errorResponse(HTTP_NOT_FOUND, error.code, translate(`patients.errors.${error.code}`));
+  }
+  if (error instanceof NoUpdateToUndoError) {
+    return errorResponse(HTTP_CONFLICT, error.code, translate(`patients.errors.${error.code}`));
   }
   if (!(error instanceof PatientValidationError)) return undefined;
   const status = error instanceof DuplicatePatientError ? HTTP_CONFLICT : HTTP_BAD_REQUEST;

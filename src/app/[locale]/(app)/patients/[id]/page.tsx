@@ -21,16 +21,17 @@ import { updatePatient } from "../actions";
 import { PatientForm } from "../patient-form";
 import { getPatientOptions } from "../patient-options";
 import { PatientStatusButton } from "../patient-status-button";
+import { PatientUndoButton } from "../patient-undo-button";
 
 const PATIENT_ID = /^[1-9]\d*$/;
-const SAVED_MESSAGES = { created: "created", updated: "updated" } as const;
+const SAVED_MESSAGES = { created: "created", updated: "updated", undone: "undone" } as const;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("patients.edit");
   return { title: t("title") };
 }
 
-/** TL04, filled — patient edit (UC07), inactivation and reactivation (UC08). */
+/** TL04, filled — patient edit (UC07), undo of the last change (RF19), inactivation and reactivation (UC08). */
 export default function PatientPage({ params, searchParams }: PageProps<"/[locale]/patients/[id]">) {
   return (
     <Suspense fallback={<FormSkeleton fields={8} />}>
@@ -45,7 +46,9 @@ async function PatientEditor({ params, searchParams }: Pick<PageProps<"/[locale]
   if (!hasPermission(actor.role, "MANAGE_PATIENTS")) return <AccessDenied />;
 
   const patient = await findPatient(actor, (await params).id);
-  const author = await (await getFacade()).findUser(patient.createdBy);
+  const facade = await getFacade();
+  const author = await facade.findUser(patient.createdBy);
+  const canUndo = await facade.canUndoPatientUpdate(actor, patient.id);
   const saved = SAVED_MESSAGES[(await searchParams).saved as keyof typeof SAVED_MESSAGES];
 
   return (
@@ -62,7 +65,10 @@ async function PatientEditor({ params, searchParams }: Pick<PageProps<"/[locale]
             </div>
             {author && <p className="text-sm text-muted-foreground">{t("edit.createdBy", { name: author.name })}</p>}
           </div>
-          <PatientStatusButton patientId={patient.id} patientName={patient.name} active={patient.active} />
+          <div className="flex flex-wrap gap-2">
+            {canUndo && <PatientUndoButton patientId={patient.id} />}
+            <PatientStatusButton patientId={patient.id} patientName={patient.name} active={patient.active} />
+          </div>
         </div>
         {saved && (
           <Alert className="max-w-3xl">
@@ -71,6 +77,7 @@ async function PatientEditor({ params, searchParams }: Pick<PageProps<"/[locale]
           </Alert>
         )}
         <PatientForm
+          key={JSON.stringify(toFormValues(patient))}
           action={updatePatient.bind(null, patient.id)}
           initialValues={toFormValues(patient)}
           {...await getPatientOptions()}
