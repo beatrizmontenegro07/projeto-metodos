@@ -110,6 +110,27 @@ describe("operations through the facade", () => {
     expect(await facade.countRegisteredEntities(admin)).toEqual({ users: 3, patients: 0 });
   });
 
+  describe("undoing the last patient update (RF19, Memento)", () => {
+    it("restores the data from before the last update", async () => {
+      const joana = await facade.addPatient(receptionist, JOANA);
+      await facade.updatePatient(receptionist, joana.id, { ...JOANA, name: "Joana Lima" });
+      expect(await facade.canUndoPatientUpdate(admin, joana.id)).toBe(true);
+
+      expect(await facade.undoPatientUpdate(admin, joana.id)).toEqual(joana);
+      expect(await facade.canUndoPatientUpdate(admin, joana.id)).toBe(false);
+      await expect(facade.undoPatientUpdate(admin, joana.id)).rejects.toMatchObject({ code: "NO_UPDATE_TO_UNDO" });
+    });
+
+    it("denies the undo to a doctor without restoring anything", async () => {
+      const joana = await facade.addPatient(receptionist, JOANA);
+      const updated = await facade.updatePatient(receptionist, joana.id, { ...JOANA, name: "Joana Lima" });
+
+      await expect(facade.undoPatientUpdate(doctor, joana.id)).rejects.toMatchObject(ACCESS_DENIED);
+      await expect(facade.canUndoPatientUpdate(doctor, joana.id)).rejects.toMatchObject(ACCESS_DENIED);
+      expect(await facade.getPatient(admin, joana.id)).toEqual(updated);
+    });
+  });
+
   describe("counting registered entities (RF15)", () => {
     beforeEach(async () => {
       const joana = await facade.addPatient(receptionist, JOANA);
@@ -128,5 +149,24 @@ describe("operations through the facade", () => {
     it("gives the doctor no totals", async () => {
       expect(await facade.countRegisteredEntities(doctor)).toEqual({});
     });
+  });
+});
+
+describe("every operation goes through the invoker (Command)", () => {
+  it("wraps each facade call in a command run by the invoker", async () => {
+    const Facade = await loadFacadeClass();
+    const { CommandInvoker } = await import("./commands/command-invoker");
+    const commands = await import("./commands/patient-commands");
+    const execute = vi.spyOn(CommandInvoker.prototype, "execute");
+    const facade = await Facade.getInstance(async () => memoryRepositories(), { recordSignIn: vi.fn() });
+
+    const admin = await facade.createFirstAdministrator({ name: "Carla", email: "carla@clinicore.com", login: "carla", password: "Secret@123" });
+    const joana = await facade.addPatient(admin, JOANA);
+    await facade.updatePatient(admin, joana.id, { ...JOANA, name: "Joana Lima" });
+    await facade.undoPatientUpdate(admin, joana.id);
+
+    const executed = execute.mock.calls.map(([command]) => command.constructor);
+    expect(executed.slice(-3)).toEqual([commands.AddPatientCommand, commands.UpdatePatientCommand, commands.UndoPatientUpdateCommand]);
+    expect(execute).toHaveBeenCalledTimes(4);
   });
 });
