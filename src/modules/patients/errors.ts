@@ -24,7 +24,7 @@ export type LegalBasisErrorCode = (typeof LEGAL_BASIS_ERROR_CODES)[number];
 export type PatientValidationErrorCode = (typeof PATIENT_VALIDATION_ERROR_CODES)[number];
 
 /** Every patient error code the UI translates at `patients.errors.<code>`. */
-export const PATIENT_ERROR_CODES = [...PATIENT_VALIDATION_ERROR_CODES, "PATIENT_NOT_FOUND"] as const;
+export const PATIENT_ERROR_CODES = [...PATIENT_VALIDATION_ERROR_CODES, "PATIENT_NOT_FOUND", "NO_UPDATE_TO_UNDO"] as const;
 
 /**
  * Base class of every rejected patient registration or edit. Each case has its own `code`,
@@ -114,6 +114,16 @@ export class PatientNotFoundError extends Error {
 
   constructor(readonly patientId: number) {
     super(`Patient ${patientId} does not exist.`);
+  }
+}
+
+/** RF19: the patient has no update left to undo in this process. */
+export class NoUpdateToUndoError extends Error {
+  override name = "NoUpdateToUndoError";
+  readonly code = "NO_UPDATE_TO_UNDO";
+
+  constructor(readonly patientId: number) {
+    super(`Patient ${patientId} has no update to undo.`);
   }
 }
 
