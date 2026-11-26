@@ -1,0 +1,84 @@
+@startuml command-memento
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+class "Telas / Server Actions / API" as UI <<boundary>>
+package business {
+class FacadeSingletonController <<Facade, Singleton, Client>> {
+  -invoker: CommandInvoker
+  -patientUpdates: PatientUpdateHistory
+  +updatePatient(actor, id, input)
+  +undoPatientUpdate(actor, id)
+  +canUndoPatientUpdate(actor, id)
+  +... demais operações (um comando cada)
+  -authorize(actor, permission)
+}
+interface "Command<Result>" as Command <<Command>> {
+  +execute(): Promise<Result>
+}
+class CommandInvoker <<Invoker>> {
+  +execute(command): Promise<Result>
+}
+class UpdatePatientCommand <<ConcreteCommand>> {
+  -id: number
+  -input: PatientInput
+  +execute(): Promise<Patient>
+}
+class UndoPatientUpdateCommand <<ConcreteCommand>> {
+  -id: number
+  +execute(): Promise<Patient>
+}
+class CanUndoPatientUpdateCommand <<ConcreteCommand>> {
+  -id: number
+  +execute(): Promise<boolean>
+}
+class "Demais ConcreteCommands" as Others <<ConcreteCommand>> {
+  SignIn, FindUser, HasUsers,
+  CreateFirstAdministrator, AddUser, ListUsers,
+  AddPatient, GetPatient, SearchPatients,
+  DeactivatePatient, ReactivatePatient,
+  GenerateAccessReport, CountRegisteredEntities
+}
+class PatientController <<Receiver, Originator>> {
+  +update(id, input): Patient
+  +createMemento(id): PatientMemento
+  +restore(memento): Patient
+}
+class "UserController\nAuthenticationController\nAccessReportTemplate" as OtherReceivers <<Receiver>>
+class PatientMemento <<Memento>> {
+  +patientId: number
+  -state: Readonly<PatientData>
+  +getState(): Readonly<PatientData>
+}
+class PatientUpdateHistory <<Caretaker>> {
+  -stacks: Map<number, PatientMemento[]>
+  +push(memento)
+  +peek(patientId): PatientMemento
+  +pop(patientId): PatientMemento
+  +has(patientId): boolean
+}
+interface PatientRepository <<Repository>> {
+  +update(id, data): Patient
+  +findById(id): Patient
+}
+}
+UI ..> FacadeSingletonController : getFacade()
+FacadeSingletonController *-- CommandInvoker
+FacadeSingletonController *-- PatientUpdateHistory
+FacadeSingletonController ..> Command : cria o comando
+CommandInvoker ..> Command : execute()
+Command <|.. UpdatePatientCommand
+Command <|.. UndoPatientUpdateCommand
+Command <|.. CanUndoPatientUpdateCommand
+Command <|.. Others
+UpdatePatientCommand --> PatientController
+UndoPatientUpdateCommand --> PatientController
+UpdatePatientCommand --> PatientUpdateHistory : push após sucesso
+UndoPatientUpdateCommand --> PatientUpdateHistory : peek, restore, pop
+CanUndoPatientUpdateCommand --> PatientUpdateHistory : has
+Others --> PatientController
+Others --> OtherReceivers
+PatientController ..> PatientMemento : cria e lê
+PatientUpdateHistory o-- "*" PatientMemento
+PatientController --> PatientRepository
+@enduml

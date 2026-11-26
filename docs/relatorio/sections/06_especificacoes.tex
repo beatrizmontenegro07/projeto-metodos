@@ -106,14 +106,15 @@ Em FE1 a FE4, o sistema mantém os valores digitados, exceto a senha, que nunca 
 7. O sistema exibe o registro atualizado e informa "Alterações salvas.". \\ \hline
 \textbf{Fluxos alternativos} & \textbf{FA1} — Remover dados opcionais (passo 3): se o ator apaga o e-mail ou o endereço, o paciente fica sem eles.\par\smallskip
 \textbf{FA2} — Inativar ou reativar (UC08, passo 2): o ator escolhe "Inativar"; o sistema pede confirmação ("Inativar <nome>?" — "O paciente mantém todos os dados e pode ser reativado depois."); ao confirmar, a situação passa a Inativo e o botão vira "Reativar". "Reativar" volta a situação para Ativo sem pedir confirmação. Os dados não mudam.\par\smallskip
-\textbf{FA3} — Cancelar (passo 4): o ator escolhe "Cancelar" e volta à lista de pacientes sem salvar. \\ \hline
+\textbf{FA3} — Cancelar (passo 4): o ator escolhe "Cancelar" e volta à lista de pacientes sem salvar.\par\smallskip
+\textbf{FA4}: desfazer última alteração (RF19, passo 7): depois de uma edição salva, o registro mostra "Desfazer última alteração"; ao escolher, o sistema devolve os dados que o paciente tinha antes da última edição, informa "Última alteração desfeita." e mantém a situação e o "cadastrado por". Edições sucessivas são desfeitas uma por vez; quando não há mais o que desfazer, o botão some. Se o CPF antigo passou a ser de outro paciente, o sistema informa "Já existe um paciente cadastrado com este CPF." e nada muda. \\ \hline
 \textbf{Fluxos de exceção} & \textbf{FE1} — Dado inválido (passo 5): o sistema mostra, junto do campo, a mensagem da primeira regra violada (por exemplo, "Informe o nome do paciente." ou "O CPF deve ter 11 dígitos."), mantém os valores digitados e volta ao passo 3.\par\smallskip
 \textbf{FE2} — CPF de outro paciente (passo 6): "Já existe um paciente cadastrado com este CPF.", com o atalho "Ver paciente" para o registro que já tem esse CPF; nada é alterado. O CPF do próprio paciente é aceito.\par\smallskip
 \textbf{FE3} — Paciente inexistente (passo 2): um endereço \path|/patients/<id>| que não corresponde a nenhum paciente exibe a página de não encontrado; se o paciente deixar de existir antes de salvar, o sistema informa "Paciente não encontrado.".\par\smallskip
 \textbf{FE4} — Papel sem permissão (passo 1): para o Médico e o Paciente, a página exibe "Acesso negado — Seu papel não permite abrir esta página."; pela API, \path|PUT /api/patients/<id>| responde 403.\par\smallskip
 \textbf{FE5} — Falha do armazenamento (passo 6): "Não foi possível acessar os dados agora. Tente novamente." (NF-CON-01). \\ \hline
 \textbf{Pós-condição} & Os dados do paciente ficam atualizados na busca (UC09); a situação e o vínculo com o usuário que o cadastrou permanecem os mesmos. \\ \hline
-\textbf{Requisitos} & RF11, RF12, RF13 (FA2), NF-SEG-02, NF-CON-01 (\path|specs/pacientes|) \\ \hline
+\textbf{Requisitos} & RF11, RF12, RF13 (FA2), RF19 (FA4), NF-SEG-02, NF-CON-01 (\path|specs/pacientes|) \\ \hline
 \textbf{Telas} & TL03 Lista de pacientes, TL04 Cadastro e edição de paciente (interface) \\ \hline
 \end{longtable}
 }
@@ -197,3 +198,7 @@ O diagrama contempla os requisitos funcionais implementados, incluindo o UC15 (G
 \includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]{images/diagrama-casos-de-uso.png}
 
 \caption{Casos de uso do CliniCore.}\end{figure}
+
+\subsection{Desfazer a última alteração do paciente (Sprint 5)}
+
+A change \path|openspec/changes/desfazer-atualizacao/| acrescenta à capacidade \path|pacientes| o requisito RF19: o Recepcionista ou o Administrador pode desfazer a última alteração dos dados de um paciente, voltando aos dados de antes dessa edição, sem mudar a situação nem o usuário que cadastrou. Edições sucessivas são desfeitas uma por vez, da mais recente para a mais antiga. Uma edição recusada não entra no histórico; sem edição para desfazer, a tela não oferece o botão e a API \path|POST /api/patients/<id>/undo| responde 409 (\path|NO_UPDATE_TO_UNDO|). Se o CPF antigo passou a ser de outro paciente, nada muda e a alteração continua podendo ser desfeita. O histórico fica na memória do servidor e se perde quando ele reinicia. Ficam fora do escopo o histórico persistente, desfazer cadastro, inativação ou reativação, e refazer.
